@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import app.voqal.com.core.designsystem.theme.VoqalTheme
+import app.voqal.com.presentation.onboarding.AddPhotoScreen
 import app.voqal.com.presentation.onboarding.AskFullNameScreen
 import org.jetbrains.compose.resources.painterResource
 
@@ -25,12 +26,11 @@ import voqal.shared.generated.resources.compose_multiplatform
 fun App() {
     VoqalTheme {
         var showContent by remember { mutableStateOf(false) }
-        AskFullNameScreen(
-            onBack = { /* Handle back navigation */ },
-            onContinue = { firstName, lastName ->
-                // Handle continue action, e.g., save the name and navigate to the next screen
-                showContent = true
-            },
+        AddPhotoScreen(
+            onEditClick = {},
+            onBack = {},
+            onContinue = { _, _ -> },
+            modifier = Modifier.fillMaxSize()
         )
 
     }
