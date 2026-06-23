@@ -16,6 +16,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import app.voqal.com.core.designsystem.theme.VoqalTheme
 import app.voqal.com.presentation.onboarding.AddPhotoScreen
 import app.voqal.com.presentation.onboarding.AskFullNameScreen
+import app.voqal.com.presentation.onboarding.EnterEmailScreen
 import org.jetbrains.compose.resources.painterResource
 
 import voqal.shared.generated.resources.Res
@@ -26,8 +27,7 @@ import voqal.shared.generated.resources.compose_multiplatform
 fun App() {
     VoqalTheme {
         var showContent by remember { mutableStateOf(false) }
-        AddPhotoScreen(
-            onEditClick = {},
+        EnterEmailScreen(
             onBack = {},
             onContinue = { _, _ -> },
             modifier = Modifier.fillMaxSize()
