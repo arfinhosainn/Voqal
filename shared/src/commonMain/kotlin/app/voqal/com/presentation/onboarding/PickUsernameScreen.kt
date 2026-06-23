@@ -1,5 +1,6 @@
 package app.voqal.com.presentation.onboarding
 
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,7 +37,7 @@ import app.voqal.com.presentation.onboarding.components.BackButton
 
 
 @Composable
-fun AskFullNameScreen(
+fun PickUsernameScreen(
     onBack: () -> Unit,
     onContinue: (firstName: String, lastName: String) -> Unit,
     modifier: Modifier = Modifier,
@@ -64,7 +65,7 @@ fun AskFullNameScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "What's your full name?",
+                text = "Pick a username?",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.SemiBold,
                 textAlign = TextAlign.Center,
@@ -75,7 +76,7 @@ fun AskFullNameScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "People use real names on Voqal",
+                text = "Choose a distinct username",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Normal,
                 color = VoqalTheme.colors.onSurfaceVariant,
@@ -84,23 +85,11 @@ fun AskFullNameScreen(
 
         Spacer(modifier = Modifier.height(48.dp))
 
-        NameField(
+        UserNameField(
             value = firstName,
             onValueChange = { firstName = it },
-            placeholder = "First",
+            placeholder = "@Superboy",
             imeAction = ImeAction.Next,
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        NameField(
-            value = lastName,
-            onValueChange = { lastName = it },
-            placeholder = "Last",
-            imeAction = ImeAction.Done,
-            onDone = {
-                if (isFormValid) onContinue(firstName.trim(), lastName.trim())
-            }
         )
 
         Spacer(modifier = Modifier.height(40.dp))
@@ -121,7 +110,7 @@ fun AskFullNameScreen(
 
 
 @Composable
-private fun NameField(
+private fun UserNameField(
     value: String,
     onValueChange: (String) -> Unit,
     placeholder: String,
@@ -171,7 +160,7 @@ private fun NameField(
 @Composable
 private fun FullNameScreenPreview() {
     VoqalTheme {
-        AskFullNameScreen(
+        PickUsernameScreen(
             onBack = {},
             onContinue = { _, _ -> },
         )
