@@ -44,6 +44,7 @@ import org.jetbrains.compose.resources.vectorResource
 import voqal.shared.generated.resources.Res
 import voqal.shared.generated.resources.ic_edit
 import voqal.shared.generated.resources.img
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun AddPhotoScreen(
@@ -143,7 +144,7 @@ private fun ProfilePhotoPicker(
                     detectTapGestures(
                         onPress = {
                             val job = scope.launch {
-                                delay(300)
+                                delay(300.milliseconds)
                                 zoom = true
                                 onPreviewChanged(true)
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
