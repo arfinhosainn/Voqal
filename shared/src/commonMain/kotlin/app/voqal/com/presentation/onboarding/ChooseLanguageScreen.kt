@@ -119,10 +119,8 @@ fun ChooseLanguageScreen(
 
             Spacer(Modifier.height(40.dp))
 
-            // --- CONTENT SECTION ---
             Box(modifier = Modifier.weight(1f)) {
 
-                // 1. The Scrollable Grid
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
                     horizontalArrangement = Arrangement.spacedBy(24.dp),
@@ -143,7 +141,6 @@ fun ChooseLanguageScreen(
                     }
                 }
 
-                // 2. The Floating Bottom Button Area
                 Box(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
