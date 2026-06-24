@@ -79,15 +79,15 @@ fun OtpInputField(
             singleLine = true,
             textStyle = TextStyle(
                 textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Light,
-                fontSize = 36.sp,
+                fontWeight = FontWeight.Normal,
+                fontSize = 32.sp,
                 color = VoqalTheme.colors.onBackground,
             ),
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.NumberPassword
             ),
             modifier = Modifier
-                .padding(10.dp)
+                .padding(5.dp)
                 .focusRequester(focusRequester)
                 .onFocusChanged {
                     isFocused = it.isFocused

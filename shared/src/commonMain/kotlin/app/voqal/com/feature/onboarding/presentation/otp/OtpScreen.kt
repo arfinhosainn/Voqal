@@ -1,23 +1,66 @@
 package app.voqal.com.feature.onboarding.presentation.otp
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.unit.dp
-import androidx.compose.material3.Text
-import androidx.compose.runtime.remember
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.voqal.com.core.designsystem.components.VoqalPrimaryButton
+import app.voqal.com.core.designsystem.presentation.util.ObserveAsEvents
 import app.voqal.com.core.designsystem.theme.VoqalTheme
 import app.voqal.com.feature.onboarding.OnboardingScaffold
-import app.voqal.com.feature.onboarding.presentation.components.OtpAction
 import app.voqal.com.feature.onboarding.presentation.components.OtpInputField
-import app.voqal.com.feature.onboarding.presentation.components.OtpState
+import org.koin.compose.viewmodel.koinViewModel
+
+@Composable
+fun OtpRoot(
+    onNavigateToNext: () -> Unit,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: OtpViewModel = koinViewModel()
+) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
+    val focusRequesters = remember { List(6) { FocusRequester() } }
+
+    ObserveAsEvents(viewModel.events) { event ->
+        when (event) {
+            is OtpEvent.NavigateToNext -> onNavigateToNext()
+            is OtpEvent.FocusField -> {
+                if (event.index in focusRequesters.indices) {
+                    focusRequesters[event.index].requestFocus()
+                }
+            }
+            is OtpEvent.ShowSnackbar -> { /* Invoke snackbar display host */ }
+        }
+    }
+
+    OtpScreen(
+        state = state,
+        focusRequesters = focusRequesters,
+        onAction = viewModel::onAction,
+        onBack = onBack,
+        modifier = modifier
+    )
+}
 
 @Composable
 fun OtpScreen(
@@ -38,7 +81,7 @@ fun OtpScreen(
         ) {
             Spacer(Modifier.height(16.dp))
 
-            // TITLE
+            // --- Header Title ---
             Text(
                 text = "Enter Your OTP Code",
                 fontSize = 24.sp,
@@ -50,9 +93,9 @@ fun OtpScreen(
 
             Spacer(Modifier.height(8.dp))
 
-            // SUBTITLE
+            // --- Subtitle with Target Phone Mapping ---
             Text(
-                text = "A 6-digit code has been sent to +1 (123) 456-7890",
+                text = "A 6-digit code has been sent to ${state.emailAddress}",
                 fontSize = 14.sp,
                 color = VoqalTheme.colors.onSurfaceVariant,
                 textAlign = TextAlign.Center,
@@ -61,7 +104,7 @@ fun OtpScreen(
 
             Spacer(Modifier.height(40.dp))
 
-            // 🔢 OTP INPUTS
+            // --- 🔢 6-Digit Entry Row ---
             Row(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -76,12 +119,7 @@ fun OtpScreen(
                             }
                         },
                         onNumberChanged = { newNumber ->
-                            onAction(
-                                OtpAction.OnEnterNumber(
-                                    number = newNumber,
-                                    index = index
-                                )
-                            )
+                            onAction(OtpAction.OnEnterNumber(number = newNumber, index = index))
                         },
                         onKeyboardBack = {
                             onAction(OtpAction.OnKeyboardBack)
@@ -93,9 +131,9 @@ fun OtpScreen(
                 }
             }
 
-            Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.height(24.dp))
 
-            // 📌 RESEND + HELP ROW
+            // --- Help Options Row ---
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -103,23 +141,27 @@ fun OtpScreen(
                 Text(
                     text = "Resend Code",
                     fontSize = 14.sp,
-                    color = VoqalTheme.colors.primary
+                    fontWeight = FontWeight.Medium,
+                    color = VoqalTheme.colors.primary,
+                    modifier = Modifier.clickable { onAction(OtpAction.OnResendCodeClick) }
                 )
 
                 Text(
                     text = "Need Help?",
                     fontSize = 14.sp,
-                    color = VoqalTheme.colors.primary
+                    fontWeight = FontWeight.Medium,
+                    color = VoqalTheme.colors.primary,
+                    modifier = Modifier.clickable { /* Route directly to standard support help channel */ }
                 )
             }
 
-            // Pushes the button to the bottom dynamically
             Spacer(modifier = Modifier.weight(1f))
 
+            // --- Action Submission ---
             VoqalPrimaryButton(
                 text = "Let's Go",
-                onClick = { /* verify OTP */ },
-                enabled = state.isValid == true,
+                onClick = { onAction(OtpAction.OnVerifyClick) },
+                enabled = state.isValid && !state.isSubmitting,
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -128,25 +170,20 @@ fun OtpScreen(
     }
 }
 
-@Preview(showBackground = true)
+@PreviewLightDark
 @Composable
 private fun OtpScreenPreview() {
-    val focusRequesters = remember {
-        List(6) { FocusRequester() }
-    }
-
-    val fakeState = OtpState(
-        code = List(6) { null },
-        isValid = null
+    val focusRequesters = remember { List(6) { FocusRequester() } }
+    val previewState = OtpState(
+        code = listOf(1, 2, 3, null, null, null)
     )
 
     VoqalTheme {
         OtpScreen(
-            state = fakeState,
+            state = previewState,
             focusRequesters = focusRequesters,
             onAction = {},
-            onBack = {},
-            modifier = Modifier
+            onBack = {}
         )
     }
 }
