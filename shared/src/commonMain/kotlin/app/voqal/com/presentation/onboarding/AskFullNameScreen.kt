@@ -1,7 +1,5 @@
 package app.voqal.com.presentation.onboarding
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,8 +30,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.voqal.com.core.designsystem.components.VoqalPrimaryButton
 import app.voqal.com.core.designsystem.theme.VoqalTheme
-import app.voqal.com.presentation.onboarding.components.BackButton
-
 
 @Composable
 fun AskFullNameScreen(
@@ -46,79 +42,75 @@ fun AskFullNameScreen(
 
     val isFormValid = firstName.isNotBlank() && lastName.isNotBlank()
 
-    Column(
+    OnboardingScaffold(
+        onBack = onBack,
         modifier = modifier
-            .fillMaxSize()
-            .background(VoqalTheme.colors.background)
-            .padding(horizontal = 24.dp),
     ) {
-
-        Spacer(modifier = Modifier.height(30.dp))
-
-        BackButton(onClick = onBack)
-
-        Spacer(modifier = Modifier.height(48.dp))
-
         Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 24.dp),
         ) {
-            Text(
-                text = "What's your full name?",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.SemiBold,
-                textAlign = TextAlign.Center,
-                color = VoqalTheme.colors.onBackground,
-                lineHeight = 36.sp,
-            )
+            Spacer(modifier = Modifier.height(16.dp))
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "What's your full name?",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    textAlign = TextAlign.Center,
+                    color = VoqalTheme.colors.onBackground,
+                    lineHeight = 36.sp,
+                )
 
-            Text(
-                text = "People use real names on Voqal",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Normal,
-                color = VoqalTheme.colors.onSurfaceVariant,
-            )
-        }
+                Spacer(modifier = Modifier.height(8.dp))
 
-        Spacer(modifier = Modifier.height(48.dp))
-
-        NameField(
-            value = firstName,
-            onValueChange = { firstName = it },
-            placeholder = "First",
-            imeAction = ImeAction.Next,
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        NameField(
-            value = lastName,
-            onValueChange = { lastName = it },
-            placeholder = "Last",
-            imeAction = ImeAction.Done,
-            onDone = {
-                if (isFormValid) onContinue(firstName.trim(), lastName.trim())
+                Text(
+                    text = "People use real names on Voqal",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Normal,
+                    color = VoqalTheme.colors.onSurfaceVariant,
+                )
             }
-        )
 
-        Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(48.dp))
 
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.Center
-        ) {
+            NameField(
+                value = firstName,
+                onValueChange = { firstName = it },
+                placeholder = "First",
+                imeAction = ImeAction.Next,
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            NameField(
+                value = lastName,
+                onValueChange = { lastName = it },
+                placeholder = "Last",
+                imeAction = ImeAction.Done,
+                onDone = {
+                    if (isFormValid) onContinue(firstName.trim(), lastName.trim())
+                }
+            )
+
+            // Pushes the button to the bottom dynamically
+            Spacer(modifier = Modifier.weight(1f))
+
             VoqalPrimaryButton(
                 text = "Let's Go",
                 onClick = { onContinue(firstName.trim(), lastName.trim()) },
                 enabled = isFormValid,
+                modifier = Modifier.fillMaxWidth()
             )
+
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
-
-
 
 @Composable
 private fun NameField(
@@ -147,6 +139,7 @@ private fun NameField(
         textStyle = TextStyle(
             fontSize = 20.sp,
             fontWeight = FontWeight.Medium,
+            color = VoqalTheme.colors.onBackground
         ),
         keyboardOptions = KeyboardOptions(
             capitalization = KeyboardCapitalization.Words,

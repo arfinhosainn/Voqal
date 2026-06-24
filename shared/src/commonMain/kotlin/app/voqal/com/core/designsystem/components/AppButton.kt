@@ -10,6 +10,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.sp
 import app.voqal.com.core.designsystem.theme.VoqalTheme
 
 @Composable
@@ -28,8 +29,11 @@ fun VoqalPrimaryButton(
         disabledContainerColor = VoqalTheme.colors.surfaceVariant,
         disabledContentColor = VoqalTheme.colors.onSurface.copy(alpha = 0.38f)
     ),
-    contentPadding: PaddingValues = PaddingValues(horizontal = 40.dp, vertical = 20.dp),
-    textStyle: TextStyle = VoqalTheme.typography.titleMedium.copy(fontWeight = FontWeight.Medium),
+    contentPadding: PaddingValues = PaddingValues(horizontal = 35.dp, vertical = 15.dp),
+    textStyle: TextStyle = VoqalTheme.typography.titleMedium.copy(
+        fontWeight = FontWeight.Medium,
+        fontSize = 18.sp
+    ),
 ) {
     Button(
         onClick = onClick,
@@ -83,7 +87,11 @@ private fun VoqalPrimaryButtonPreview() {
             Spacer(modifier = Modifier.height(12.dp))
             VoqalPrimaryButton(text = "Join the room in progress", onClick = {}, loading = false)
             Spacer(modifier = Modifier.height(16.dp))
-            VoqalPrimaryButton(text = "Join the room in progress", onClick = {}, modifier = Modifier.fillMaxWidth())
+            VoqalPrimaryButton(
+                text = "Join the room in progress",
+                onClick = {},
+                modifier = Modifier.fillMaxWidth()
+            )
         }
     }
 }
