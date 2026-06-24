@@ -14,9 +14,6 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,26 +21,50 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.voqal.com.core.designsystem.components.VoqalPrimaryButton
+import app.voqal.com.core.designsystem.presentation.util.ObserveAsEvents
 import app.voqal.com.core.designsystem.theme.VoqalTheme
 import app.voqal.com.feature.onboarding.OnboardingScaffold
+import org.koin.compose.viewmodel.koinViewModel
+
+@Composable
+fun PickUsernameRoot(
+    onNavigateToNext: () -> Unit,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: UsernameViewModel = koinViewModel()
+) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
+    ObserveAsEvents(viewModel.events) { event ->
+        when (event) {
+            is UsernameEvent.NavigateToNext -> onNavigateToNext()
+            is UsernameEvent.ShowSnackbar -> { /* Handle notification presentation if needed */ }
+        }
+    }
+
+    PickUsernameScreen(
+        state = state,
+        onBack = onBack,
+        onAction = viewModel::onAction,
+        modifier = modifier
+    )
+}
 
 @Composable
 fun PickUsernameScreen(
+    state: UsernameState,
     onBack: () -> Unit,
-    onContinue: (firstName: String, lastName: String) -> Unit,
+    onAction: (UsernameAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var firstName by remember { mutableStateOf("") }
-    var lastName by remember { mutableStateOf("") }
-
-    val isFormValid = firstName.isNotBlank() && lastName.isNotBlank()
-
-  OnboardingScaffold(
+    OnboardingScaffold(
         onBack = onBack,
         modifier = modifier
     ) {
@@ -54,6 +75,7 @@ fun PickUsernameScreen(
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
+            // --- Header Section ---
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -79,11 +101,15 @@ fun PickUsernameScreen(
 
             Spacer(modifier = Modifier.height(48.dp))
 
+            // --- Username Input Field ---
             UserNameField(
-                value = firstName,
-                onValueChange = { firstName = it },
-                placeholder = "@Superboy",
-                imeAction = ImeAction.Next,
+                value = state.username,
+                onValueChange = { onAction(UsernameAction.OnUsernameChange(it)) },
+                placeholder = "@superboy",
+                imeAction = ImeAction.Done,
+                onDone = {
+                    if (state.isFormValid) onAction(UsernameAction.OnContinueClick)
+                }
             )
 
             // Pushes the button area to the bottom dynamically
@@ -91,8 +117,8 @@ fun PickUsernameScreen(
 
             VoqalPrimaryButton(
                 text = "Let's Go",
-                onClick = { onContinue(firstName.trim(), lastName.trim()) },
-                enabled = isFormValid,
+                onClick = { onAction(UsernameAction.OnContinueClick) },
+                enabled = state.isFormValid && !state.isSubmitting,
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -131,7 +157,8 @@ private fun UserNameField(
             color = VoqalTheme.colors.onBackground
         ),
         keyboardOptions = KeyboardOptions(
-            capitalization = KeyboardCapitalization.Words,
+            capitalization = KeyboardCapitalization.None, // Fixed: Usernames are lowercase strings
+            keyboardType = KeyboardType.Ascii,
             imeAction = imeAction,
         ),
         keyboardActions = KeyboardActions(
@@ -151,11 +178,12 @@ private fun UserNameField(
 
 @Preview
 @Composable
-private fun FullNameScreenPreview() {
+private fun PickUsernameScreenPreview() {
     VoqalTheme {
         PickUsernameScreen(
+            state = UsernameState(username = ""),
             onBack = {},
-            onContinue = { _, _ -> },
+            onAction = {}
         )
     }
 }
