@@ -13,7 +13,10 @@ import org.koin.viewmodel.factory.KoinViewModelFactory
 @Preview
 fun App() {
     VoqalTheme {
-
+        FullNameRoot(
+            onNavigate = {},
+            onBack = {}
+        )
 
     }
 }
