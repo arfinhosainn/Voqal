@@ -1,6 +1,5 @@
-package app.voqal.com.presentation.onboarding
+package app.voqal.com.feature.onboarding.presentation.username
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -31,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.voqal.com.core.designsystem.components.VoqalPrimaryButton
 import app.voqal.com.core.designsystem.theme.VoqalTheme
+import app.voqal.com.feature.onboarding.OnboardingScaffold
 
 @Composable
 fun PickUsernameScreen(
@@ -43,7 +43,7 @@ fun PickUsernameScreen(
 
     val isFormValid = firstName.isNotBlank() && lastName.isNotBlank()
 
-    OnboardingScaffold(
+  OnboardingScaffold(
         onBack = onBack,
         modifier = modifier
     ) {

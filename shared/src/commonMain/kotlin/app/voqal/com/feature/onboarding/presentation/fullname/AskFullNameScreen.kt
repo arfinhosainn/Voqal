@@ -1,4 +1,4 @@
-package app.voqal.com.presentation.onboarding
+package app.voqal.com.feature.onboarding.presentation.fullname
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -14,9 +14,6 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -25,23 +22,46 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.voqal.com.core.designsystem.components.VoqalPrimaryButton
+import app.voqal.com.core.designsystem.presentation.util.ObserveAsEvents
 import app.voqal.com.core.designsystem.theme.VoqalTheme
+import app.voqal.com.feature.onboarding.OnboardingScaffold
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun AskFullNameScreen(
+fun FullNameRoot(
+    onNavigate: () -> Unit,
     onBack: () -> Unit,
-    onContinue: (firstName: String, lastName: String) -> Unit,
     modifier: Modifier = Modifier,
+    viewModel: FullNameViewModel = koinViewModel()
 ) {
-    var firstName by remember { mutableStateOf("") }
-    var lastName by remember { mutableStateOf("") }
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
-    val isFormValid = firstName.isNotBlank() && lastName.isNotBlank()
+    ObserveAsEvents(viewModel.events) { event ->
+        when (event) {
+            is FullNameEvent.Navigate -> onNavigate()
+            is FullNameEvent.ShowSnackbar -> { /* Trigger snackbar workflow if required */ }
+        }
+    }
 
+    FullNameScreen(
+        state = state,
+        onBack = onBack,
+        onAction = viewModel::onAction,
+        modifier = modifier
+    )
+}
+
+@Composable
+fun FullNameScreen(
+    state: FullNameState,
+    onBack: () -> Unit,
+    onAction: (FullNameAction) -> Unit,
+    modifier: Modifier = Modifier
+) {
     OnboardingScaffold(
         onBack = onBack,
         modifier = modifier
@@ -53,6 +73,7 @@ fun AskFullNameScreen(
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
+            // --- Header Section ---
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -78,9 +99,10 @@ fun AskFullNameScreen(
 
             Spacer(modifier = Modifier.height(48.dp))
 
+            // --- Text Input Fields (Purely driven by hoisted ViewModel State) ---
             NameField(
-                value = firstName,
-                onValueChange = { firstName = it },
+                value = state.firstName,
+                onValueChange = { onAction(FullNameAction.OnFirstNameChange(it)) },
                 placeholder = "First",
                 imeAction = ImeAction.Next,
             )
@@ -88,12 +110,12 @@ fun AskFullNameScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             NameField(
-                value = lastName,
-                onValueChange = { lastName = it },
+                value = state.lastName,
+                onValueChange = { onAction(FullNameAction.OnLastNameChange(it)) },
                 placeholder = "Last",
                 imeAction = ImeAction.Done,
                 onDone = {
-                    if (isFormValid) onContinue(firstName.trim(), lastName.trim())
+                    if (state.isFormValid) onAction(FullNameAction.OnContinueClick)
                 }
             )
 
@@ -102,8 +124,8 @@ fun AskFullNameScreen(
 
             VoqalPrimaryButton(
                 text = "Let's Go",
-                onClick = { onContinue(firstName.trim(), lastName.trim()) },
-                enabled = isFormValid,
+                onClick = { onAction(FullNameAction.OnContinueClick) },
+                enabled = state.isFormValid,
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -111,7 +133,6 @@ fun AskFullNameScreen(
         }
     }
 }
-
 @Composable
 private fun NameField(
     value: String,
@@ -160,13 +181,13 @@ private fun NameField(
     )
 }
 
-@Preview
-@Composable
-private fun FullNameScreenPreview() {
-    VoqalTheme {
-        AskFullNameScreen(
-            onBack = {},
-            onContinue = { _, _ -> },
-        )
-    }
-}
+//@Preview
+//@Composable
+//private fun FullNameScreenPreview() {
+//    VoqalTheme {
+//        FullNameScreen(
+//            onBack = {},
+//            onContinue = { _, _ -> },
+//        )
+//    }
+//}

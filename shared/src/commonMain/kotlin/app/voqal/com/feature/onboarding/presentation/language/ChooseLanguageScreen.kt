@@ -1,4 +1,4 @@
-package app.voqal.com.presentation.onboarding
+package app.voqal.com.feature.onboarding.presentation.language
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.voqal.com.core.designsystem.components.VoqalPrimaryButton
 import app.voqal.com.core.designsystem.theme.VoqalTheme
+import app.voqal.com.feature.onboarding.OnboardingScaffold
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import voqal.shared.generated.resources.Res

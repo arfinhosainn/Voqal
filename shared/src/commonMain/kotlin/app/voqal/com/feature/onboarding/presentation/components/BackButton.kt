@@ -1,4 +1,4 @@
-package app.voqal.com.presentation.onboarding.components
+package app.voqal.com.feature.onboarding.presentation.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box

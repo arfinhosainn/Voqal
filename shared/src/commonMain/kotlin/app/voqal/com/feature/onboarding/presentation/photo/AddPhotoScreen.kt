@@ -1,4 +1,4 @@
-package app.voqal.com.presentation.onboarding
+package app.voqal.com.feature.onboarding.presentation.photo
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.voqal.com.core.designsystem.components.VoqalPrimaryButton
 import app.voqal.com.core.designsystem.theme.VoqalTheme
+import app.voqal.com.feature.onboarding.OnboardingScaffold
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
@@ -43,6 +44,7 @@ import org.jetbrains.compose.resources.vectorResource
 import voqal.shared.generated.resources.Res
 import voqal.shared.generated.resources.ic_edit
 import voqal.shared.generated.resources.img
+
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
