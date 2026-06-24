@@ -13,6 +13,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import app.voqal.com.core.designsystem.theme.VoqalTheme
+import org.jetbrains.compose.resources.painterResource
+import voqal.shared.generated.resources.Res
+import voqal.shared.generated.resources.ic_back
 
 @Composable
  fun BackButton(onClick: () -> Unit) {
@@ -24,7 +27,7 @@ import app.voqal.com.core.designsystem.theme.VoqalTheme
     ) {
         IconButton(onClick = onClick) {
             Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                painter = painterResource(Res.drawable.ic_back),
                 contentDescription = "Back",
                 tint = VoqalTheme.colors.onSurface,
             )

@@ -1,7 +1,5 @@
 package app.voqal.com.presentation.onboarding
 
-
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -33,8 +31,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.voqal.com.core.designsystem.components.VoqalPrimaryButton
 import app.voqal.com.core.designsystem.theme.VoqalTheme
-import app.voqal.com.presentation.onboarding.components.BackButton
-
 
 @Composable
 fun PickUsernameScreen(
@@ -47,67 +43,63 @@ fun PickUsernameScreen(
 
     val isFormValid = firstName.isNotBlank() && lastName.isNotBlank()
 
-    Column(
+    OnboardingScaffold(
+        onBack = onBack,
         modifier = modifier
-            .fillMaxSize()
-            .background(VoqalTheme.colors.background)
-            .padding(horizontal = 24.dp),
     ) {
-
-        Spacer(modifier = Modifier.height(30.dp))
-
-        BackButton(onClick = onBack)
-
-        Spacer(modifier = Modifier.height(48.dp))
-
         Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 24.dp),
         ) {
-            Text(
-                text = "Pick a username?",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.SemiBold,
-                textAlign = TextAlign.Center,
-                color = VoqalTheme.colors.onBackground,
-                lineHeight = 36.sp,
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Pick a username?",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    textAlign = TextAlign.Center,
+                    color = VoqalTheme.colors.onBackground,
+                    lineHeight = 36.sp,
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "Choose a distinct username",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Normal,
+                    color = VoqalTheme.colors.onSurfaceVariant,
+                )
+            }
+
+            Spacer(modifier = Modifier.height(48.dp))
+
+            UserNameField(
+                value = firstName,
+                onValueChange = { firstName = it },
+                placeholder = "@Superboy",
+                imeAction = ImeAction.Next,
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            // Pushes the button area to the bottom dynamically
+            Spacer(modifier = Modifier.weight(1f))
 
-            Text(
-                text = "Choose a distinct username",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Normal,
-                color = VoqalTheme.colors.onSurfaceVariant,
-            )
-        }
-
-        Spacer(modifier = Modifier.height(48.dp))
-
-        UserNameField(
-            value = firstName,
-            onValueChange = { firstName = it },
-            placeholder = "@Superboy",
-            imeAction = ImeAction.Next,
-        )
-
-        Spacer(modifier = Modifier.height(40.dp))
-
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.Center
-        ) {
             VoqalPrimaryButton(
                 text = "Let's Go",
                 onClick = { onContinue(firstName.trim(), lastName.trim()) },
                 enabled = isFormValid,
+                modifier = Modifier.fillMaxWidth()
             )
+
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
-
-
 
 @Composable
 private fun UserNameField(
@@ -136,6 +128,7 @@ private fun UserNameField(
         textStyle = TextStyle(
             fontSize = 20.sp,
             fontWeight = FontWeight.Medium,
+            color = VoqalTheme.colors.onBackground
         ),
         keyboardOptions = KeyboardOptions(
             capitalization = KeyboardCapitalization.Words,

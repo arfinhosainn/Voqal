@@ -29,7 +29,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.voqal.com.core.designsystem.components.VoqalPrimaryButton
 import app.voqal.com.core.designsystem.theme.VoqalTheme
-import app.voqal.com.presentation.onboarding.components.BackButton
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import voqal.shared.generated.resources.Res
@@ -85,20 +84,21 @@ fun ChooseLanguageScreen(
 
     var selectedLanguage by remember { mutableStateOf<LanguageUi?>(null) }
 
-    Column(
+    OnboardingScaffold(
+        onBack = onBack,
         modifier = modifier
-            .fillMaxSize()
-            .background(VoqalTheme.colors.background)
     ) {
-        // --- HEADER SECTION ---
-        Column(modifier = Modifier.padding(horizontal = 24.dp)) {
-            Spacer(Modifier.height(30.dp))
-            BackButton(onClick = onBack)
-            Spacer(Modifier.height(40.dp))
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            // --- HEADER SECTION ---
+            Spacer(Modifier.height(16.dp)) // Optional: slightly offset from the app bar
 
             Text(
                 text = "Choose Language",
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
                 textAlign = TextAlign.Center,
                 fontSize = 30.sp,
                 fontWeight = FontWeight.Bold,
@@ -109,63 +109,66 @@ fun ChooseLanguageScreen(
 
             Text(
                 text = "Select the language you speak",
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
                 textAlign = TextAlign.Center,
                 fontSize = 16.sp,
                 color = VoqalTheme.colors.onSurfaceVariant
             )
 
             Spacer(Modifier.height(40.dp))
-        }
 
-        Box(modifier = Modifier.weight(1f)) {
+            // --- CONTENT SECTION ---
+            Box(modifier = Modifier.weight(1f)) {
 
-            // 1. The Scrollable Grid
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                horizontalArrangement = Arrangement.spacedBy(24.dp),
-                verticalArrangement = Arrangement.spacedBy(28.dp),
-                // Important: Padding allows scrolling past the floating bottom button
-                contentPadding = PaddingValues(start = 24.dp, end = 24.dp, bottom = 140.dp),
-                modifier = Modifier.fillMaxSize()
-            ) {
-                items(
-                    items = languages,
-                    key = { it.id }
-                ) { language ->
-                    LanguageItem(
-                        language = language,
-                        selected = selectedLanguage == language,
-                        onClick = { selectedLanguage = language }
-                    )
+                // 1. The Scrollable Grid
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    horizontalArrangement = Arrangement.spacedBy(24.dp),
+                    verticalArrangement = Arrangement.spacedBy(28.dp),
+                    // Important: Padding allows scrolling past the floating bottom button
+                    contentPadding = PaddingValues(start = 24.dp, end = 24.dp, bottom = 140.dp),
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    items(
+                        items = languages,
+                        key = { it.id }
+                    ) { language ->
+                        LanguageItem(
+                            language = language,
+                            selected = selectedLanguage == language,
+                            onClick = { selectedLanguage = language }
+                        )
+                    }
                 }
-            }
 
-            // 2. The Floating Bottom Button Area
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .height(140.dp) // Make it taller than the button for a smooth fade
-                    .background(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                Color.Transparent, // Starts transparent at the top
-                                VoqalTheme.colors.background.copy(alpha = 0.8f), // Gets mostly solid
-                                VoqalTheme.colors.background // Fully solid at the bottom edge
+                // 2. The Floating Bottom Button Area
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                        .height(140.dp) // Make it taller than the button for a smooth fade
+                        .background(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    Color.Transparent, // Starts transparent at the top
+                                    VoqalTheme.colors.background.copy(alpha = 0.8f), // Gets mostly solid
+                                    VoqalTheme.colors.background // Fully solid at the bottom edge
+                                )
                             )
                         )
+                        .padding(bottom = 24.dp), // Lift the button off the bottom edge
+                    contentAlignment = Alignment.BottomCenter
+                ) {
+                    VoqalPrimaryButton(
+                        text = "Let's Go",
+                        enabled = selectedLanguage != null,
+                        onClick = {
+                            selectedLanguage?.let(onContinue)
+                        }
                     )
-                    .padding(bottom = 24.dp), // Lift the button off the bottom edge
-                contentAlignment = Alignment.BottomCenter
-            ) {
-                VoqalPrimaryButton(
-                    text = "Let's Go",
-                    enabled = selectedLanguage != null,
-                    onClick = {
-                        selectedLanguage?.let(onContinue)
-                    }
-                )
+                }
             }
         }
     }
@@ -261,7 +264,6 @@ data class LanguageUi(
 @Composable
 fun PreviewChooseLanguageScreen(){
     VoqalTheme {
-
         ChooseLanguageScreen(onBack = {}, onContinue = {})
     }
 }

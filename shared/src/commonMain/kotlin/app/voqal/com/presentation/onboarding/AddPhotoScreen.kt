@@ -36,7 +36,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.voqal.com.core.designsystem.components.VoqalPrimaryButton
 import app.voqal.com.core.designsystem.theme.VoqalTheme
-import app.voqal.com.presentation.onboarding.components.BackButton
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
@@ -56,58 +55,57 @@ fun AddPhotoScreen(
     var preview by remember { mutableStateOf(false) }
 
     Box(
-        modifier = modifier.fillMaxSize().background(VoqalTheme.colors.background)
+        modifier = modifier.fillMaxSize()
     ) {
-        Column(
-            Modifier.fillMaxSize().padding(horizontal = 24.dp)
+        OnboardingScaffold(
+            onBack = onBack
         ) {
-            Spacer(Modifier.height(30.dp))
-            BackButton(onClick = onBack)
-            Spacer(Modifier.height(48.dp))
-
             Column(
-                Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                Spacer(Modifier.height(16.dp))
+
                 Text(
-                    "Add a photo",
+                    text = "Add a photo",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = VoqalTheme.colors.onBackground,
                     textAlign = TextAlign.Center
                 )
+
                 Spacer(Modifier.height(8.dp))
+
                 Text(
-                    "Select a profile photo for your account",
+                    text = "Select a profile photo for your account",
                     fontSize = 14.sp,
-                    color = VoqalTheme.colors.onSurfaceVariant
+                    color = VoqalTheme.colors.onSurfaceVariant,
+                    textAlign = TextAlign.Center
                 )
-            }
 
-            Spacer(Modifier.height(48.dp))
+                Spacer(Modifier.height(48.dp))
 
-            ProfilePhotoPicker(
-                onEditClick = onEditClick,
-                onPreviewChanged = { preview = it },
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
+                ProfilePhotoPicker(
+                    onEditClick = onEditClick,
+                    onPreviewChanged = { preview = it }
+                )
 
-            Spacer(modifier = Modifier.height(40.dp))
+                Spacer(modifier = Modifier.weight(1f))
 
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ) {
                 VoqalPrimaryButton(
                     text = "Let's Go",
-                    onClick = {},
+                    onClick = { /* TODO: Use onContinue properties here if needed */ },
                     enabled = true,
+                    modifier = Modifier.fillMaxWidth()
                 )
-            }
 
-            Spacer(Modifier.height(24.dp))
+                Spacer(Modifier.height(24.dp))
+            }
         }
 
+        // Preview overlay sits completely on top of everything (Scaffold included)
         ProfilePhotoPreview(preview)
     }
 }
@@ -132,7 +130,7 @@ private fun ProfilePhotoPicker(
     )
 
     Box(
-        modifier.size(avatarSize).graphicsLayer {
+        modifier = modifier.size(avatarSize).graphicsLayer {
             scaleX = scale
             scaleY = scale
         }
