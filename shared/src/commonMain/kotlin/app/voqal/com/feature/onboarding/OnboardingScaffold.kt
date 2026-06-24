@@ -1,4 +1,4 @@
-package app.voqal.com.presentation.onboarding
+package app.voqal.com.feature.onboarding
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -11,7 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import app.voqal.com.core.designsystem.theme.VoqalTheme
-import app.voqal.com.presentation.onboarding.components.BackButton
+import app.voqal.com.feature.onboarding.presentation.components.BackButton
 
 @Composable
 fun OnboardingScaffold(

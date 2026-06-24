@@ -1,4 +1,4 @@
-package app.voqal.com.presentation.onboarding.components
+package app.voqal.com.feature.onboarding.presentation.components
 
 sealed interface OtpAction {
     data class OnEnterNumber(val number: Int?, val index: Int): OtpAction

@@ -1,4 +1,4 @@
-package app.voqal.com.presentation.onboarding
+package app.voqal.com.feature.onboarding.presentation.otp
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
@@ -14,9 +14,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import app.voqal.com.core.designsystem.components.VoqalPrimaryButton
 import app.voqal.com.core.designsystem.theme.VoqalTheme
-import app.voqal.com.presentation.onboarding.components.OtpAction
-import app.voqal.com.presentation.onboarding.components.OtpInputField
-import app.voqal.com.presentation.onboarding.components.OtpState
+import app.voqal.com.feature.onboarding.OnboardingScaffold
+import app.voqal.com.feature.onboarding.presentation.components.OtpAction
+import app.voqal.com.feature.onboarding.presentation.components.OtpInputField
+import app.voqal.com.feature.onboarding.presentation.components.OtpState
 
 @Composable
 fun OtpScreen(

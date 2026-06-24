@@ -1,4 +1,4 @@
-package app.voqal.com.presentation.onboarding
+package app.voqal.com.feature.onboarding.presentation.interest
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.voqal.com.core.designsystem.components.VoqalPrimaryButton
 import app.voqal.com.core.designsystem.theme.VoqalTheme
+import app.voqal.com.feature.onboarding.OnboardingScaffold
 
 data class InterestItem(
     val id: String,
@@ -87,7 +88,6 @@ fun ChooseInterestsScreen(
 
     var selectedInterestIds by remember { mutableStateOf(setOf<String>()) }
     val categories = remember(repositoryInterests) { repositoryInterests.groupBy { it.category } }
-
     OnboardingScaffold(
         onBack = onBack,
         modifier = modifier
