@@ -3,22 +3,39 @@ package app.voqal.com.feature.onboarding.presentation.otp
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.voqal.com.feature.onboarding.presentation.OnboardingDraftStore
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class OtpViewModel : ViewModel() {
+private const val ResendCountdownSeconds = 30
 
-    private val _state = MutableStateFlow(OtpState())
+class OtpViewModel(
+    private val onboardingDraftStore: OnboardingDraftStore
+) : ViewModel() {
+
+    private val _state = MutableStateFlow(
+        OtpState(
+            code = onboardingDraftStore.otpCode,
+            emailAddress = onboardingDraftStore.email
+        )
+    )
     val state = _state.asStateFlow()
 
     private val _events = Channel<OtpEvent>()
     val events = _events.receiveAsFlow()
 
     private var currentlyFocusedIndex: Int = 0
+    private var resendCountdownJob: Job? = null
+
+    init {
+        startResendCountdown()
+    }
 
     fun onAction(action: OtpAction) {
         when (action) {
@@ -28,6 +45,7 @@ class OtpViewModel : ViewModel() {
             }
             OtpAction.OnKeyboardBack -> handleBackspaceTraversal()
             OtpAction.OnResendCodeClick -> resendOtpCode()
+            OtpAction.OnChangeEmailClick -> changeEmail()
             OtpAction.OnVerifyClick -> verifyOtpCode()
         }
     }
@@ -37,7 +55,13 @@ class OtpViewModel : ViewModel() {
             val updatedCode = currentState.code.toMutableList().apply {
                 this[index] = number
             }
+            onboardingDraftStore.otpCode = updatedCode
             currentState.copy(code = updatedCode, error = null)
+        }
+
+        if (_state.value.isValid && !_state.value.isSubmitting) {
+            verifyOtpCode()
+            return
         }
 
         viewModelScope.launch {
@@ -61,8 +85,25 @@ class OtpViewModel : ViewModel() {
     }
 
     private fun resendOtpCode() {
+        if (_state.value.resendSecondsRemaining > 0) return
+
         viewModelScope.launch {
+            onboardingDraftStore.otpCode = List(6) { null }
+            _state.update {
+                it.copy(
+                    code = onboardingDraftStore.otpCode,
+                    error = null,
+                    resendSecondsRemaining = ResendCountdownSeconds
+                )
+            }
+            startResendCountdown()
             _events.send(OtpEvent.ShowSnackbar("A new code has been sent!"))
+        }
+    }
+
+    private fun changeEmail() {
+        viewModelScope.launch {
+            _events.send(OtpEvent.NavigateToEmail)
         }
     }
 
@@ -79,6 +120,18 @@ class OtpViewModel : ViewModel() {
                 _events.send(OtpEvent.ShowSnackbar(e.message ?: "Invalid code verification"))
             } finally {
                 _state.update { it.copy(isSubmitting = false) }
+            }
+        }
+    }
+
+    private fun startResendCountdown() {
+        resendCountdownJob?.cancel()
+        resendCountdownJob = viewModelScope.launch {
+            while (_state.value.resendSecondsRemaining > 0) {
+                delay(1000)
+                _state.update {
+                    it.copy(resendSecondsRemaining = (it.resendSecondsRemaining - 1).coerceAtLeast(0))
+                }
             }
         }
     }

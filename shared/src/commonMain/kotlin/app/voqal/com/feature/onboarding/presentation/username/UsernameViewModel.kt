@@ -3,18 +3,21 @@ package app.voqal.com.feature.onboarding.presentation.username
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.voqal.com.feature.onboarding.presentation.OnboardingDraftStore
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class UsernameViewModel : ViewModel() {
+class UsernameViewModel(
+    private val onboardingDraftStore: OnboardingDraftStore
+) : ViewModel() {
 
-    private val _state = MutableStateFlow(UsernameState())
+    private val _state = MutableStateFlow(
+        UsernameState(username = onboardingDraftStore.username)
+    )
     val state = _state.asStateFlow()
 
     private val _events = Channel<UsernameEvent>()
@@ -23,10 +26,11 @@ class UsernameViewModel : ViewModel() {
     fun onAction(action: UsernameAction) {
         when (action) {
             is UsernameAction.OnUsernameChange -> {
+                val username = action.username.lowercase().replace("\\s".toRegex(), "")
+                onboardingDraftStore.username = username
                 _state.update {
-                    // Sanitize username input: lowercase, remove spaces/special chars if needed
                     it.copy(
-                        username = action.username.lowercase().replace("\\s".toRegex(), ""),
+                        username = username,
                         error = null
                     )
                 }

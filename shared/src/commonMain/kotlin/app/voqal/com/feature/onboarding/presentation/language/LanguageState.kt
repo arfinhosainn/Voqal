@@ -23,10 +23,10 @@ import voqal.shared.generated.resources.ukrainian
 
 data class LanguageState(
     val languages: List<LanguageUi> = listOf(
+        LanguageUi("en", "English", Res.drawable.english),
         LanguageUi("de", "German", Res.drawable.german),
         LanguageUi("zh", "Chinese", Res.drawable.chinese),
         LanguageUi("ko", "Korean", Res.drawable.korean),
-        LanguageUi("en", "English", Res.drawable.english),
         LanguageUi("fr", "French", Res.drawable.french),
         LanguageUi("id", "Indonesian", Res.drawable.indonesian),
         LanguageUi("fa", "Persian", Res.drawable.persian),
@@ -44,5 +44,15 @@ data class LanguageState(
         LanguageUi("uk", "Ukrainian", Res.drawable.ukrainian),
     ),
     val selectedLanguage: LanguageUi? = null,
+    val searchQuery: String = "",
     val isSubmitting: Boolean = false
-)
+) {
+    val filteredLanguages: List<LanguageUi> =
+        if (searchQuery.isBlank()) {
+            languages
+        } else {
+            languages.filter {
+                it.name.contains(searchQuery.trim(), ignoreCase = true)
+            }
+        }
+}

@@ -2,6 +2,7 @@ package app.voqal.com.feature.onboarding.presentation.email
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.voqal.com.feature.onboarding.presentation.OnboardingDraftStore
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -9,9 +10,13 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class EmailViewModel : ViewModel() {
+class EmailViewModel(
+    private val onboardingDraftStore: OnboardingDraftStore
+) : ViewModel() {
 
-    private val _state = MutableStateFlow(EmailState())
+    private val _state = MutableStateFlow(
+        EmailState(email = onboardingDraftStore.email)
+    )
     val state = _state.asStateFlow()
 
     private val _events = Channel<EmailEvent>()
@@ -20,9 +25,14 @@ class EmailViewModel : ViewModel() {
     fun onAction(action: EmailAction) {
         when (action) {
             is EmailAction.OnEmailChange -> {
+                val email = action.email.trim()
+                if (email != onboardingDraftStore.email) {
+                    onboardingDraftStore.otpCode = List(6) { null }
+                }
+                onboardingDraftStore.email = email
                 _state.update {
                     it.copy(
-                        email = action.email.trim(),
+                        email = email,
                         error = null
                     )
                 }

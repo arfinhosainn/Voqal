@@ -29,8 +29,10 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.voqal.com.core.components.VoqalPrimaryButton
 import app.voqal.com.core.presentation.util.ObserveAsEvents
+import app.voqal.com.core.designsystem.theme.BricolageGrotesq
 import app.voqal.com.core.designsystem.theme.VoqalTheme
 import app.voqal.com.feature.onboarding.OnboardingScaffold
+import app.voqal.com.feature.onboarding.presentation.components.ValidationHint
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -66,7 +68,8 @@ fun PickUsernameScreen(
 ) {
     OnboardingScaffold(
         onBack = onBack,
-        modifier = modifier
+        modifier = modifier,
+        currentStep = 4
     ) {
         Column(
             modifier = Modifier
@@ -81,7 +84,7 @@ fun PickUsernameScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Pick a username?",
+                    text = "Pick a username",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.SemiBold,
                     textAlign = TextAlign.Center,
@@ -112,13 +115,26 @@ fun PickUsernameScreen(
                 }
             )
 
+            if (state.username.isNotBlank()) {
+                Spacer(modifier = Modifier.height(10.dp))
+                ValidationHint(
+                    isValid = state.isFormValid,
+                    message = if (state.isFormValid) {
+                        "Username looks good"
+                    } else {
+                        "Use at least 3 characters"
+                    }
+                )
+            }
+
             // Pushes the button area to the bottom dynamically
             Spacer(modifier = Modifier.weight(1f))
 
             VoqalPrimaryButton(
-                text = "Let's Go",
+                text = "Continue",
                 onClick = { onAction(UsernameAction.OnContinueClick) },
                 enabled = state.isFormValid && !state.isSubmitting,
+                loading = state.isSubmitting,
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -143,6 +159,7 @@ private fun UserNameField(
                 text = placeholder,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.SemiBold,
+                fontFamily = BricolageGrotesq,
                 color = VoqalTheme.colors.onSurfaceVariant,
             )
         },
@@ -154,6 +171,7 @@ private fun UserNameField(
         textStyle = TextStyle(
             fontSize = 20.sp,
             fontWeight = FontWeight.Medium,
+            fontFamily = BricolageGrotesq,
             color = VoqalTheme.colors.onBackground
         ),
         keyboardOptions = KeyboardOptions(

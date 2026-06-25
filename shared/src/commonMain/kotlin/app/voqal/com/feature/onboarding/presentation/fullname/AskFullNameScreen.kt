@@ -27,8 +27,10 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.voqal.com.core.components.VoqalPrimaryButton
 import app.voqal.com.core.presentation.util.ObserveAsEvents
+import app.voqal.com.core.designsystem.theme.BricolageGrotesq
 import app.voqal.com.core.designsystem.theme.VoqalTheme
 import app.voqal.com.feature.onboarding.OnboardingScaffold
+import app.voqal.com.feature.onboarding.presentation.components.ValidationHint
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -64,7 +66,8 @@ fun FullNameScreen(
 ) {
     OnboardingScaffold(
         onBack = onBack,
-        modifier = modifier
+        modifier = modifier,
+        currentStep = 3
     ) {
         Column(
             modifier = Modifier
@@ -119,13 +122,26 @@ fun FullNameScreen(
                 }
             )
 
+            if (state.firstName.isNotBlank() || state.lastName.isNotBlank()) {
+                Spacer(modifier = Modifier.height(10.dp))
+                ValidationHint(
+                    isValid = state.isFormValid,
+                    message = if (state.isFormValid) {
+                        "Name looks good"
+                    } else {
+                        "Enter first and last name"
+                    }
+                )
+            }
+
             // Pushes the button to the bottom dynamically
             Spacer(modifier = Modifier.weight(1f))
 
             VoqalPrimaryButton(
-                text = "Let's Go",
+                text = "Continue",
                 onClick = { onAction(FullNameAction.OnContinueClick) },
                 enabled = state.isFormValid,
+                loading = state.isLoading,
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -149,6 +165,7 @@ private fun NameField(
                 text = placeholder,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.SemiBold,
+                fontFamily = BricolageGrotesq,
                 color = VoqalTheme.colors.onSurfaceVariant,
             )
         },
@@ -160,6 +177,7 @@ private fun NameField(
         textStyle = TextStyle(
             fontSize = 20.sp,
             fontWeight = FontWeight.Medium,
+            fontFamily = BricolageGrotesq,
             color = VoqalTheme.colors.onBackground
         ),
         keyboardOptions = KeyboardOptions(

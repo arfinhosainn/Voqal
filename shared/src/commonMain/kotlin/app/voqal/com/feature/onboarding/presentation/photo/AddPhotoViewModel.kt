@@ -1,8 +1,10 @@
 package app.voqal.com.feature.onboarding.presentation.photo
 
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.voqal.com.feature.onboarding.presentation.OnboardingDraftStore
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -10,9 +12,19 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class AddPhotoViewModel : ViewModel() {
+private const val PROFILE_PHOTO_BYTES_KEY = "profilePhotoBytes"
 
-    private val _state = MutableStateFlow(AddPhotoState())
+class AddPhotoViewModel(
+    private val savedStateHandle: SavedStateHandle,
+    private val onboardingDraftStore: OnboardingDraftStore
+) : ViewModel() {
+
+    private val _state = MutableStateFlow(
+        AddPhotoState(
+            profilePhotoUri = savedStateHandle[PROFILE_PHOTO_BYTES_KEY]
+                ?: onboardingDraftStore.profilePhotoBytes
+        )
+    )
     val state = _state.asStateFlow()
 
     private val _events = Channel<AddPhotoEvent>()
@@ -21,6 +33,8 @@ class AddPhotoViewModel : ViewModel() {
     fun onAction(action: AddPhotoAction) {
         when (action) {
             is AddPhotoAction.OnPhotoSelected -> {
+                onboardingDraftStore.profilePhotoBytes = action.bytes
+                savedStateHandle[PROFILE_PHOTO_BYTES_KEY] = action.bytes
                 _state.update { it.copy(profilePhotoUri = action.bytes, error = null) }
             }
             AddPhotoAction.OnContinueClick -> {
