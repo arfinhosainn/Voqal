@@ -8,6 +8,7 @@ import app.voqal.com.feature.onboarding.presentation.OnboardingDraftStore
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -28,15 +29,28 @@ class FullNameViewModel(
     private val _events = Channel<FullNameEvent>()
     val events = _events.receiveAsFlow()
 
+    init {
+        viewModelScope.launch {
+            onboardingDraftStore.draft.collectLatest { draft ->
+                _state.update {
+                    it.copy(
+                        firstName = it.firstName.ifBlank { draft.firstName },
+                        lastName = it.lastName.ifBlank { draft.lastName }
+                    )
+                }
+            }
+        }
+    }
+
     fun onAction(action: FullNameAction) {
         when (action) {
             is FullNameAction.OnFirstNameChange -> {
-                onboardingDraftStore.firstName = action.value
+                onboardingDraftStore.updateFirstName(action.value)
                 savedStateHandle["firstName"] = action.value
                 _state.update { it.copy(firstName = action.value) }
             }
             is FullNameAction.OnLastNameChange -> {
-                onboardingDraftStore.lastName = action.value
+                onboardingDraftStore.updateLastName(action.value)
                 savedStateHandle["lastName"] = action.value
                 _state.update { it.copy(lastName = action.value) }
             }

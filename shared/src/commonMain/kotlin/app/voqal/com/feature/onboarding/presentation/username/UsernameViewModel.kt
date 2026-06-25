@@ -7,6 +7,7 @@ import app.voqal.com.feature.onboarding.presentation.OnboardingDraftStore
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -23,11 +24,21 @@ class UsernameViewModel(
     private val _events = Channel<UsernameEvent>()
     val events = _events.receiveAsFlow()
 
+    init {
+        viewModelScope.launch {
+            onboardingDraftStore.draft.collectLatest { draft ->
+                if (_state.value.username.isBlank() && draft.username.isNotBlank()) {
+                    _state.update { it.copy(username = draft.username, error = null) }
+                }
+            }
+        }
+    }
+
     fun onAction(action: UsernameAction) {
         when (action) {
             is UsernameAction.OnUsernameChange -> {
                 val username = action.username.lowercase().replace("\\s".toRegex(), "")
-                onboardingDraftStore.username = username
+                onboardingDraftStore.updateUsername(username)
                 _state.update {
                     it.copy(
                         username = username,

@@ -9,6 +9,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -34,6 +35,13 @@ class OtpViewModel(
     private var resendCountdownJob: Job? = null
 
     init {
+        viewModelScope.launch {
+            onboardingDraftStore.draft.collectLatest { draft ->
+                if (_state.value.emailAddress.isBlank() && draft.email.isNotBlank()) {
+                    _state.update { it.copy(emailAddress = draft.email) }
+                }
+            }
+        }
         startResendCountdown()
     }
 
