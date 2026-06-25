@@ -57,6 +57,7 @@ fun ChooseInterestsRoot(
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
             is ChooseInterestsEvent.NavigateToNext -> onNavigateToNext(event.selectedIds)
+            is ChooseInterestsEvent.ShowSnackbar -> Unit
         }
     }
 

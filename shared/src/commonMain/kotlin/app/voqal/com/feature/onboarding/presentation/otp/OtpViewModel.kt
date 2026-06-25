@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import app.voqal.com.core.domain.Result
 import app.voqal.com.feature.onboarding.domain.OnboardingAuthDataSource
 import app.voqal.com.feature.onboarding.domain.OnboardingAuthError
+import app.voqal.com.feature.onboarding.domain.OnboardingProfileDataSource
+import app.voqal.com.feature.onboarding.domain.toUserMessage
 import app.voqal.com.feature.onboarding.presentation.OnboardingDraftStore
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -21,7 +23,8 @@ private const val ResendCountdownSeconds = 30
 
 class OtpViewModel(
     private val onboardingDraftStore: OnboardingDraftStore,
-    private val onboardingAuthDataSource: OnboardingAuthDataSource
+    private val onboardingAuthDataSource: OnboardingAuthDataSource,
+    private val onboardingProfileDataSource: OnboardingProfileDataSource
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
@@ -171,15 +174,30 @@ class OtpViewModel(
 
             when (val result = onboardingAuthDataSource.verifyEmailOtp(email, token)) {
                 is Result.Success -> {
-                    _state.update {
-                        it.copy(
-                            isSubmitting = false,
-                            error = null,
-                            verificationStatus = OtpVerificationStatus.Valid
-                        )
+                    when (val profileResult = onboardingProfileDataSource.ensureProfileExists()) {
+                        is Result.Success -> {
+                            _state.update {
+                                it.copy(
+                                    isSubmitting = false,
+                                    error = null,
+                                    verificationStatus = OtpVerificationStatus.Valid
+                                )
+                            }
+                            delay(350)
+                            _events.send(OtpEvent.NavigateToNext)
+                        }
+                        is Result.Failure -> {
+                            val message = profileResult.error.toUserMessage()
+                            _state.update {
+                                it.copy(
+                                    isSubmitting = false,
+                                    error = message,
+                                    verificationStatus = OtpVerificationStatus.Invalid
+                                )
+                            }
+                            _events.send(OtpEvent.ShowSnackbar(message))
+                        }
                     }
-                    delay(350)
-                    _events.send(OtpEvent.NavigateToNext)
                 }
                 is Result.Failure -> {
                     val message = result.error.toOtpErrorMessage()

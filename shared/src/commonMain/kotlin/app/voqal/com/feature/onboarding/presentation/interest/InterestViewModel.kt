@@ -3,6 +3,9 @@ package app.voqal.com.feature.onboarding.presentation.interest
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.voqal.com.core.domain.Result
+import app.voqal.com.feature.onboarding.domain.OnboardingProfileDataSource
+import app.voqal.com.feature.onboarding.domain.toUserMessage
 import app.voqal.com.feature.onboarding.presentation.OnboardingDraftStore
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,7 +16,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ChooseInterestsViewModel(
-    private val onboardingDraftStore: OnboardingDraftStore
+    private val onboardingDraftStore: OnboardingDraftStore,
+    private val onboardingProfileDataSource: OnboardingProfileDataSource
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
@@ -59,18 +63,22 @@ class ChooseInterestsViewModel(
     }
 
     private fun submitSelectedInterests() {
-        val selectedIds = state.value.selectedInterestIds.toList()
-        if (!state.value.canContinue) return
+        val selectedIds = state.value.selectedInterestIds
+        if (!state.value.canContinue || state.value.isSubmitting) return
 
         viewModelScope.launch {
             _state.update { it.copy(isSubmitting = true) }
-            try {
-                // Future Hook: Save profile preferences to remote cluster or database here
-                _events.send(ChooseInterestsEvent.NavigateToNext(selectedIds))
-            } catch (e: Exception) {
-                _state.update { it.copy(isSubmitting = false) }
-            } finally {
-                _state.update { it.copy(isSubmitting = false) }
+
+            when (val result = onboardingProfileDataSource.completeOnboarding(selectedIds)) {
+                is Result.Success -> {
+                    _state.update { it.copy(isSubmitting = false) }
+                    _events.send(ChooseInterestsEvent.NavigateToNext(selectedIds.toList()))
+                }
+                is Result.Failure -> {
+                    val message = result.error.toUserMessage()
+                    _state.update { it.copy(isSubmitting = false) }
+                    _events.send(ChooseInterestsEvent.ShowSnackbar(message))
+                }
             }
         }
     }

@@ -4,6 +4,10 @@ package app.voqal.com.feature.onboarding.presentation.photo
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.voqal.com.core.domain.Result
+import app.voqal.com.core.presentation.util.UiText
+import app.voqal.com.feature.onboarding.domain.OnboardingProfileDataSource
+import app.voqal.com.feature.onboarding.domain.toUserMessage
 import app.voqal.com.feature.onboarding.presentation.OnboardingDraftStore
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,7 +20,8 @@ private const val PROFILE_PHOTO_BYTES_KEY = "profilePhotoBytes"
 
 class AddPhotoViewModel(
     private val savedStateHandle: SavedStateHandle,
-    private val onboardingDraftStore: OnboardingDraftStore
+    private val onboardingDraftStore: OnboardingDraftStore,
+    private val onboardingProfileDataSource: OnboardingProfileDataSource
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
@@ -45,14 +50,19 @@ class AddPhotoViewModel(
 
     private fun saveProfilePhotoAndProceed() {
         viewModelScope.launch {
-            _state.update { it.copy(isSubmitting = true) }
-            try {
-                // Perform any validation or local persistence checks here
-                _events.send(AddPhotoEvent.NavigateToNext)
-            } catch (e: Exception) {
-                _state.update { it.copy(isSubmitting = false) }
-            } finally {
-                _state.update { it.copy(isSubmitting = false) }
+            _state.update { it.copy(isSubmitting = true, error = null) }
+
+            val photoBytes = state.value.profilePhotoUri ?: ByteArray(0)
+            when (val result = onboardingProfileDataSource.uploadAvatar(photoBytes)) {
+                is Result.Success -> {
+                    _state.update { it.copy(isSubmitting = false) }
+                    _events.send(AddPhotoEvent.NavigateToNext)
+                }
+                is Result.Failure -> {
+                    val message = UiText.DynamicString(result.error.toUserMessage())
+                    _state.update { it.copy(isSubmitting = false, error = message) }
+                    _events.send(AddPhotoEvent.ShowSnackbar(message))
+                }
             }
         }
     }
