@@ -27,9 +27,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.voqal.com.core.components.VoqalPrimaryButton
+import app.voqal.com.core.designsystem.theme.BricolageGrotesq
 import app.voqal.com.core.designsystem.theme.VoqalTheme
 import app.voqal.com.core.presentation.util.ObserveAsEvents
 import app.voqal.com.feature.onboarding.OnboardingScaffold
+import app.voqal.com.feature.onboarding.presentation.components.ValidationHint
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -65,7 +67,9 @@ fun EmailScreen(
 ) {
     OnboardingScaffold(
         onBack = onBack,
-        modifier = modifier
+        modifier = modifier,
+        showTopBar = false,
+        currentStep = 1
     ) {
         Column(
             modifier = Modifier
@@ -108,10 +112,18 @@ fun EmailScreen(
                 }
             )
 
+            if (state.email.isNotBlank()) {
+                Spacer(modifier = Modifier.height(10.dp))
+                ValidationHint(
+                    isValid = state.isFormValid,
+                    message = if (state.isFormValid) "Email looks good" else "Email is incorrect"
+                )
+            }
+
             Spacer(modifier = Modifier.weight(1f))
 
             VoqalPrimaryButton(
-                text = "Let's Go",
+                text = "Send code",
                 onClick = { onAction(EmailAction.OnContinueClick) },
                 enabled = state.isFormValid && !state.isSubmitting,
                 loading = state.isSubmitting,
@@ -137,6 +149,7 @@ private fun EmailField(
                 text = "email@example.com",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.SemiBold,
+                fontFamily = BricolageGrotesq,
                 color = VoqalTheme.colors.onSurfaceVariant,
             )
         },
@@ -148,6 +161,7 @@ private fun EmailField(
         textStyle = TextStyle(
             fontSize = 20.sp,
             fontWeight = FontWeight.Medium,
+            fontFamily = BricolageGrotesq,
             color = VoqalTheme.colors.onBackground
         ),
         keyboardOptions = KeyboardOptions(

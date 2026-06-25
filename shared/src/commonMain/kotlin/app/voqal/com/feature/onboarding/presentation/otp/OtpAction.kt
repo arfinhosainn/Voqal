@@ -5,5 +5,6 @@ sealed interface OtpAction {
     data class OnChangeFieldFocused(val index: Int) : OtpAction
     data object OnKeyboardBack : OtpAction
     data object OnResendCodeClick : OtpAction
+    data object OnChangeEmailClick : OtpAction
     data object OnVerifyClick : OtpAction
 }

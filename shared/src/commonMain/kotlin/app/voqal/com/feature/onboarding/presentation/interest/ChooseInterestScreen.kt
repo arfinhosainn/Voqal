@@ -75,7 +75,8 @@ fun ChooseInterestsScreen(
 ) {
     OnboardingScaffold(
         onBack = onBack,
-        modifier = modifier
+        modifier = modifier,
+        currentStep = 7
     ) {
         Column(
             modifier = Modifier.fillMaxSize()
@@ -85,7 +86,7 @@ fun ChooseInterestsScreen(
             // --- Header Title Section ---
             Column(modifier = Modifier.padding(horizontal = 24.dp)) {
                 Text(
-                    text = "Choose your interest",
+                    text = "Choose your interests",
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center,
                     fontSize = 26.sp,
@@ -96,11 +97,26 @@ fun ChooseInterestsScreen(
                 Spacer(Modifier.height(8.dp))
 
                 Text(
-                    text = "Choose your preferred interest",
+                    text = "Select a few topics you want to follow",
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center,
                     fontSize = 14.sp,
                     color = VoqalTheme.colors.onSurfaceVariant
+                )
+
+                Spacer(Modifier.height(8.dp))
+
+                Text(
+                    text = "${state.selectedInterestIds.size} selected - choose at least ${state.minimumSelectionCount}",
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = if (state.canContinue) {
+                        VoqalTheme.colors.primary
+                    } else {
+                        VoqalTheme.colors.onSurfaceVariant
+                    }
                 )
             }
 
@@ -163,8 +179,9 @@ fun ChooseInterestsScreen(
                     contentAlignment = Alignment.BottomCenter
                 ) {
                     VoqalPrimaryButton(
-                        text = "Looks good",
-                        enabled = state.selectedInterestIds.isNotEmpty() && !state.isSubmitting,
+                        text = "Finish",
+                        enabled = state.canContinue && !state.isSubmitting,
+                        loading = state.isSubmitting,
                         onClick = { onAction(ChooseInterestsAction.OnContinueClick) },
                         modifier = Modifier.fillMaxWidth()
                     )

@@ -44,6 +44,7 @@ fun OtpRoot(
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
             is OtpEvent.NavigateToNext -> onNavigateToNext()
+            is OtpEvent.NavigateToEmail -> onBack()
             is OtpEvent.FocusField -> {
                 if (event.index in focusRequesters.indices) {
                     focusRequesters[event.index].requestFocus()
@@ -72,7 +73,8 @@ fun OtpScreen(
 ) {
     OnboardingScaffold(
         onBack = onBack,
-        modifier = modifier
+        modifier = modifier,
+        currentStep = 2
     ) {
         Column(
             modifier = Modifier
@@ -95,11 +97,26 @@ fun OtpScreen(
 
             // --- Subtitle with Target Phone Mapping ---
             Text(
-                text = "A 6-digit code has been sent to ${state.emailAddress}",
+                text = if (state.emailAddress.isNotBlank()) {
+                    "A 6-digit code has been sent to ${state.emailAddress}"
+                } else {
+                    "A 6-digit code has been sent to your email"
+                },
                 fontSize = 14.sp,
                 color = VoqalTheme.colors.onSurfaceVariant,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
+            )
+
+            Text(
+                text = "Change email",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
+                color = VoqalTheme.colors.primary,
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .align(Alignment.CenterHorizontally)
+                    .clickable { onAction(OtpAction.OnChangeEmailClick) }
             )
 
             Spacer(Modifier.height(40.dp))
@@ -133,17 +150,36 @@ fun OtpScreen(
 
             Spacer(Modifier.height(24.dp))
 
+            if (state.code.any { it != null } && !state.isValid) {
+                app.voqal.com.feature.onboarding.presentation.components.ValidationHint(
+                    isValid = false,
+                    message = "Enter the 6-digit code"
+                )
+
+                Spacer(Modifier.height(12.dp))
+            }
+
             // --- Help Options Row ---
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Resend Code",
+                    text = if (state.resendSecondsRemaining > 0) {
+                        "Resend in ${state.resendSecondsRemaining}s"
+                    } else {
+                        "Resend Code"
+                    },
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
-                    color = VoqalTheme.colors.primary,
-                    modifier = Modifier.clickable { onAction(OtpAction.OnResendCodeClick) }
+                    color = if (state.resendSecondsRemaining > 0) {
+                        VoqalTheme.colors.onSurfaceVariant
+                    } else {
+                        VoqalTheme.colors.primary
+                    },
+                    modifier = Modifier.clickable(
+                        enabled = state.resendSecondsRemaining == 0
+                    ) { onAction(OtpAction.OnResendCodeClick) }
                 )
 
                 Text(
@@ -159,9 +195,10 @@ fun OtpScreen(
 
             // --- Action Submission ---
             VoqalPrimaryButton(
-                text = "Let's Go",
+                text = "Verify",
                 onClick = { onAction(OtpAction.OnVerifyClick) },
                 enabled = state.isValid && !state.isSubmitting,
+                loading = state.isSubmitting,
                 modifier = Modifier.fillMaxWidth()
             )
 

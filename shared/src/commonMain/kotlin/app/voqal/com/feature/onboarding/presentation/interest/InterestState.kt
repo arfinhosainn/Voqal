@@ -46,6 +46,9 @@ data class ChooseInterestsState(
     val selectedInterestIds: Set<String> = emptySet(),
     val isSubmitting: Boolean = false
 ) {
+    val minimumSelectionCount: Int = 3
+    val canContinue: Boolean = selectedInterestIds.size >= minimumSelectionCount
+
     // Memoized optimization grouping evaluation layout
     val categorizedInterests: Map<String, List<InterestItem>> =
         availableInterests.groupBy { it.category }

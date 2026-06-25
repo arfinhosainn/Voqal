@@ -3,6 +3,7 @@ package app.voqal.com.feature.onboarding.presentation.interest
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.voqal.com.feature.onboarding.presentation.OnboardingDraftStore
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -10,9 +11,15 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class ChooseInterestsViewModel : ViewModel() {
+class ChooseInterestsViewModel(
+    private val onboardingDraftStore: OnboardingDraftStore
+) : ViewModel() {
 
-    private val _state = MutableStateFlow(ChooseInterestsState())
+    private val _state = MutableStateFlow(
+        ChooseInterestsState(
+            selectedInterestIds = onboardingDraftStore.selectedInterestIds
+        )
+    )
     val state = _state.asStateFlow()
 
     private val _events = Channel<ChooseInterestsEvent>()
@@ -32,13 +39,14 @@ class ChooseInterestsViewModel : ViewModel() {
             } else {
                 currentState.selectedInterestIds + interestId
             }
+            onboardingDraftStore.selectedInterestIds = updatedSelection
             currentState.copy(selectedInterestIds = updatedSelection)
         }
     }
 
     private fun submitSelectedInterests() {
         val selectedIds = state.value.selectedInterestIds.toList()
-        if (selectedIds.isEmpty()) return
+        if (!state.value.canContinue) return
 
         viewModelScope.launch {
             _state.update { it.copy(isSubmitting = true) }

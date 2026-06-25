@@ -4,7 +4,8 @@ data class OtpState(
     val code: List<Int?> = List(6) { null },
     val isSubmitting: Boolean = false,
     val error: String? = null,
-    val emailAddress: String = "hello@email.com" // Hoisted out of hardcoding
+    val emailAddress: String = "",
+    val resendSecondsRemaining: Int = 30
 ) {
     val isValid: Boolean = code.all { it != null }
     val codeString: String = code.joinToString("") { it?.toString() ?: "" }

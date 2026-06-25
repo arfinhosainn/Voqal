@@ -109,7 +109,8 @@ fun AddPhotoScreen(
         modifier = modifier.fillMaxSize()
     ) {
         OnboardingScaffold(
-            onBack = onBack
+            onBack = onBack,
+            currentStep = 5
         ) {
             Column(
                 modifier = Modifier
@@ -130,7 +131,7 @@ fun AddPhotoScreen(
                 Spacer(Modifier.height(8.dp))
 
                 Text(
-                    text = "Select a profile photo for your account",
+                    text = "Add a profile photo so people recognize you. You can skip this for now.",
                     fontSize = 14.sp,
                     color = VoqalTheme.colors.onSurfaceVariant,
                     textAlign = TextAlign.Center
@@ -149,9 +150,10 @@ fun AddPhotoScreen(
                 Spacer(modifier = Modifier.weight(1f))
 
                 VoqalPrimaryButton(
-                    text = "Let's Go",
+                    text = if (state.profilePhotoUri == null) "Skip for now" else "Save photo",
                     onClick = { onAction(AddPhotoAction.OnContinueClick) },
                     enabled = !state.isSubmitting,
+                    loading = state.isSubmitting,
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -204,6 +206,9 @@ private fun ProfilePhotoPicker(
                 .clip(CircleShape)
                 .pointerInput(Unit) {
                     detectTapGestures(
+                        onTap = {
+                            onEditClick()
+                        },
                         onPress = {
                             val job = scope.launch {
                                 delay(300.milliseconds)

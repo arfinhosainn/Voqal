@@ -23,6 +23,8 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -32,7 +34,11 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -40,6 +46,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.voqal.com.core.components.VoqalPrimaryButton
 import app.voqal.com.core.presentation.util.ObserveAsEvents
+import app.voqal.com.core.designsystem.theme.BricolageGrotesq
 import app.voqal.com.core.designsystem.theme.VoqalTheme
 import app.voqal.com.feature.onboarding.OnboardingScaffold
 import org.jetbrains.compose.resources.painterResource
@@ -77,7 +84,8 @@ fun ChooseLanguageScreen(
 ) {
     OnboardingScaffold(
         onBack = onBack,
-        modifier = modifier
+        modifier = modifier,
+        currentStep = 6
     ) {
         Column(
             modifier = Modifier.fillMaxSize()
@@ -85,7 +93,7 @@ fun ChooseLanguageScreen(
             Spacer(Modifier.height(16.dp))
 
             Text(
-                text = "Choose Language",
+                text = "Choose language",
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp),
@@ -98,7 +106,7 @@ fun ChooseLanguageScreen(
             Spacer(Modifier.height(8.dp))
 
             Text(
-                text = "Select the language you speak",
+                text = "Select the language you speak most often",
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp),
@@ -107,25 +115,47 @@ fun ChooseLanguageScreen(
                 color = VoqalTheme.colors.onSurfaceVariant
             )
 
-            Spacer(Modifier.height(40.dp))
+            Spacer(Modifier.height(24.dp))
+
+            LanguageSearchField(
+                value = state.searchQuery,
+                onValueChange = { onAction(LanguageAction.OnSearchQueryChange(it)) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+            )
+
+            Spacer(Modifier.height(24.dp))
 
             Box(modifier = Modifier.weight(1f)) {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    horizontalArrangement = Arrangement.spacedBy(24.dp),
-                    verticalArrangement = Arrangement.spacedBy(28.dp),
-                    contentPadding = PaddingValues(start = 24.dp, end = 24.dp, bottom = 140.dp),
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    items(
-                        items = state.languages,
-                        key = { it.id }
-                    ) { language ->
-                        LanguageItem(
-                            language = language,
-                            selected = state.selectedLanguage?.id == language.id,
-                            onClick = { onAction(LanguageAction.OnLanguageSelect(language)) }
-                        )
+                if (state.filteredLanguages.isEmpty()) {
+                    Text(
+                        text = "No languages found",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp, vertical = 24.dp),
+                        textAlign = TextAlign.Center,
+                        fontSize = 15.sp,
+                        color = VoqalTheme.colors.onSurfaceVariant
+                    )
+                } else {
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(2),
+                        horizontalArrangement = Arrangement.spacedBy(24.dp),
+                        verticalArrangement = Arrangement.spacedBy(28.dp),
+                        contentPadding = PaddingValues(start = 24.dp, end = 24.dp, bottom = 140.dp),
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        items(
+                            items = state.filteredLanguages,
+                            key = { it.id }
+                        ) { language ->
+                            LanguageItem(
+                                language = language,
+                                selected = state.selectedLanguage?.id == language.id,
+                                onClick = { onAction(LanguageAction.OnLanguageSelect(language)) }
+                            )
+                        }
                     }
                 }
 
@@ -148,14 +178,58 @@ fun ChooseLanguageScreen(
                     contentAlignment = Alignment.BottomCenter
                 ) {
                     VoqalPrimaryButton(
-                        text = "Let's Go",
+                        text = "Choose language",
                         enabled = state.selectedLanguage != null && !state.isSubmitting,
+                        loading = state.isSubmitting,
                         onClick = { onAction(LanguageAction.OnContinueClick) }
                     )
                 }
             }
         }
     }
+}
+
+@Composable
+private fun LanguageSearchField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    TextField(
+        value = value,
+        onValueChange = onValueChange,
+        placeholder = {
+            Text(
+                text = "Search languages",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                fontFamily = BricolageGrotesq,
+                color = VoqalTheme.colors.onSurfaceVariant
+            )
+        },
+        modifier = modifier.height(58.dp),
+        shape = RoundedCornerShape(20.dp),
+        singleLine = true,
+        textStyle = TextStyle(
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Medium,
+            fontFamily = BricolageGrotesq,
+            color = VoqalTheme.colors.onBackground
+        ),
+        keyboardOptions = KeyboardOptions(
+            capitalization = KeyboardCapitalization.Words,
+            imeAction = ImeAction.Search
+        ),
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = VoqalTheme.colors.surfaceVariant,
+            unfocusedContainerColor = VoqalTheme.colors.surfaceVariant,
+            disabledContainerColor = VoqalTheme.colors.surfaceVariant,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            disabledIndicatorColor = Color.Transparent,
+            cursorColor = VoqalTheme.colors.primary
+        )
+    )
 }
 
 @Composable

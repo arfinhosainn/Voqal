@@ -35,6 +35,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import app.voqal.com.core.designsystem.theme.BricolageGrotesq
 import app.voqal.com.core.designsystem.theme.VoqalTheme
 
 @Composable
@@ -79,8 +80,9 @@ fun OtpInputField(
             singleLine = true,
             textStyle = TextStyle(
                 textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Normal,
-                fontSize = 32.sp,
+                fontWeight = FontWeight.Medium,
+                fontFamily = BricolageGrotesq,
+                fontSize = 30.sp,
                 color = VoqalTheme.colors.onBackground,
             ),
             keyboardOptions = KeyboardOptions(
