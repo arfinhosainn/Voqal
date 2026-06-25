@@ -7,10 +7,16 @@ import kotlinx.serialization.Serializable
 sealed interface OnboardingRoute {
 
     @Serializable
+    data object Email : OnboardingRoute
+
+    @Serializable
     data object FullName : OnboardingRoute
 
     @Serializable
     data object OtpVerification : OnboardingRoute
+
+    @Serializable
+    data object Username : OnboardingRoute
 
     @Serializable
     data object AddPhoto : OnboardingRoute
