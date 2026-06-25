@@ -36,8 +36,8 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import app.voqal.com.core.designsystem.components.VoqalPrimaryButton
-import app.voqal.com.core.designsystem.presentation.util.ObserveAsEvents
+import app.voqal.com.core.components.VoqalPrimaryButton
+import app.voqal.com.core.presentation.util.ObserveAsEvents
 import app.voqal.com.core.designsystem.theme.VoqalTheme
 import app.voqal.com.feature.onboarding.OnboardingScaffold
 import org.koin.compose.viewmodel.koinViewModel

@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
+import app.voqal.com.core.presentation.util.ImagePicker
 import app.voqal.com.feature.onboarding.presentation.navigation.OnboardingGraph
 import app.voqal.com.feature.onboarding.presentation.navigation.onboardingNavGraph
 import kotlinx.serialization.Serializable
@@ -15,6 +16,7 @@ data object MainDashboardGraph
 @Composable
 fun AppNavHost(
     modifier: Modifier = Modifier,
+    imagePicker: ImagePicker,
     startDestination: Any = OnboardingGraph // Or dynamically check if user is logged in
 ) {
     val navController = rememberNavController()
@@ -31,7 +33,8 @@ fun AppNavHost(
                 navController.navigate(MainDashboardGraph) {
                     popUpTo(OnboardingGraph) { inclusive = true }
                 }
-            }
+            },
+            imagePicker = imagePicker
         )
 
 

@@ -1,6 +1,6 @@
 package app.voqal.com.feature.onboarding.presentation.photo
 
-import app.voqal.com.core.designsystem.presentation.util.UiText
+import app.voqal.com.core.presentation.util.UiText
 
 sealed interface AddPhotoEvent {
     data object NavigateToNext : AddPhotoEvent

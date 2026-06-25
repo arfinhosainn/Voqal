@@ -6,6 +6,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import app.voqal.com.core.presentation.util.ImagePicker
 
 import app.voqal.com.feature.onboarding.presentation.photo.AddPhotoRoot
 import app.voqal.com.feature.onboarding.presentation.otp.OtpRoot
@@ -19,7 +20,8 @@ data object OnboardingGraph
 fun NavGraphBuilder.onboardingNavGraph(
     navController: NavController,
     onOnboardingComplete: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    imagePicker: ImagePicker
 ) {
     navigation<OnboardingGraph>(
         startDestination = OnboardingRoute.OtpVerification
@@ -47,9 +49,7 @@ fun NavGraphBuilder.onboardingNavGraph(
             AddPhotoRoot(
                 onNavigateToNext = { navController.navigate(OnboardingRoute.ChooseLanguage) },
                 onBack = { navController.popBackStack() },
-                onTriggerPhotoPicker = {
-                    // Launch native/system picker interface channels here
-                },
+                imagePicker = imagePicker,
                 modifier = modifier
             )
         }
