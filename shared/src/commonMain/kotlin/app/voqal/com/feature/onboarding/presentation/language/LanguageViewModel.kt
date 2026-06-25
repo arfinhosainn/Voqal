@@ -3,6 +3,9 @@ package app.voqal.com.feature.onboarding.presentation.language
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.voqal.com.core.domain.Result
+import app.voqal.com.feature.onboarding.domain.OnboardingProfileDataSource
+import app.voqal.com.feature.onboarding.domain.toUserMessage
 import app.voqal.com.feature.onboarding.presentation.OnboardingDraftStore
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,7 +16,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class LanguageViewModel(
-    private val onboardingDraftStore: OnboardingDraftStore
+    private val onboardingDraftStore: OnboardingDraftStore,
+    private val onboardingProfileDataSource: OnboardingProfileDataSource
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
@@ -63,16 +67,21 @@ class LanguageViewModel(
 
     private fun submitSelectedLanguage() {
         val selection = state.value.selectedLanguage ?: return
+        if (state.value.isSubmitting) return
 
         viewModelScope.launch {
             _state.update { it.copy(isSubmitting = true) }
-            try {
-                // Future Hook: Save selection to local preferences store here
-                _events.send(LanguageEvent.NavigateToNext(selection))
-            } catch (e: Exception) {
-                _state.update { it.copy(isSubmitting = false) }
-            } finally {
-                _state.update { it.copy(isSubmitting = false) }
+
+            when (val result = onboardingProfileDataSource.updateLanguage(selection.id)) {
+                is Result.Success -> {
+                    _state.update { it.copy(isSubmitting = false) }
+                    _events.send(LanguageEvent.NavigateToNext(selection))
+                }
+                is Result.Failure -> {
+                    val message = result.error.toUserMessage()
+                    _state.update { it.copy(isSubmitting = false) }
+                    _events.send(LanguageEvent.ShowSnackbar(message))
+                }
             }
         }
     }

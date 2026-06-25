@@ -6,8 +6,10 @@ import app.voqal.com.core.data.SupabaseConfig
 import app.voqal.com.core.data.VoqalSupabaseConfig
 import app.voqal.com.feature.onboarding.data.DataStoreOnboardingDraftDataSource
 import app.voqal.com.feature.onboarding.data.SupabaseOnboardingAuthDataSource
+import app.voqal.com.feature.onboarding.data.SupabaseOnboardingProfileDataSource
 import app.voqal.com.feature.onboarding.domain.OnboardingAuthDataSource
 import app.voqal.com.feature.onboarding.domain.OnboardingDraftLocalDataSource
+import app.voqal.com.feature.onboarding.domain.OnboardingProfileDataSource
 import app.voqal.com.feature.onboarding.presentation.OnboardingDraftStore
 import app.voqal.com.feature.onboarding.presentation.email.EmailViewModel
 import app.voqal.com.feature.onboarding.presentation.fullname.FullNameViewModel
@@ -28,12 +30,13 @@ val onboardingPresentationModule = module {
     single<SupabaseClient> { SupabaseClientFactory.create(get()) }
     singleOf(::DataStoreOnboardingDraftDataSource) { bind<OnboardingDraftLocalDataSource>() }
     singleOf(::SupabaseOnboardingAuthDataSource) { bind<OnboardingAuthDataSource>() }
+    singleOf(::SupabaseOnboardingProfileDataSource) { bind<OnboardingProfileDataSource>() }
     singleOf(::OnboardingDraftStore)
     viewModel { EmailViewModel(get(), get()) }
-    viewModel { FullNameViewModel(get(), get()) }
-    viewModel { UsernameViewModel(get()) }
-    viewModel { OtpViewModel(get(), get()) }
-    viewModel { AddPhotoViewModel(get(), get()) }
-    viewModel { LanguageViewModel(get()) }
-    viewModel { ChooseInterestsViewModel(get()) }
+    viewModel { FullNameViewModel(get(), get(), get()) }
+    viewModel { UsernameViewModel(get(), get()) }
+    viewModel { OtpViewModel(get(), get(), get()) }
+    viewModel { AddPhotoViewModel(get(), get(), get()) }
+    viewModel { LanguageViewModel(get(), get()) }
+    viewModel { ChooseInterestsViewModel(get(), get()) }
 }

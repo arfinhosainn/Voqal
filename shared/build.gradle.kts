@@ -58,6 +58,7 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.supabase.postgrest.kt)
             implementation(libs.supabase.auth.kt)
+            implementation(libs.supabase.storage.kt)
 
             implementation(libs.datastore)
             implementation(libs.datastore.preferences)

@@ -3,6 +3,9 @@ package app.voqal.com.feature.onboarding.presentation.username
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.voqal.com.core.domain.Result
+import app.voqal.com.feature.onboarding.domain.OnboardingProfileDataSource
+import app.voqal.com.feature.onboarding.domain.toUserMessage
 import app.voqal.com.feature.onboarding.presentation.OnboardingDraftStore
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,7 +16,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class UsernameViewModel(
-    private val onboardingDraftStore: OnboardingDraftStore
+    private val onboardingDraftStore: OnboardingDraftStore,
+    private val onboardingProfileDataSource: OnboardingProfileDataSource
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
@@ -53,17 +57,21 @@ class UsernameViewModel(
     }
 
     private fun submitUsername() {
-        if (!state.value.isFormValid) return
+        if (!state.value.isFormValid || state.value.isSubmitting) return
 
         viewModelScope.launch {
-            _state.update { it.copy(isSubmitting = true) }
-            try {
-                _events.send(UsernameEvent.NavigateToNext)
-            } catch (e: Exception) {
-                _state.update { it.copy(error = e.message, isSubmitting = false) }
-                _events.send(UsernameEvent.ShowSnackbar(e.message ?: "An error occurred"))
-            } finally {
-                _state.update { it.copy(isSubmitting = false) }
+            _state.update { it.copy(isSubmitting = true, error = null) }
+
+            when (val result = onboardingProfileDataSource.updateUsername(state.value.username)) {
+                is Result.Success -> {
+                    _state.update { it.copy(isSubmitting = false) }
+                    _events.send(UsernameEvent.NavigateToNext)
+                }
+                is Result.Failure -> {
+                    val message = result.error.toUserMessage()
+                    _state.update { it.copy(error = message, isSubmitting = false) }
+                    _events.send(UsernameEvent.ShowSnackbar(message))
+                }
             }
         }
     }

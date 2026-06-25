@@ -64,6 +64,7 @@ fun ChooseLanguageRoot(
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
             is LanguageEvent.NavigateToNext -> onNavigateToNext(event.chosenLanguage)
+            is LanguageEvent.ShowSnackbar -> Unit
         }
     }
 

@@ -4,6 +4,10 @@ package app.voqal.com.feature.onboarding.presentation.fullname
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.voqal.com.core.domain.Result
+import app.voqal.com.core.presentation.util.UiText
+import app.voqal.com.feature.onboarding.domain.OnboardingProfileDataSource
+import app.voqal.com.feature.onboarding.domain.toUserMessage
 import app.voqal.com.feature.onboarding.presentation.OnboardingDraftStore
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +19,8 @@ import kotlinx.coroutines.launch
 
 class FullNameViewModel(
     private val savedStateHandle: SavedStateHandle,
-    private val onboardingDraftStore: OnboardingDraftStore
+    private val onboardingDraftStore: OnboardingDraftStore,
+    private val onboardingProfileDataSource: OnboardingProfileDataSource
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
@@ -47,18 +52,38 @@ class FullNameViewModel(
             is FullNameAction.OnFirstNameChange -> {
                 onboardingDraftStore.updateFirstName(action.value)
                 savedStateHandle["firstName"] = action.value
-                _state.update { it.copy(firstName = action.value) }
+                _state.update { it.copy(firstName = action.value, error = null) }
             }
             is FullNameAction.OnLastNameChange -> {
                 onboardingDraftStore.updateLastName(action.value)
                 savedStateHandle["lastName"] = action.value
-                _state.update { it.copy(lastName = action.value) }
+                _state.update { it.copy(lastName = action.value, error = null) }
             }
-            FullNameAction.OnContinueClick -> {
-                if (_state.value.isFormValid) {
-                    viewModelScope.launch {
-                        _events.send(FullNameEvent.Navigate)
-                    }
+            FullNameAction.OnContinueClick -> submitFullName()
+        }
+    }
+
+    private fun submitFullName() {
+        val currentState = state.value
+        if (!currentState.isFormValid || currentState.isLoading) return
+
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true, error = null) }
+
+            when (
+                val result = onboardingProfileDataSource.updateFullName(
+                    firstName = currentState.firstName,
+                    lastName = currentState.lastName
+                )
+            ) {
+                is Result.Success -> {
+                    _state.update { it.copy(isLoading = false) }
+                    _events.send(FullNameEvent.Navigate)
+                }
+                is Result.Failure -> {
+                    val message = UiText.DynamicString(result.error.toUserMessage())
+                    _state.update { it.copy(isLoading = false, error = message) }
+                    _events.send(FullNameEvent.ShowSnackbar(message))
                 }
             }
         }
