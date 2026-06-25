@@ -9,11 +9,9 @@ import app.voqal.com.core.presentation.util.ImagePicker
 import app.voqal.com.feature.onboarding.presentation.OnboardingDraftStore
 import app.voqal.com.feature.onboarding.presentation.navigation.OnboardingGraph
 import app.voqal.com.feature.onboarding.presentation.navigation.onboardingNavGraph
-import kotlinx.serialization.Serializable
+import app.voqal.com.feature.room.presentation.navigation.RoomGraph
+import app.voqal.com.feature.room.presentation.navigation.roomGraph
 import org.koin.compose.koinInject
-
-@Serializable
-data object MainDashboardGraph
 
 @Composable
 fun AppNavHost(
@@ -34,13 +32,17 @@ fun AppNavHost(
             onOnboardingComplete = {
                 onboardingDraftStore.clear()
                 // Clear onboarding off the backstack completely
-                navController.navigate(MainDashboardGraph) {
+                navController.navigate(RoomGraph) {
                     popUpTo(OnboardingGraph) { inclusive = true }
                 }
             },
             imagePicker = imagePicker
         )
 
+        roomGraph(
+            navController = navController,
+            modifier = modifier
+        )
 
     }
 }
