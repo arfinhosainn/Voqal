@@ -33,7 +33,7 @@ class AddPhotoViewModel(
     fun onAction(action: AddPhotoAction) {
         when (action) {
             is AddPhotoAction.OnPhotoSelected -> {
-                onboardingDraftStore.profilePhotoBytes = action.bytes
+                onboardingDraftStore.updateProfilePhotoBytes(action.bytes)
                 savedStateHandle[PROFILE_PHOTO_BYTES_KEY] = action.bytes
                 _state.update { it.copy(profilePhotoUri = action.bytes, error = null) }
             }

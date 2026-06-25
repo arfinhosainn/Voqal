@@ -6,6 +6,7 @@ import app.voqal.com.feature.onboarding.presentation.OnboardingDraftStore
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -22,6 +23,16 @@ class EmailViewModel(
     private val _events = Channel<EmailEvent>()
     val events = _events.receiveAsFlow()
 
+    init {
+        viewModelScope.launch {
+            onboardingDraftStore.draft.collectLatest { draft ->
+                if (_state.value.email.isBlank() && draft.email.isNotBlank()) {
+                    _state.update { it.copy(email = draft.email, error = null) }
+                }
+            }
+        }
+    }
+
     fun onAction(action: EmailAction) {
         when (action) {
             is EmailAction.OnEmailChange -> {
@@ -29,7 +40,7 @@ class EmailViewModel(
                 if (email != onboardingDraftStore.email) {
                     onboardingDraftStore.otpCode = List(6) { null }
                 }
-                onboardingDraftStore.email = email
+                onboardingDraftStore.updateEmail(email)
                 _state.update {
                     it.copy(
                         email = email,

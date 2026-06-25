@@ -2,22 +2,23 @@ package app.voqal.com.feature.onboarding.presentation.interest
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
@@ -25,11 +26,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -124,40 +127,50 @@ fun ChooseInterestsScreen(
 
             // --- Categories Display & Floating Overlay Area ---
             Box(modifier = Modifier.weight(1f)) {
-                Column(
+                LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
-                        .padding(horizontal = 24.dp)
+                        .padding(horizontal = 24.dp),
+                    contentPadding = PaddingValues(bottom = 140.dp)
                 ) {
                     state.categorizedInterests.forEach { (categoryName, items) ->
-                        Text(
-                            text = categoryName,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = VoqalTheme.colors.onBackground,
-                            modifier = Modifier.padding(vertical = 12.dp)
-                        )
+                        item(key = "category-$categoryName") {
+                            Text(
+                                text = categoryName,
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = VoqalTheme.colors.onBackground,
+                                modifier = Modifier.padding(vertical = 12.dp)
+                            )
+                        }
 
-                        FlowRow(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            items.forEach { item ->
-                                val isSelected = state.selectedInterestIds.contains(item.id)
-                                InterestChip(
-                                    item = item,
-                                    isSelected = isSelected,
-                                    onClick = { onAction(ChooseInterestsAction.OnInterestToggle(item.id)) }
-                                )
+                        item(key = "interests-$categoryName") {
+                            FlowRow(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                items.forEach { item ->
+                                    key(item.id) {
+                                        val isSelected = state.selectedInterestIds.contains(item.id)
+                                        InterestChip(
+                                            item = item,
+                                            isSelected = isSelected,
+                                            onClick = {
+                                                onAction(
+                                                    ChooseInterestsAction.OnInterestToggle(item.id)
+                                                )
+                                            }
+                                        )
+                                    }
+                                }
                             }
                         }
-                        Spacer(Modifier.height(16.dp))
-                    }
 
-                    // Padding spacer allocation to cleanly clear the absolute bottom button layer bounds
-                    Spacer(Modifier.height(140.dp))
+                        item(key = "category-spacer-$categoryName") {
+                            Spacer(Modifier.height(16.dp))
+                        }
+                    }
                 }
 
                 // --- Absolute Overlay Gradient Layer ---
@@ -211,7 +224,12 @@ private fun InterestChip(
         modifier = Modifier
             .clip(RoundedCornerShape(20.dp))
             .background(backgroundColor)
-            .clickable { onClick() }
+            .toggleable(
+                value = isSelected,
+                role = Role.Checkbox,
+                onValueChange = { onClick() }
+            )
+            .defaultMinSize(minHeight = 48.dp)
             .padding(horizontal = 14.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp)

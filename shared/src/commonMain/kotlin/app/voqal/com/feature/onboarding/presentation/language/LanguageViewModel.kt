@@ -7,6 +7,7 @@ import app.voqal.com.feature.onboarding.presentation.OnboardingDraftStore
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -29,10 +30,26 @@ class LanguageViewModel(
     private val _events = Channel<LanguageEvent>()
     val events = _events.receiveAsFlow()
 
+    init {
+        viewModelScope.launch {
+            onboardingDraftStore.draft.collectLatest { draft ->
+                if (_state.value.selectedLanguage == null && draft.selectedLanguageId != null) {
+                    _state.update { state ->
+                        state.copy(
+                            selectedLanguage = state.languages.firstOrNull {
+                                it.id == draft.selectedLanguageId
+                            }
+                        )
+                    }
+                }
+            }
+        }
+    }
+
     fun onAction(action: LanguageAction) {
         when (action) {
             is LanguageAction.OnLanguageSelect -> {
-                onboardingDraftStore.selectedLanguageId = action.language.id
+                onboardingDraftStore.updateSelectedLanguageId(action.language.id)
                 _state.update { it.copy(selectedLanguage = action.language) }
             }
             is LanguageAction.OnSearchQueryChange -> {
