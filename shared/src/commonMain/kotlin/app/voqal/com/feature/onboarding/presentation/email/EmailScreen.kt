@@ -115,8 +115,9 @@ fun EmailScreen(
             if (state.email.isNotBlank()) {
                 Spacer(modifier = Modifier.height(10.dp))
                 ValidationHint(
-                    isValid = state.isFormValid,
-                    message = if (state.isFormValid) "Email looks good" else "Email is incorrect"
+                    isValid = state.error == null && state.isFormValid,
+                    message = state.error
+                        ?: if (state.isFormValid) "Email looks good" else "Email is incorrect"
                 )
             }
 

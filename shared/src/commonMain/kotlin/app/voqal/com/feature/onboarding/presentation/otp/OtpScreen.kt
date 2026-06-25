@@ -141,6 +141,7 @@ fun OtpScreen(
                         onKeyboardBack = {
                             onAction(OtpAction.OnKeyboardBack)
                         },
+                        verificationStatus = state.verificationStatus,
                         modifier = Modifier
                             .weight(1f)
                             .aspectRatio(1f)
@@ -150,7 +151,14 @@ fun OtpScreen(
 
             Spacer(Modifier.height(24.dp))
 
-            if (state.code.any { it != null } && !state.isValid) {
+            if (state.error != null) {
+                app.voqal.com.feature.onboarding.presentation.components.ValidationHint(
+                    isValid = false,
+                    message = state.error
+                )
+
+                Spacer(Modifier.height(12.dp))
+            } else if (state.code.any { it != null } && !state.isValid) {
                 app.voqal.com.feature.onboarding.presentation.components.ValidationHint(
                     isValid = false,
                     message = "Enter the 6-digit code"

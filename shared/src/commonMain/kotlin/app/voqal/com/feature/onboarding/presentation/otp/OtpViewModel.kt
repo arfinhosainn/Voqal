@@ -3,6 +3,9 @@ package app.voqal.com.feature.onboarding.presentation.otp
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.voqal.com.core.domain.Result
+import app.voqal.com.feature.onboarding.domain.OnboardingAuthDataSource
+import app.voqal.com.feature.onboarding.domain.OnboardingAuthError
 import app.voqal.com.feature.onboarding.presentation.OnboardingDraftStore
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -17,7 +20,8 @@ import kotlinx.coroutines.launch
 private const val ResendCountdownSeconds = 30
 
 class OtpViewModel(
-    private val onboardingDraftStore: OnboardingDraftStore
+    private val onboardingDraftStore: OnboardingDraftStore,
+    private val onboardingAuthDataSource: OnboardingAuthDataSource
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
@@ -33,6 +37,7 @@ class OtpViewModel(
 
     private var currentlyFocusedIndex: Int = 0
     private var resendCountdownJob: Job? = null
+    private var verifyOtpJob: Job? = null
 
     init {
         viewModelScope.launch {
@@ -59,12 +64,18 @@ class OtpViewModel(
     }
 
     private fun handleNumberInput(number: Int?, index: Int) {
+        verifyOtpJob?.cancel()
         _state.update { currentState ->
             val updatedCode = currentState.code.toMutableList().apply {
                 this[index] = number
             }
             onboardingDraftStore.otpCode = updatedCode
-            currentState.copy(code = updatedCode, error = null)
+            currentState.copy(
+                code = updatedCode,
+                error = null,
+                verificationStatus = OtpVerificationStatus.Idle,
+                isSubmitting = false
+            )
         }
 
         if (_state.value.isValid && !_state.value.isSubmitting) {
@@ -96,12 +107,32 @@ class OtpViewModel(
         if (_state.value.resendSecondsRemaining > 0) return
 
         viewModelScope.launch {
+            val email = _state.value.emailAddress
+            if (email.isBlank()) {
+                _events.send(OtpEvent.ShowSnackbar("Enter your email again"))
+                _events.send(OtpEvent.NavigateToEmail)
+                return@launch
+            }
+
+            _state.update { it.copy(isSubmitting = true, error = null) }
+            when (val result = onboardingAuthDataSource.sendEmailOtp(email)) {
+                is Result.Failure -> {
+                    val message = result.error.toOtpErrorMessage()
+                    _state.update { it.copy(error = message, isSubmitting = false) }
+                    _events.send(OtpEvent.ShowSnackbar(message))
+                    return@launch
+                }
+                is Result.Success -> Unit
+            }
+
             onboardingDraftStore.otpCode = List(6) { null }
             _state.update {
                 it.copy(
                     code = onboardingDraftStore.otpCode,
                     error = null,
-                    resendSecondsRemaining = ResendCountdownSeconds
+                    resendSecondsRemaining = ResendCountdownSeconds,
+                    verificationStatus = OtpVerificationStatus.Idle,
+                    isSubmitting = false
                 )
             }
             startResendCountdown()
@@ -116,18 +147,51 @@ class OtpViewModel(
     }
 
     private fun verifyOtpCode() {
-        if (!state.value.isValid) return
+        val currentState = state.value
+        if (!currentState.isValid || currentState.isSubmitting) return
+        val email = currentState.emailAddress
+        val token = currentState.codeString
+        if (email.isBlank()) {
+            viewModelScope.launch {
+                _events.send(OtpEvent.ShowSnackbar("Enter your email again"))
+                _events.send(OtpEvent.NavigateToEmail)
+            }
+            return
+        }
 
-        viewModelScope.launch {
-            _state.update { it.copy(isSubmitting = true) }
-            try {
-                // Execute verification network call with: state.value.codeString
-                _events.send(OtpEvent.NavigateToNext)
-            } catch (e: Exception) {
-                _state.update { it.copy(error = e.message, isSubmitting = false) }
-                _events.send(OtpEvent.ShowSnackbar(e.message ?: "Invalid code verification"))
-            } finally {
-                _state.update { it.copy(isSubmitting = false) }
+        verifyOtpJob?.cancel()
+        verifyOtpJob = viewModelScope.launch {
+            _state.update {
+                it.copy(
+                    isSubmitting = true,
+                    error = null,
+                    verificationStatus = OtpVerificationStatus.Checking
+                )
+            }
+
+            when (val result = onboardingAuthDataSource.verifyEmailOtp(email, token)) {
+                is Result.Success -> {
+                    _state.update {
+                        it.copy(
+                            isSubmitting = false,
+                            error = null,
+                            verificationStatus = OtpVerificationStatus.Valid
+                        )
+                    }
+                    delay(350)
+                    _events.send(OtpEvent.NavigateToNext)
+                }
+                is Result.Failure -> {
+                    val message = result.error.toOtpErrorMessage()
+                    _state.update {
+                        it.copy(
+                            isSubmitting = false,
+                            error = message,
+                            verificationStatus = OtpVerificationStatus.Invalid
+                        )
+                    }
+                    _events.send(OtpEvent.ShowSnackbar(message))
+                }
             }
         }
     }
@@ -141,6 +205,17 @@ class OtpViewModel(
                     it.copy(resendSecondsRemaining = (it.resendSecondsRemaining - 1).coerceAtLeast(0))
                 }
             }
+        }
+    }
+
+    private fun OnboardingAuthError.toOtpErrorMessage(): String {
+        return when (this) {
+            OnboardingAuthError.NotConfigured -> "Supabase is not configured yet"
+            OnboardingAuthError.InvalidOtp -> "Verification code is incorrect"
+            OnboardingAuthError.InvalidEmail -> "Email is incorrect"
+            OnboardingAuthError.Network -> "Check your connection and try again"
+            OnboardingAuthError.TooManyRequests -> "Too many attempts. Try again later"
+            OnboardingAuthError.Unknown -> "Could not verify code"
         }
     }
 }

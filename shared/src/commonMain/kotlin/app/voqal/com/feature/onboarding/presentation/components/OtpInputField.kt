@@ -1,6 +1,8 @@
 package app.voqal.com.feature.onboarding.presentation.components
 
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -37,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.voqal.com.core.designsystem.theme.BricolageGrotesq
 import app.voqal.com.core.designsystem.theme.VoqalTheme
+import app.voqal.com.feature.onboarding.presentation.otp.OtpVerificationStatus
 
 @Composable
 fun OtpInputField(
@@ -46,9 +49,30 @@ fun OtpInputField(
     onNumberChanged: (Int?) -> Unit,
     onKeyboardBack: () -> Unit,
     modifier: Modifier = Modifier,
-    isFocusedExternal: Boolean = false
+    verificationStatus: OtpVerificationStatus = OtpVerificationStatus.Idle
 ) {
     var isFocused by remember { mutableStateOf(false) }
+    val strokeColor by animateColorAsState(
+        targetValue = when (verificationStatus) {
+            OtpVerificationStatus.Valid -> Color(0xFF2EAD4F)
+            OtpVerificationStatus.Invalid -> VoqalTheme.colors.error
+            OtpVerificationStatus.Checking -> VoqalTheme.colors.primary
+            OtpVerificationStatus.Idle -> if (isFocused) {
+                VoqalTheme.colors.primary
+            } else {
+                VoqalTheme.colors.outline.copy(alpha = 0.35f)
+            }
+        },
+        label = "OtpInputStrokeColor"
+    )
+    val strokeWidth by animateDpAsState(
+        targetValue = if (verificationStatus == OtpVerificationStatus.Idle && !isFocused) {
+            1.dp
+        } else {
+            2.dp
+        },
+        label = "OtpInputStrokeWidth"
+    )
 
     val text = remember(number) {
         TextFieldValue(
@@ -60,9 +84,11 @@ fun OtpInputField(
     Box(
         modifier = modifier
             .border(
-                width = 0.dp,
-                color = VoqalTheme.colors.surface
-            ).clip(VoqalTheme.shapes.extraSmall)
+                width = strokeWidth,
+                color = strokeColor,
+                shape = VoqalTheme.shapes.extraSmall
+            )
+            .clip(VoqalTheme.shapes.extraSmall)
             .background(if (isSystemInDarkTheme()) VoqalTheme.extendedColors.chip else Color(0xFFF0F0F0)),
         contentAlignment = Alignment.Center
     ) {
@@ -119,6 +145,7 @@ private fun OtpInputFieldFilledPreview() {
         onFocusChanged = {},
         onNumberChanged = {},
         onKeyboardBack = {},
-        modifier = Modifier.size(80.dp)
+        modifier = Modifier.size(80.dp),
+        verificationStatus = OtpVerificationStatus.Valid
     )
 }

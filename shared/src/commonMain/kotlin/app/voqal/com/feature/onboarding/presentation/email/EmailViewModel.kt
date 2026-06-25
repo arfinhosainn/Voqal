@@ -2,6 +2,9 @@ package app.voqal.com.feature.onboarding.presentation.email
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.voqal.com.core.domain.Result
+import app.voqal.com.feature.onboarding.domain.OnboardingAuthDataSource
+import app.voqal.com.feature.onboarding.domain.OnboardingAuthError
 import app.voqal.com.feature.onboarding.presentation.OnboardingDraftStore
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,7 +15,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class EmailViewModel(
-    private val onboardingDraftStore: OnboardingDraftStore
+    private val onboardingDraftStore: OnboardingDraftStore,
+    private val onboardingAuthDataSource: OnboardingAuthDataSource
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
@@ -53,18 +57,34 @@ class EmailViewModel(
     }
 
     private fun submitEmail() {
-        if (!_state.value.isFormValid) return
+        val email = _state.value.email
+        if (!_state.value.isFormValid || _state.value.isSubmitting) return
 
         viewModelScope.launch {
-            _state.update { it.copy(isSubmitting = true) }
-            try {
-                _events.send(EmailEvent.NavigateToNext)
-            } catch (e: Exception) {
-                _state.update { it.copy(error = e.message, isSubmitting = false) }
-                _events.send(EmailEvent.ShowSnackbar(e.message ?: "An error occurred"))
-            } finally {
-                _state.update { it.copy(isSubmitting = false) }
+            _state.update { it.copy(isSubmitting = true, error = null) }
+
+            when (val result = onboardingAuthDataSource.sendEmailOtp(email)) {
+                is Result.Success -> {
+                    _state.update { it.copy(isSubmitting = false) }
+                    _events.send(EmailEvent.NavigateToNext)
+                }
+                is Result.Failure -> {
+                    val message = result.error.toEmailErrorMessage()
+                    _state.update { it.copy(error = message, isSubmitting = false) }
+                    _events.send(EmailEvent.ShowSnackbar(message))
+                }
             }
+        }
+    }
+
+    private fun OnboardingAuthError.toEmailErrorMessage(): String {
+        return when (this) {
+            OnboardingAuthError.NotConfigured -> "Supabase is not configured yet"
+            OnboardingAuthError.InvalidEmail -> "Email is incorrect"
+            OnboardingAuthError.Network -> "Check your connection and try again"
+            OnboardingAuthError.TooManyRequests -> "Too many attempts. Try again later"
+            OnboardingAuthError.InvalidOtp,
+            OnboardingAuthError.Unknown -> "Could not send verification code"
         }
     }
 }
