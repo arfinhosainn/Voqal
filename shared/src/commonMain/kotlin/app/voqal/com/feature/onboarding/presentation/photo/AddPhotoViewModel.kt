@@ -21,7 +21,7 @@ class AddPhotoViewModel : ViewModel() {
     fun onAction(action: AddPhotoAction) {
         when (action) {
             is AddPhotoAction.OnPhotoSelected -> {
-                _state.update { it.copy(profilePhotoUri = action.uri, error = null) }
+                _state.update { it.copy(profilePhotoUri = action.bytes, error = null) }
             }
             AddPhotoAction.OnContinueClick -> {
                 saveProfilePhotoAndProceed()

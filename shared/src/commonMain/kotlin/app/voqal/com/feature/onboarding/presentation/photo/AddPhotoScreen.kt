@@ -43,14 +43,15 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import app.voqal.com.core.designsystem.components.VoqalPrimaryButton
-import app.voqal.com.core.designsystem.presentation.util.ObserveAsEvents
+import app.voqal.com.core.components.VoqalPrimaryButton
 import app.voqal.com.core.designsystem.theme.VoqalTheme
+import app.voqal.com.core.presentation.util.ImagePicker
+import app.voqal.com.core.presentation.util.ObserveAsEvents
+import app.voqal.com.core.presentation.util.rememberBitmapFromBytes
 import app.voqal.com.feature.onboarding.OnboardingScaffold
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -66,7 +67,7 @@ import kotlin.time.Duration.Companion.milliseconds
 fun AddPhotoRoot(
     onNavigateToNext: () -> Unit,
     onBack: () -> Unit,
-    onTriggerPhotoPicker: () -> Unit, // Launches system camera/gallery selector
+    imagePicker: ImagePicker,
     modifier: Modifier = Modifier,
     viewModel: AddPhotoViewModel = koinViewModel()
 ) {
@@ -75,14 +76,15 @@ fun AddPhotoRoot(
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
             is AddPhotoEvent.NavigateToNext -> onNavigateToNext()
-            is AddPhotoEvent.ShowSnackbar -> { /* Trigger notification system */ }
+            is AddPhotoEvent.ShowSnackbar -> {
+            }
         }
     }
 
     AddPhotoScreen(
         state = state,
         onBack = onBack,
-        onEditClick = onTriggerPhotoPicker,
+        imagePicker = imagePicker,
         onAction = viewModel::onAction,
         modifier = modifier
     )
@@ -92,10 +94,15 @@ fun AddPhotoRoot(
 fun AddPhotoScreen(
     state: AddPhotoState,
     onBack: () -> Unit,
-    onEditClick: () -> Unit,
+    imagePicker: ImagePicker,
     onAction: (AddPhotoAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    imagePicker.registerPicker { imageBytes ->
+        onAction(AddPhotoAction.OnPhotoSelected(imageBytes))
+    }
+
+
     var isPreviewVisible by remember { mutableStateOf(false) }
 
     Box(
@@ -132,8 +139,10 @@ fun AddPhotoScreen(
                 Spacer(Modifier.height(48.dp))
 
                 ProfilePhotoPicker(
-                    photoUri = state.profilePhotoUri,
-                    onEditClick = onEditClick,
+                    photoBytes = state.profilePhotoUri,
+                    onEditClick = {
+                        imagePicker.pickImage()
+                    },
                     onPreviewChanged = { isPreviewVisible = it }
                 )
 
@@ -153,14 +162,14 @@ fun AddPhotoScreen(
         // Preview overlay layer
         ProfilePhotoPreview(
             visible = isPreviewVisible,
-            photoUri = state.profilePhotoUri
+            photoBytes = state.profilePhotoUri
         )
     }
 }
 
 @Composable
 private fun ProfilePhotoPicker(
-    photoUri: String?,
+    photoBytes: ByteArray?,
     onEditClick: () -> Unit,
     onPreviewChanged: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
@@ -170,6 +179,8 @@ private fun ProfilePhotoPicker(
     val scope = rememberCoroutineScope()
     val strokeColor = VoqalTheme.colors.surface
     var zoom by remember { mutableStateOf(false) }
+
+    val bitmap = rememberBitmapFromBytes(photoBytes)
 
     val scale by animateFloatAsState(
         if (zoom) 1.08f else 1f,
@@ -211,13 +222,21 @@ private fun ProfilePhotoPicker(
                     )
                 }
         ) {
-            // Future Optimization note: If photoUri is not null, load via your image painter dependency (Coil, etc.)
-            Image(
-                painter = painterResource(Res.drawable.img),
-                contentDescription = "Profile Photo Picker Display",
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
-            )
+            if (bitmap != null) {
+                Image(
+                    bitmap = bitmap,
+                    contentDescription = "Selected Profile Photo",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Image(
+                    painter = painterResource(Res.drawable.img),
+                    contentDescription = "Default Profile Photo",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            }
         }
 
         Box(
@@ -227,7 +246,10 @@ private fun ProfilePhotoPicker(
                 .shadow(0.dp, CircleShape)
                 .clip(CircleShape)
                 .border(4.dp, strokeColor, CircleShape)
-                .background(if (isSystemInDarkTheme()) VoqalTheme.extendedColors.chip else Color(0xFFF0F0F0)),
+                .background(
+                    if (isSystemInDarkTheme())
+                        VoqalTheme.extendedColors.chip else Color(0xFFF0F0F0)
+                ),
             contentAlignment = Alignment.Center
         ) {
             IconButton(onClick = onEditClick) {
@@ -244,16 +266,18 @@ private fun ProfilePhotoPicker(
 @Composable
 private fun ProfilePhotoPreview(
     visible: Boolean,
-    photoUri: String?
+    photoBytes: ByteArray?
 ) {
+    val bitmap = rememberBitmapFromBytes(photoBytes)
+
     AnimatedVisibility(
         visible = visible,
         enter = fadeIn() + scaleIn(initialScale = .92f),
         exit = fadeOut() + scaleOut(targetScale = .92f)
     ) {
         val scale by animateFloatAsState(
-            1f,
-            spring(
+            targetValue = 1f,
+            animationSpec = spring(
                 dampingRatio = Spring.DampingRatioNoBouncy,
                 stiffness = Spring.StiffnessVeryLow
             ),
@@ -266,31 +290,30 @@ private fun ProfilePhotoPreview(
                 .background(Color.Black.copy(alpha = .82f)),
             contentAlignment = Alignment.Center
         ) {
-            Image(
-                painter = painterResource(Res.drawable.img),
-                contentDescription = "Full Screen Photo Preview Overlay",
-                modifier = Modifier
-                    .size(340.dp)
-                    .graphicsLayer {
-                        scaleX = scale
-                        scaleY = scale
-                    }
-                    .clip(CircleShape),
-                contentScale = ContentScale.Crop
-            )
-        }
-    }
-}
 
-@PreviewLightDark
-@Composable
-private fun AddPhotoScreenPreview() {
-    VoqalTheme {
-        AddPhotoScreen(
-            state = AddPhotoState(),
-            onBack = {},
-            onEditClick = {},
-            onAction = {}
-        )
+            val imageModifier = Modifier
+                .size(340.dp)
+                .graphicsLayer {
+                    scaleX = scale
+                    scaleY = scale
+                }
+                .clip(CircleShape)
+
+            if (bitmap != null) {
+                Image(
+                    bitmap = bitmap,
+                    contentDescription = "Full Screen Photo Preview",
+                    modifier = imageModifier,
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Image(
+                    painter = painterResource(Res.drawable.img),
+                    contentDescription = "Full Screen Default Preview",
+                    modifier = imageModifier,
+                    contentScale = ContentScale.Crop
+                )
+            }
+        }
     }
 }

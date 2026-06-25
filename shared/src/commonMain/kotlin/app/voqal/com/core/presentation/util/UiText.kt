@@ -1,4 +1,4 @@
-package app.voqal.com.core.designsystem.presentation.util
+package app.voqal.com.core.presentation.util
 
 import androidx.compose.runtime.Composable
 import org.jetbrains.compose.resources.StringResource
