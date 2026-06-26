@@ -19,8 +19,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import app.voqal.com.core.designsystem.theme.VoqalTheme
 import org.jetbrains.compose.resources.DrawableResource
@@ -70,12 +72,14 @@ fun VoqalBottomNavigationBar(
     modifier: Modifier = Modifier,
     items: List<VoqalBottomNavItem> = DefaultVoqalBottomNavItems
 ) {
+    val iconTint = VoqalTheme.colors.onBackground
+
     Row(
         modifier = modifier
             .fillMaxWidth()
             .height(92.dp)
             .clip(RoundedCornerShape(topStart = 42.dp, topEnd = 42.dp))
-            .background(Color.White)
+            .background(VoqalTheme.colors.background)
             .padding(start = 28.dp, end = 28.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -88,7 +92,8 @@ fun VoqalBottomNavigationBar(
                 VoqalBottomNavIconButton(
                     item = item,
                     selected = item.tab == selectedTab,
-                    onClick = { onTabClick(item.tab) }
+                    onClick = { onTabClick(item.tab) },
+                    tint = iconTint
                 )
             }
         }
@@ -108,6 +113,7 @@ private fun VoqalBottomNavIconButton(
     item: VoqalBottomNavItem,
     selected: Boolean,
     onClick: () -> Unit,
+    tint: Color,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -132,12 +138,13 @@ private fun VoqalBottomNavIconButton(
         Image(
             painter = painterResource(item.icon),
             contentDescription = item.contentDescription,
-            modifier = Modifier.size(32.dp)
+            modifier = Modifier.size(32.dp),
+            colorFilter = ColorFilter.tint(tint)
         )
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF000000, widthDp = 390, heightDp = 140)
+@PreviewLightDark()
 @Composable
 private fun VoqalBottomNavigationBarHomePreview() {
     VoqalTheme {
@@ -156,21 +163,3 @@ private fun VoqalBottomNavigationBarHomePreview() {
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF000000, widthDp = 390, heightDp = 140)
-@Composable
-private fun VoqalBottomNavigationBarEventsPreview() {
-    VoqalTheme {
-        Box(
-            modifier = Modifier
-                .background(Color.Black)
-                .padding(top = 24.dp),
-            contentAlignment = Alignment.BottomCenter
-        ) {
-            VoqalBottomNavigationBar(
-                selectedTab = VoqalBottomNavTab.Events,
-                onTabClick = {},
-                onCreateRoomClick = {}
-            )
-        }
-    }
-}
