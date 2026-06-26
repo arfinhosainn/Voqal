@@ -4,26 +4,26 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 
 val VoqalMint = Color(0xFF96C09F)
-val VoqalMintLight = Color(0xFFB8E1C1)
-val VoqalInk = Color(0xFF080808)
-val VoqalLightBackground = Color(0xFFFFFEFC)
+val VoqalMintLight = Color(0xFFB2DABB)
+val VoqalInk = Color(0xFF000000)
+val VoqalLightBackground = Color(0xFFFFFFFF)
 val VoqalDarkBackground = Color(0xFF222222)
 
-private val LightRoomBlue = Color(0xFFE4F7FB)
-private val LightRoomCream = Color(0xFFFFF5E4)
-private val LightRoomSlate = Color(0xFFF0F4FA)
-private val LightEventPeach = Color(0xFFFFEDDE)
-private val LightChip = Color(0xFFF2F2F2)
-private val LightSearch = Color(0xFFF6F6F6)
-private val LightDivider = Color(0xFFEAF1F5)
+private val LightRoomBlue = Color(0xFFE6F5F9)
+private val LightRoomCream = Color(0xFFFBF5E8)
+private val LightRoomSlate = Color(0xFFEFF2F8)
+private val LightEventPeach = Color(0xFFFFEFE2)
+private val LightChip = Color(0xFFF4F4F4)
+private val LightSearch = Color(0xFFF6F6F6) // not in provided swatch — unchanged
+private val LightDivider = Color(0xFFEAF1F5) // not in provided swatch — unchanged
 
-private val DarkRoomBlue = Color(0xFF334E53)
-private val DarkRoomOlive = Color(0xFF6C624A)
-private val DarkRoomSlate = Color(0xFF3D4656)
-private val DarkEventBrown = Color(0xFF6A5545)
+private val DarkRoomBlue = Color(0xFF35484D)
+private val DarkRoomOlive = Color(0xFF645A47)
+private val DarkRoomSlate = Color(0xFF39404D)
+private val DarkEventBrown = Color(0xFF614E3E)
 private val DarkChip = Color(0xFF3B3B3B)
-private val DarkSearch = Color(0xFF454545)
-private val DarkDivider = Color(0xFF72868F)
+private val DarkSearch = Color(0xFF454545) // not in provided swatch — unchanged
+private val DarkDivider = Color(0xFF72868F) // not in provided swatch — unchanged
 
 @Immutable
 data class VoqalExtendedColors(

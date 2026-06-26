@@ -3,6 +3,7 @@ package app.voqal.com.core.components
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.GenericShape
@@ -17,6 +18,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.voqal.com.core.designsystem.theme.VoqalTheme
@@ -80,6 +82,7 @@ fun CreateRoomButton(
     modifier: Modifier = Modifier,
     width: Dp = 112.dp,
     height: Dp = 104.dp,
+    color: Color = VoqalTheme.colors.background,
     contentDescription: String = "Create room"
 ) {
     Box(
@@ -110,7 +113,7 @@ fun CreateRoomButton(
             val lineEnd = size.width * 0.78f
 
             drawLine(
-                color = Color.White,
+                color = color,
                 start = Offset(lineStart, center),
                 end = Offset(lineEnd, center),
                 strokeWidth = strokeWidth,
@@ -118,7 +121,7 @@ fun CreateRoomButton(
             )
 
             drawLine(
-                color = Color.White,
+                color = color,
                 start = Offset(center, lineStart),
                 end = Offset(center, lineEnd),
                 strokeWidth = strokeWidth,
@@ -148,7 +151,7 @@ private fun CreateRoomButtonPreview() {
     }
 }
 
-@Preview(showBackground = true)
+@PreviewLightDark()
 @Composable
 private fun CreateRoomButtonBottomNavSizePreview() {
     VoqalTheme {
