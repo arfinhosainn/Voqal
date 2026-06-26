@@ -15,6 +15,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -25,8 +29,10 @@ import androidx.compose.ui.unit.sp
 import app.voqal.com.core.components.VoqalBottomNavTab
 import app.voqal.com.core.components.VoqalBottomNavigationBar
 import app.voqal.com.core.designsystem.theme.VoqalTheme
+import app.voqal.com.feature.room.domain.InviteParticipantUi
 import app.voqal.com.feature.room.domain.NewsRoomUi
 import app.voqal.com.feature.room.domain.ParticipantUi
+import app.voqal.com.feature.room.presentation.components.InviteToRoomDialog
 import app.voqal.com.feature.room.presentation.components.NewsRoomCard
 import app.voqal.com.feature.room.presentation.components.RoomColorVariant
 
@@ -46,6 +52,24 @@ fun RoomScreen(
     onCreateRoomClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var showInviteDialog by remember { mutableStateOf(false) }
+
+    if (showInviteDialog) {
+        InviteToRoomDialog(
+            participants = listOf(
+                InviteParticipantUi(id = "1", name = "Alex", avatar = null),
+                InviteParticipantUi(id = "2", name = "Jordan", avatar = null),
+                InviteParticipantUi(id = "3", name = "Taylor", avatar = null),
+                InviteParticipantUi(id = "4", name = "Morgan", avatar = null),
+                InviteParticipantUi(id = "5", name = "Casey", avatar = null),
+                InviteParticipantUi(id = "6", name = "Riley", avatar = null),
+                InviteParticipantUi(id = "7", name = "Parker", avatar = null),
+                InviteParticipantUi(id = "8", name = "Quinn", avatar = null),
+            ),
+            onDismissRequest = { showInviteDialog = false }
+        )
+    }
+
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = VoqalTheme.colors.background,
@@ -86,7 +110,8 @@ fun RoomScreen(
                             listenerCount = 155,
                             commentCount = 3
                         ),
-                        colorVariant = RoomColorVariant.BLUE
+                        colorVariant = RoomColorVariant.BLUE,
+                        onMoreClick = { showInviteDialog = true }
                     )
 
                     Spacer(Modifier.height(12.dp))
@@ -104,7 +129,8 @@ fun RoomScreen(
                             listenerCount = 49,
                             commentCount = 12
                         ),
-                        colorVariant = RoomColorVariant.WARM
+                        colorVariant = RoomColorVariant.WARM,
+                        onMoreClick = { showInviteDialog = true }
                     )
 
                     Spacer(Modifier.height(12.dp))
@@ -121,7 +147,8 @@ fun RoomScreen(
                             listenerCount = 15,
                             commentCount = 2
                         ),
-                        colorVariant = RoomColorVariant.SLATE
+                        colorVariant = RoomColorVariant.SLATE,
+                        onMoreClick = { showInviteDialog = true }
                     )
                 }
             }
