@@ -55,6 +55,7 @@ kotlin {
             implementation(libs.jetbrains.compose.material.icons.extended)
             implementation(libs.bundles.koin.common)
             implementation(libs.jetbrains.compose.navigation)
+            implementation(libs.kotlinx.datetime)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.supabase.postgrest.kt)
             implementation(libs.supabase.auth.kt)
