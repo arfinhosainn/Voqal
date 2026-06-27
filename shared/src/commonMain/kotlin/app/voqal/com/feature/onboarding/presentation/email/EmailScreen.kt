@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.voqal.com.core.components.VoqalPrimaryButton
-import app.voqal.com.core.designsystem.theme.BricolageGrotesq
+import app.voqal.com.core.designsystem.theme.Poppins
 import app.voqal.com.core.designsystem.theme.VoqalTheme
 import app.voqal.com.core.presentation.util.ObserveAsEvents
 import app.voqal.com.feature.onboarding.OnboardingScaffold
@@ -150,7 +150,7 @@ private fun EmailField(
                 text = "email@example.com",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.SemiBold,
-                fontFamily = BricolageGrotesq,
+                fontFamily = Poppins,
                 color = VoqalTheme.colors.onSurfaceVariant,
             )
         },
@@ -162,7 +162,7 @@ private fun EmailField(
         textStyle = TextStyle(
             fontSize = 20.sp,
             fontWeight = FontWeight.Medium,
-            fontFamily = BricolageGrotesq,
+            fontFamily = Poppins,
             color = VoqalTheme.colors.onBackground
         ),
         keyboardOptions = KeyboardOptions(

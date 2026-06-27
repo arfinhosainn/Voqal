@@ -16,7 +16,7 @@ import voqal.shared.generated.resources.poppins_regular
 import voqal.shared.generated.resources.poppins_semibold
 
 
-val BricolageGrotesq
+val Poppins
     @Composable get() = FontFamily(
         Font(Res.font.poppins_regular, FontWeight.Normal),
         Font(Res.font.poppins_medium, FontWeight.Medium),
@@ -33,7 +33,7 @@ val VoqalTypography
     get() = Typography(
 
         displayLarge = TextStyle(
-            fontFamily = BricolageGrotesq,
+            fontFamily = Poppins,
             fontWeight = FontWeight.Normal,
             fontSize = 34.sp,
             lineHeight = 41.sp
@@ -41,7 +41,7 @@ val VoqalTypography
 
         // Title 1 — 28 / 34
         titleLarge = TextStyle(
-            fontFamily = BricolageGrotesq,
+            fontFamily = Poppins,
             fontWeight = FontWeight.Bold,
             fontSize = 28.sp,
             lineHeight = 34.sp
@@ -49,7 +49,7 @@ val VoqalTypography
 
         // Title 2 — 22 / 28
         titleMedium = TextStyle(
-            fontFamily = BricolageGrotesq,
+            fontFamily = Poppins,
             fontWeight = FontWeight.Normal,
             fontSize = 22.sp,
             lineHeight = 28.sp
@@ -57,7 +57,7 @@ val VoqalTypography
 
         // Title 3 — 20 / 25
         titleSmall = TextStyle(
-            fontFamily = BricolageGrotesq,
+            fontFamily = Poppins,
             fontWeight = FontWeight.Normal,
             fontSize = 20.sp,
             lineHeight = 25.sp
@@ -65,7 +65,7 @@ val VoqalTypography
 
         // Headline — 17 / 22
         headlineSmall = TextStyle(
-            fontFamily = BricolageGrotesq,
+            fontFamily = Poppins,
             fontWeight = FontWeight.SemiBold,
             fontSize = 24.sp,
             lineHeight = 22.sp
@@ -73,35 +73,35 @@ val VoqalTypography
 
         // Body — 17 / 22
         bodyLarge = TextStyle(
-            fontFamily = BricolageGrotesq,
+            fontFamily = Poppins,
             fontWeight = FontWeight.Normal,
             fontSize = 17.sp,
             lineHeight = 22.sp
         ),
 
         bodyMedium = TextStyle(
-            fontFamily = BricolageGrotesq,
+            fontFamily = Poppins,
             fontWeight = FontWeight.Medium,
             fontSize = 18.sp,
             lineHeight = 21.sp
         ),
 
         bodySmall = TextStyle(
-            fontFamily = BricolageGrotesq,
+            fontFamily = Poppins,
             fontWeight = FontWeight.Normal,
             fontSize = 15.sp,
             lineHeight = 20.sp
         ),
 
         labelMedium = TextStyle(
-            fontFamily = BricolageGrotesq,
+            fontFamily = Poppins,
             fontWeight = FontWeight.Normal,
-            fontSize = 13.sp,
+            fontSize = 14.sp,
             lineHeight = 18.sp
         ),
 
         labelSmall = TextStyle(
-            fontFamily = BricolageGrotesq,
+            fontFamily = Poppins,
             fontWeight = FontWeight.Normal,
             fontSize = 12.sp,
             lineHeight = 16.sp

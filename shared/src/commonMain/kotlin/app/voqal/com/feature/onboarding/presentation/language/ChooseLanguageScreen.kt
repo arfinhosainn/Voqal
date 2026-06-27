@@ -46,7 +46,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.voqal.com.core.components.VoqalPrimaryButton
 import app.voqal.com.core.presentation.util.ObserveAsEvents
-import app.voqal.com.core.designsystem.theme.BricolageGrotesq
+import app.voqal.com.core.designsystem.theme.Poppins
 import app.voqal.com.core.designsystem.theme.VoqalTheme
 import app.voqal.com.feature.onboarding.OnboardingScaffold
 import org.jetbrains.compose.resources.painterResource
@@ -204,7 +204,7 @@ private fun LanguageSearchField(
                 text = "Search languages",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium,
-                fontFamily = BricolageGrotesq,
+                fontFamily = Poppins,
                 color = VoqalTheme.colors.onSurfaceVariant
             )
         },
@@ -214,7 +214,7 @@ private fun LanguageSearchField(
         textStyle = TextStyle(
             fontSize = 18.sp,
             fontWeight = FontWeight.Medium,
-            fontFamily = BricolageGrotesq,
+            fontFamily = Poppins,
             color = VoqalTheme.colors.onBackground
         ),
         keyboardOptions = KeyboardOptions(

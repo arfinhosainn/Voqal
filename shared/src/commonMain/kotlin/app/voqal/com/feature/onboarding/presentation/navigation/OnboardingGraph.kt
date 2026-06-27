@@ -26,6 +26,8 @@ import app.voqal.com.feature.onboarding.presentation.language.ChooseLanguageRoot
 import app.voqal.com.feature.onboarding.presentation.interest.ChooseInterestsRoot
 import app.voqal.com.feature.room.presentation.RoomScreen
 import app.voqal.com.feature.room.presentation.navigation.RoomRoute
+import app.voqal.com.feature.rooom_detail.presentation.RoomDetailRoot
+import app.voqal.com.feature.rooom_detail.presentation.RoomDetailScreen
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -65,7 +67,7 @@ fun NavGraphBuilder.onboardingNavGraph(
     }
 
     navigation<OnboardingGraph>(
-        startDestination = OnboardingRoute.Room
+        startDestination = OnboardingRoute.RoomDetail
     ) {
         // 1. Email Entry Screen
         composable<OnboardingRoute.Email>(
@@ -182,7 +184,19 @@ fun NavGraphBuilder.onboardingNavGraph(
             RoomScreen(
                 onCreateRoomClick = {
                 },
-                modifier = modifier
+                modifier = modifier,
+
+            )
+        }
+
+        composable<OnboardingRoute.RoomDetail>(
+            enterTransition = enterTransition,
+            exitTransition = exitTransition,
+            popEnterTransition = popEnterTransition,
+            popExitTransition = popExitTransition
+        ) {
+            RoomDetailRoot(
+                onLeave = { navController.popBackStack() }
             )
         }
     }
