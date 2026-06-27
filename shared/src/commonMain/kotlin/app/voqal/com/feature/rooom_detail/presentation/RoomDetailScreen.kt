@@ -3,12 +3,14 @@ package app.voqal.com.feature.rooom_detail.presentation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.voqal.com.core.presentation.util.ObserveAsEvents
+import app.voqal.com.feature.rooom_detail.presentation.components.RoomDetailTopBar
 import org.koin.compose.viewmodel.koinViewModel
 import org.jetbrains.compose.resources.vectorResource
 import voqal.shared.generated.resources.Res
@@ -64,6 +66,13 @@ fun RoomDetailScreen(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
+        topBar = {
+            RoomDetailTopBar(
+                greeting = "Good morning",
+                name = "Marian Marsh",
+                modifier = Modifier.statusBarsPadding()
+            )
+        },
         bottomBar = {
             RoomDetailBottomBar(
                 actions = actions,

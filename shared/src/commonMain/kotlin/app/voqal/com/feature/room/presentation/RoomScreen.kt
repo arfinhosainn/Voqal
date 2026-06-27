@@ -83,7 +83,6 @@ fun RoomScreen(
                     // Additional tabs will be wired when their screens exist.
                 },
                 onCreateRoomClick = onCreateRoomClick,
-                modifier = Modifier.navigationBarsPadding()
             )
         }
     ) { innerPadding ->
