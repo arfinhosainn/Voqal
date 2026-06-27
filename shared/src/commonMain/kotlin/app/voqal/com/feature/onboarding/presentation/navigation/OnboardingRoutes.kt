@@ -31,4 +31,8 @@ sealed interface OnboardingRoute {
     data object Room : OnboardingRoute
 
 
+
+    @Serializable
+    data object RoomDetail : OnboardingRoute
+
 }

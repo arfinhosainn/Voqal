@@ -37,7 +37,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import app.voqal.com.core.designsystem.theme.BricolageGrotesq
+import app.voqal.com.core.designsystem.theme.Poppins
 import app.voqal.com.core.designsystem.theme.VoqalTheme
 import app.voqal.com.feature.onboarding.presentation.otp.OtpVerificationStatus
 
@@ -107,7 +107,7 @@ fun OtpInputField(
             textStyle = TextStyle(
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.Medium,
-                fontFamily = BricolageGrotesq,
+                fontFamily = Poppins,
                 fontSize = 30.sp,
                 color = VoqalTheme.colors.onBackground,
             ),
