@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -19,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.voqal.com.core.components.VoqalBottomNavTab
 import app.voqal.com.core.components.VoqalBottomNavigationBar
 import app.voqal.com.core.designsystem.theme.VoqalTheme
@@ -29,21 +29,28 @@ import app.voqal.com.feature.room.presentation.components.HomeTopBar
 import app.voqal.com.feature.room.presentation.components.InviteToRoomDialog
 import app.voqal.com.feature.room.presentation.components.NewsRoomCard
 import app.voqal.com.feature.room.presentation.components.RoomColorVariant
+import app.voqal.com.feature.room.presentation.components.bottomsheet.RoomTypeBottomSheet
+import app.voqal.com.feature.room.presentation.model.RoomType
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun RoomRoot(
-    onCreateRoomClick: () -> Unit,
+    viewModel: RoomViewModel = koinViewModel(),
     modifier: Modifier = Modifier
 ) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    
     RoomScreen(
-        onCreateRoomClick = onCreateRoomClick,
+        state = state,
+        onAction = viewModel::onAction,
         modifier = modifier
     )
 }
 
 @Composable
 fun RoomScreen(
-    onCreateRoomClick: () -> Unit,
+    state: RoomState,
+    onAction: (RoomAction) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showInviteDialog by remember { mutableStateOf(false) }
@@ -61,6 +68,15 @@ fun RoomScreen(
                 InviteParticipantUi(id = "8", name = "Quinn", avatar = null),
             ),
             onDismissRequest = { showInviteDialog = false }
+        )
+    }
+
+    if (state.showRoomTypeSheet) {
+        RoomTypeBottomSheet(
+            selectedType = state.selectedRoomType,
+            onTypeSelected = { onAction(RoomAction.OnRoomTypeSelected(it)) },
+            onStartClick = { onAction(RoomAction.OnStartClick) },
+            onDismiss = { onAction(RoomAction.OnDismissSheet) }
         )
     }
 
@@ -82,7 +98,7 @@ fun RoomScreen(
                 onTabClick = {
                     // Additional tabs will be wired when their screens exist.
                 },
-                onCreateRoomClick = onCreateRoomClick,
+                onCreateRoomClick = { onAction(RoomAction.OnCreateRoomClick) },
             )
         }
     ) { innerPadding ->
@@ -155,7 +171,10 @@ private fun RoomScreenPreview() {
                 .fillMaxSize()
                 .background(VoqalTheme.colors.background)
         ) {
-            RoomScreen(onCreateRoomClick = {})
+            RoomScreen(
+                state = RoomState(),
+                onAction = {}
+            )
         }
     }
 }

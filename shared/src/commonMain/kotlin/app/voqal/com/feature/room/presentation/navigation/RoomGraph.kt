@@ -16,9 +16,6 @@ fun NavGraphBuilder.roomGraph(
     ) {
         composable<RoomRoute.Rooms> {
             RoomRoot(
-                onCreateRoomClick = {
-                    // Create-room flow will be wired here when that feature exists.
-                },
                 modifier = modifier
             )
         }

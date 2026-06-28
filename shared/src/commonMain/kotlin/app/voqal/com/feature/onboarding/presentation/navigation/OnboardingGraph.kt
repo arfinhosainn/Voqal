@@ -24,7 +24,7 @@ import app.voqal.com.feature.onboarding.presentation.photo.AddPhotoRoot
 import app.voqal.com.feature.onboarding.presentation.otp.OtpRoot
 import app.voqal.com.feature.onboarding.presentation.language.ChooseLanguageRoot
 import app.voqal.com.feature.onboarding.presentation.interest.ChooseInterestsRoot
-import app.voqal.com.feature.room.presentation.RoomScreen
+import app.voqal.com.feature.room.presentation.RoomRoot
 import app.voqal.com.feature.room.presentation.navigation.RoomRoute
 import app.voqal.com.feature.rooom_detail.presentation.RoomDetailRoot
 import app.voqal.com.feature.rooom_detail.presentation.RoomDetailScreen
@@ -67,7 +67,7 @@ fun NavGraphBuilder.onboardingNavGraph(
     }
 
     navigation<OnboardingGraph>(
-        startDestination = OnboardingRoute.RoomDetail
+        startDestination = OnboardingRoute.Room
     ) {
         // 1. Email Entry Screen
         composable<OnboardingRoute.Email>(
@@ -181,11 +181,8 @@ fun NavGraphBuilder.onboardingNavGraph(
             popEnterTransition = popEnterTransition,
             popExitTransition = popExitTransition
         ) {
-            RoomScreen(
-                onCreateRoomClick = {
-                },
-                modifier = modifier,
-
+            RoomRoot(
+                modifier = modifier
             )
         }
 

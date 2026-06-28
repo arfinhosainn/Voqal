@@ -10,6 +10,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.sp
 import app.voqal.com.core.designsystem.theme.VoqalTheme
 
@@ -61,7 +62,6 @@ fun VoqalPrimaryButton(
         Text(
             text = if (loading) "Please wait" else text,
             style = textStyle,
-            color = VoqalTheme.colors.background,
             maxLines = 1
         )
 
@@ -74,7 +74,7 @@ fun VoqalPrimaryButton(
     }
 }
 
-@Preview(showSystemUi = false)
+@PreviewLightDark
 @Composable
 private fun VoqalPrimaryButtonPreview() {
     VoqalTheme {
