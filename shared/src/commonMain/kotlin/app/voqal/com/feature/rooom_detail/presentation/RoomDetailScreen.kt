@@ -1,16 +1,22 @@
 package app.voqal.com.feature.rooom_detail.presentation
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.voqal.com.core.presentation.util.ObserveAsEvents
 import app.voqal.com.feature.rooom_detail.presentation.components.RoomDetailTopBar
+import app.voqal.com.feature.rooom_detail.presentation.components.participant.ParticipantAvatar
 import org.koin.compose.viewmodel.koinViewModel
 import org.jetbrains.compose.resources.vectorResource
 import voqal.shared.generated.resources.Res
@@ -80,12 +86,21 @@ fun RoomDetailScreen(
             )
         }
     ) { innerPadding ->
-        Box(
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(3),
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
+                .padding(innerPadding),
+            contentPadding = PaddingValues(5.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            // Content will go here (participants, title, etc.)
+            items(state.participants, key = { it.id }) { participant ->
+                ParticipantAvatar(
+                    state = participant,
+                    onClick = { /* Handle participant click */ }
+                )
+            }
         }
     }
 }
