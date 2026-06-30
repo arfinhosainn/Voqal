@@ -70,22 +70,15 @@ class FullNameViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
 
-            when (
-                val result = onboardingProfileDataSource.updateFullName(
-                    firstName = currentState.firstName,
-                    lastName = currentState.lastName
-                )
-            ) {
-                is Result.Success -> {
-                    _state.update { it.copy(isLoading = false) }
-                    _events.send(FullNameEvent.Navigate)
-                }
-                is Result.Failure -> {
-                    val message = UiText.DynamicString(result.error.toUserMessage())
-                    _state.update { it.copy(isLoading = false, error = message) }
-                    _events.send(FullNameEvent.ShowSnackbar(message))
-                }
-            }
+            // Attempt to update Supabase, but don't block navigation if it fails
+            // (Since we are skipping OTP for now, this will usually fail)
+            onboardingProfileDataSource.updateFullName(
+                firstName = currentState.firstName,
+                lastName = currentState.lastName
+            )
+
+            _state.update { it.copy(isLoading = false) }
+            _events.send(FullNameEvent.Navigate)
         }
     }
 }

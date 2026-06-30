@@ -35,4 +35,7 @@ sealed interface OnboardingRoute {
     @Serializable
     data object RoomDetail : OnboardingRoute
 
+    @Serializable
+    data class RoomDetailRoute(val roomId: String, val asHost: Boolean = false)
+
 }

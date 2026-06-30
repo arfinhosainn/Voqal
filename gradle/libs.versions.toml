@@ -23,10 +23,10 @@ datastore = "1.2.0"
 koin = "4.1.1"
 navigation-compose = "2.9.1"
 kotlinx-serialization = "1.9.0"
-kotlinx-datetime = "0.8.0"
-supabase = "3.1.4"
+kotlinx-datetime = "0.7.1"
+supabase = "3.6.0"
 ktor = "3.1.2"
-
+stream-video = "1.28.0"
 
 
 
@@ -76,9 +76,15 @@ datastore-preferences = { module = "androidx.datastore:datastore-preferences", v
 supabase-postgrest-kt = { module = "io.github.jan-tennert.supabase:postgrest-kt", version.ref = "supabase" }
 supabase-auth-kt = { module = "io.github.jan-tennert.supabase:auth-kt", version.ref = "supabase" }
 supabase-storage-kt = { module = "io.github.jan-tennert.supabase:storage-kt", version.ref = "supabase" }
+supabase-functions-kt = { module = "io.github.jan-tennert.supabase:functions-kt", version.ref = "supabase" }
 realtime-kt = { module = "io.github.jan-tennert.supabase:realtime-kt", version.ref = "supabase" }
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
 ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
+
+#Stream SDK
+stream-video-android-core = { module = "io.getstream:stream-video-android-core", version.ref = "stream-video" }
+stream-video-compose-ui = { module = "io.getstream:stream-video-android-ui-compose", version.ref = "stream-video" }
+
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

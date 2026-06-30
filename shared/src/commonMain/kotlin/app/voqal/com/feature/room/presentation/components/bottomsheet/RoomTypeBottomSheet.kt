@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -42,14 +41,15 @@ fun RoomTypeBottomSheet(
     onTypeSelected: (RoomType) -> Unit,
     onStartClick: () -> Unit,
     onDismiss: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isLoading: Boolean = false,
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         dragHandle = null,
         containerColor = VoqalTheme.colors.background,
         sheetState = rememberModalBottomSheetState(
-            skipPartiallyExpanded = true
+            skipPartiallyExpanded = true,
         ),
         modifier = modifier,
     ) {
@@ -120,6 +120,8 @@ fun RoomTypeBottomSheet(
             VoqalPrimaryButton(
                 text = "Let's Go",
                 onClick = onStartClick,
+                enabled = !isLoading,
+                loading = isLoading,
                 shape = VoqalTheme.shapes.medium,
                 colors = ButtonDefaults.buttonColors(
                     contentColor = if (isSystemInDarkTheme()) Color.Black else Color.White,

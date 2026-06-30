@@ -1,0 +1,7 @@
+<resources>
+    <string name="error_mic_permission_denied">Microphone permission is required to join</string>
+    <string name="error_not_connected">Not connected to the room</string>
+    <string name="error_already_in_room">You\'re already in this room</string>
+    <string name="error_join_failed">Couldn\'t join the room</string>
+    <string name="error_unknown">Something went wrong</string>
+</resources>
