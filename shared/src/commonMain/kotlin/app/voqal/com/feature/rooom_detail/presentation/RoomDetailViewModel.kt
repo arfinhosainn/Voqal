@@ -8,6 +8,7 @@ import app.voqal.com.core.domain.onFailure
 import app.voqal.com.feature.onboarding.presentation.navigation.OnboardingRoute
 import app.voqal.com.feature.room.domain.RoomCallRemoteDataSource
 import app.voqal.com.feature.room.domain.RoomConnectionState
+import app.voqal.com.feature.room.domain.StreamRoomConnectionRepository
 import app.voqal.com.feature.room.domain.toParticipantAvatarUiState
 import app.voqal.com.feature.room.domain.toUiText
 import kotlinx.coroutines.channels.Channel
@@ -21,6 +22,7 @@ import kotlinx.coroutines.launch
 class RoomDetailViewModel(
     savedStateHandle: SavedStateHandle,
     private val roomCallDataSource: RoomCallRemoteDataSource,
+    private val connectionRepository: StreamRoomConnectionRepository
 ) : ViewModel() {
 
     private val route = savedStateHandle.toRoute<OnboardingRoute.RoomDetailRoute>()
@@ -33,7 +35,8 @@ class RoomDetailViewModel(
     ) { connection, info, participants, micEnabled ->
         RoomDetailState(
             title = info.title.orEmpty(),
-            isLoading = connection != RoomConnectionState.CONNECTED,
+            isLoading = connection == RoomConnectionState.CONNECTING || connection == RoomConnectionState.RECONNECTING,
+            isFailed = connection == RoomConnectionState.FAILED,
             isMicrophoneEnabled = micEnabled,
             participants = participants.map { it.toParticipantAvatarUiState() }
         )
@@ -44,6 +47,14 @@ class RoomDetailViewModel(
 
     init {
         viewModelScope.launch {
+            // 1. Ensure user is connected to Stream
+            val connectionResult = connectionRepository.ensureUserConnected()
+            if (connectionResult is app.voqal.com.core.domain.Result.Failure) {
+                _events.send(RoomDetailEvent.ShowError(connectionResult.error.toUiText()))
+                return@launch
+            }
+
+            // 2. Join the room
             roomCallDataSource.joinRoom(roomId = route.roomId, asHost = route.asHost)
                 .onFailure { error ->
                     _events.send(RoomDetailEvent.ShowError(error.toUiText()))

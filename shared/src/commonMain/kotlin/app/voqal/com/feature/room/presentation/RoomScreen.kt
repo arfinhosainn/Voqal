@@ -38,6 +38,7 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun RoomRoot(
     onRoomCreated: (String) -> Unit,
+    onRoomClick: (String) -> Unit,
     viewModel: RoomViewModel = koinViewModel(),
     modifier: Modifier = Modifier,
 ) {
@@ -59,7 +60,7 @@ fun RoomRoot(
     RoomScreen(
         state = state,
         onAction = viewModel::onAction,
-        onRoomClick = onRoomCreated,
+        onRoomClick = onRoomClick,
         snackbarHostState = snackbarHostState,
         modifier = modifier
     )

@@ -13,9 +13,6 @@ sealed interface OnboardingRoute {
     data object FullName : OnboardingRoute
 
     @Serializable
-    data object OtpVerification : OnboardingRoute
-
-    @Serializable
     data object Username : OnboardingRoute
 
     @Serializable
@@ -26,11 +23,6 @@ sealed interface OnboardingRoute {
 
     @Serializable
     data object ChooseInterests : OnboardingRoute
-
-    @Serializable
-    data object Room : OnboardingRoute
-
-
 
     @Serializable
     data object RoomDetail : OnboardingRoute

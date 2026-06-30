@@ -20,6 +20,9 @@ fun NavGraphBuilder.roomGraph(
                 onRoomCreated = { roomId ->
                     navController.navigate(OnboardingRoute.RoomDetailRoute(roomId = roomId, asHost = true))
                 },
+                onRoomClick = { roomId ->
+                    navController.navigate(OnboardingRoute.RoomDetailRoute(roomId = roomId, asHost = false))
+                },
                 modifier = modifier
             )
         }

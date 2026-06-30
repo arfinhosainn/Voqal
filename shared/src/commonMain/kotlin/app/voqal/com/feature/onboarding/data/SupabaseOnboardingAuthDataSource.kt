@@ -6,10 +6,9 @@ import app.voqal.com.core.domain.Result
 import app.voqal.com.feature.onboarding.domain.OnboardingAuthDataSource
 import app.voqal.com.feature.onboarding.domain.OnboardingAuthError
 import io.github.jan.supabase.SupabaseClient
-import io.github.jan.supabase.auth.OtpType
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.exception.AuthRestException
-import io.github.jan.supabase.auth.providers.builtin.OTP
+import io.github.jan.supabase.auth.providers.builtin.Email
 import io.github.jan.supabase.exceptions.HttpRequestException
 import io.ktor.client.plugins.HttpRequestTimeoutException
 
@@ -18,38 +17,29 @@ class SupabaseOnboardingAuthDataSource(
     private val supabaseConfig: SupabaseConfig
 ) : OnboardingAuthDataSource {
 
-    override suspend fun sendEmailOtp(email: String): EmptyResult<OnboardingAuthError> {
+    override suspend fun signUp(email: String): EmptyResult<OnboardingAuthError> {
         if (!supabaseConfig.isConfigured) {
             return Result.Failure(OnboardingAuthError.NotConfigured)
         }
 
         return try {
-            supabaseClient.auth.signInWith(OTP, redirectUrl = null) {
+            // Using a simple signup since email verification is disabled in Supabase
+            supabaseClient.auth.signUpWith(Email) {
                 this.email = email
+                this.password = "VoqalPassword123!" // Hardcoded for simplified testing flow
             }
             Result.Success(Unit)
         } catch (e: Throwable) {
-            Result.Failure(e.toOnboardingAuthError(default = OnboardingAuthError.Unknown))
-        }
-    }
-
-    override suspend fun verifyEmailOtp(
-        email: String,
-        token: String
-    ): EmptyResult<OnboardingAuthError> {
-        if (!supabaseConfig.isConfigured) {
-            return Result.Failure(OnboardingAuthError.NotConfigured)
-        }
-
-        return try {
-            supabaseClient.auth.verifyEmailOtp(
-                type = OtpType.Email.EMAIL,
-                email = email,
-                token = token
-            )
-            Result.Success(Unit)
-        } catch (e: Throwable) {
-            Result.Failure(e.toOnboardingAuthError(default = OnboardingAuthError.InvalidOtp))
+            // If user already exists, try signing in
+            try {
+                supabaseClient.auth.signInWith(Email) {
+                    this.email = email
+                    this.password = "VoqalPassword123!"
+                }
+                Result.Success(Unit)
+            } catch (inner: Throwable) {
+                Result.Failure(e.toOnboardingAuthError(default = OnboardingAuthError.Unknown))
+            }
         }
     }
 

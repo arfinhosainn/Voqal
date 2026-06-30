@@ -41,9 +41,6 @@ class EmailViewModel(
         when (action) {
             is EmailAction.OnEmailChange -> {
                 val email = action.email.trim()
-                if (email != onboardingDraftStore.email) {
-                    onboardingDraftStore.otpCode = List(6) { null }
-                }
                 onboardingDraftStore.updateEmail(email)
                 _state.update {
                     it.copy(
@@ -61,19 +58,7 @@ class EmailViewModel(
         if (!_state.value.isFormValid || _state.value.isSubmitting) return
 
         viewModelScope.launch {
-            _state.update { it.copy(isSubmitting = true, error = null) }
-
-            when (val result = onboardingAuthDataSource.sendEmailOtp(email)) {
-                is Result.Success -> {
-                    _state.update { it.copy(isSubmitting = false) }
-                    _events.send(EmailEvent.NavigateToNext)
-                }
-                is Result.Failure -> {
-                    val message = result.error.toEmailErrorMessage()
-                    _state.update { it.copy(error = message, isSubmitting = false) }
-                    _events.send(EmailEvent.ShowSnackbar(message))
-                }
-            }
+            _events.send(EmailEvent.NavigateToNext)
         }
     }
 
@@ -83,7 +68,6 @@ class EmailViewModel(
             OnboardingAuthError.InvalidEmail -> "Email is incorrect"
             OnboardingAuthError.Network -> "Check your connection and try again"
             OnboardingAuthError.TooManyRequests -> "Too many attempts. Try again later"
-            OnboardingAuthError.InvalidOtp,
             OnboardingAuthError.Unknown -> "Could not send verification code"
         }
     }

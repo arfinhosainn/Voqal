@@ -29,11 +29,13 @@ fun OnboardingScaffold(
     showTopBar: Boolean = true,
     currentStep: Int? = null,
     totalSteps: Int = 7,
+    snackbarHost: @Composable () -> Unit = {},
     content: @Composable BoxScope.() -> Unit
 ) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = VoqalTheme.colors.background,
+        snackbarHost = snackbarHost,
         topBar = {
             if (showTopBar || currentStep != null) {
                 Row(

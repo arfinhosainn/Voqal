@@ -68,16 +68,6 @@ class FullNameViewModel(
         if (!currentState.isFormValid || currentState.isLoading) return
 
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, error = null) }
-
-            // Attempt to update Supabase, but don't block navigation if it fails
-            // (Since we are skipping OTP for now, this will usually fail)
-            onboardingProfileDataSource.updateFullName(
-                firstName = currentState.firstName,
-                lastName = currentState.lastName
-            )
-
-            _state.update { it.copy(isLoading = false) }
             _events.send(FullNameEvent.Navigate)
         }
     }

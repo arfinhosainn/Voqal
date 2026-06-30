@@ -56,22 +56,39 @@ class StreamRoomCallDataSource(
         call = newCall
 
         return try {
-            val joinResult = newCall.join(
-                create = true,
-                createOptions = CreateCallOptions(
-                    members = listOf(
-                        MemberRequest(
-                            userId = userId,
-                            role = if (asHost) "host" else "speaker",
-                            custom = emptyMap()
-                        )
-                    ),
-                    custom = buildMap {
-                        title?.let { put("title", it) }
-                        description?.let { put("description", it) }
-                    }
+            val joinResult = if (asHost) {
+                newCall.join(
+                    create = true,
+                    createOptions = CreateCallOptions(
+                        members = listOf(
+                            MemberRequest(
+                                userId = userId,
+                                role = "host",
+                                custom = emptyMap()
+                            )
+                        ),
+                        custom = buildMap {
+                            title?.let { put("title", it) }
+                            description?.let { put("description", it) }
+                        }
+                    )
                 )
-            )
+            } else {
+                // For participants, we also use create = true to ensure they are added
+                // as members if the room type requires it, but with a restricted role.
+                newCall.join(
+                    create = true,
+                    createOptions = CreateCallOptions(
+                        members = listOf(
+                            MemberRequest(
+                                userId = userId,
+                                role = "user",
+                                custom = emptyMap()
+                            )
+                        )
+                    )
+                )
+            }
 
             var failed = false
             joinResult.onError { failed = true }
@@ -81,9 +98,17 @@ class StreamRoomCallDataSource(
                 Result.Failure(RoomCallError.JOIN_FAILED)
             } else {
                 observe(newCall)
+                if (asHost) {
+                    try {
+                        newCall.goLive()
+                    } catch (e: Exception) {
+                        e.printStackTrace() // Log but don't fail join if goLive fails
+                    }
+                }
                 Result.Success(Unit)
             }
         } catch (e: Exception) {
+            e.printStackTrace()
             call = null
             Result.Failure(RoomCallError.JOIN_FAILED)
         }
@@ -121,6 +146,11 @@ class StreamRoomCallDataSource(
         _activeSpeakerId.value = null
         _roomInfo.value = RoomInfo(null, null, isBackstage = true)
         _isMicrophoneEnabled.value = false
+    }
+
+    fun close() {
+        observerJob?.cancel()
+        scope.cancel()
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -161,7 +191,10 @@ class StreamRoomCallDataSource(
 // and fill these in (Reconnecting/Failed/Joined names may differ slightly by release).
 private fun RealtimeConnection.toDomain(): RoomConnectionState = when (this) {
     RealtimeConnection.Connected -> RoomConnectionState.CONNECTED
-    else -> RoomConnectionState.CONNECTING
+    is RealtimeConnection.Reconnecting -> RoomConnectionState.RECONNECTING
+    is RealtimeConnection.Failed -> RoomConnectionState.FAILED
+    RealtimeConnection.Disconnected -> RoomConnectionState.DISCONNECTED
+    else -> RoomConnectionState.CONNECTING // PreJoin and any other pre-connect states
 }
 
 private fun List<ParticipantState>.toRoomParticipantsFlow(): Flow<List<RoomParticipant>> {
@@ -170,7 +203,7 @@ private fun List<ParticipantState>.toRoomParticipantsFlow(): Flow<List<RoomParti
         combine(p.image, p.userNameOrId, p.speaking, p.audioEnabled, p.roles) { image, name, speaking, audio, roles ->
             RoomParticipant(
                 sessionId = p.sessionId,
-                userId = p.userId.value, // verify this is a plain val, not a StateFlow, in your SDK version
+                userId = p.userId.value, // StateValue<String> — stable per session, deliberate snapshot read
                 name = name,
                 imageUrl = image,
                 role = roles.firstOrNull() ?: "listener",
