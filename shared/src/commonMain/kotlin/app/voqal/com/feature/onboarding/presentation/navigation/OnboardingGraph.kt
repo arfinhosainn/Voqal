@@ -21,7 +21,6 @@ import app.voqal.com.feature.onboarding.presentation.email.EmailRoot
 import app.voqal.com.feature.onboarding.presentation.fullname.FullNameRoot
 import app.voqal.com.feature.onboarding.presentation.username.PickUsernameRoot
 import app.voqal.com.feature.onboarding.presentation.photo.AddPhotoRoot
-import app.voqal.com.feature.onboarding.presentation.otp.OtpRoot
 import app.voqal.com.feature.onboarding.presentation.language.ChooseLanguageRoot
 import app.voqal.com.feature.onboarding.presentation.interest.ChooseInterestsRoot
 import app.voqal.com.feature.room.presentation.RoomRoot
@@ -77,20 +76,6 @@ fun NavGraphBuilder.onboardingNavGraph(
             popExitTransition = popExitTransition
         ) {
             EmailRoot(
-                onNavigateToNext = { navController.navigate(OnboardingRoute.FullName) },
-                onBack = { navController.popBackStack() },
-                modifier = modifier
-            )
-        }
-
-        // 2. OTP Verification Screen
-        composable<OnboardingRoute.OtpVerification>(
-            enterTransition = enterTransition,
-            exitTransition = exitTransition,
-            popEnterTransition = popEnterTransition,
-            popExitTransition = popExitTransition
-        ) {
-            OtpRoot(
                 onNavigateToNext = { navController.navigate(OnboardingRoute.FullName) },
                 onBack = { navController.popBackStack() },
                 modifier = modifier
@@ -174,20 +159,6 @@ fun NavGraphBuilder.onboardingNavGraph(
             )
         }
 
-
-        composable<OnboardingRoute.Room>(
-            enterTransition = enterTransition,
-            exitTransition = exitTransition,
-            popEnterTransition = popEnterTransition,
-            popExitTransition = popExitTransition
-        ) {
-            RoomRoot(
-                onRoomCreated = { roomId ->
-                    navController.navigate(OnboardingRoute.RoomDetailRoute(roomId = roomId, asHost = true))
-                },
-                modifier = modifier
-            )
-        }
 
         composable<OnboardingRoute.RoomDetailRoute>(
             enterTransition = enterTransition,

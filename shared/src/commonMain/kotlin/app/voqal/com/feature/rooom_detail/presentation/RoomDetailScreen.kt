@@ -1,6 +1,7 @@
 package app.voqal.com.feature.rooom_detail.presentation
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -8,12 +9,19 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.voqal.com.core.designsystem.theme.VoqalTheme
 import app.voqal.com.core.presentation.util.ObserveAsEvents
 import app.voqal.com.feature.rooom_detail.presentation.components.RoomDetailTopBar
 import app.voqal.com.feature.rooom_detail.presentation.components.participant.ParticipantAvatar
@@ -23,6 +31,7 @@ import voqal.shared.generated.resources.Res
 import voqal.shared.generated.resources.ic_hand
 import voqal.shared.generated.resources.ic_more
 import voqal.shared.generated.resources.ic_send
+import kotlinx.coroutines.launch
 
 @Composable
 fun RoomDetailRoot(
@@ -30,19 +39,24 @@ fun RoomDetailRoot(
     viewModel: RoomDetailViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
             RoomDetailEvent.LeaveRoom -> onLeave()
             is RoomDetailEvent.ShowError -> {
-                // TODO: Show snackbar or error dialog
+                scope.launch {
+                    snackbarHostState.showSnackbar(event.error.asStringAsync())
+                }
             }
         }
     }
 
     RoomDetailScreen(
         state = state,
-        onAction = viewModel::onAction
+        onAction = viewModel::onAction,
+        snackbarHostState = snackbarHostState
     )
 }
 
@@ -50,6 +64,7 @@ fun RoomDetailRoot(
 fun RoomDetailScreen(
     state: RoomDetailState,
     onAction: (RoomDetailAction) -> Unit,
+    snackbarHostState: SnackbarHostState,
     modifier: Modifier = Modifier
 ) {
     val actions = listOf(
@@ -72,6 +87,8 @@ fun RoomDetailScreen(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
+        containerColor = VoqalTheme.colors.background,
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             RoomDetailTopBar(
                 greeting = "Good morning",
@@ -86,20 +103,31 @@ fun RoomDetailScreen(
             )
         }
     ) { innerPadding ->
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(3),
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding),
-            contentPadding = PaddingValues(5.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+                .padding(innerPadding)
         ) {
-            items(state.participants, key = { it.id }) { participant ->
-                ParticipantAvatar(
-                    state = participant,
-                    onClick = { /* Handle participant click */ }
+            if (state.isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center),
+                    color = VoqalTheme.colors.primary
                 )
+            }
+
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(3),
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(5.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement = Arrangement.spacedBy(24.dp)
+            ) {
+                items(state.participants, key = { it.id }) { participant ->
+                    ParticipantAvatar(
+                        state = participant,
+                        onClick = { /* Handle participant click */ }
+                    )
+                }
             }
         }
     }

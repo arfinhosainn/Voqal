@@ -70,19 +70,7 @@ class LanguageViewModel(
         if (state.value.isSubmitting) return
 
         viewModelScope.launch {
-            _state.update { it.copy(isSubmitting = true) }
-
-            when (val result = onboardingProfileDataSource.updateLanguage(selection.id)) {
-                is Result.Success -> {
-                    _state.update { it.copy(isSubmitting = false) }
-                    _events.send(LanguageEvent.NavigateToNext(selection))
-                }
-                is Result.Failure -> {
-                    val message = result.error.toUserMessage()
-                    _state.update { it.copy(isSubmitting = false) }
-                    _events.send(LanguageEvent.ShowSnackbar(message))
-                }
-            }
+            _events.send(LanguageEvent.NavigateToNext(selection))
         }
     }
 }

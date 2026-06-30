@@ -27,8 +27,6 @@ class OnboardingDraftStore(
     val selectedLanguageId: String? get() = _draft.value.selectedLanguageId
     val selectedInterestIds: Set<String> get() = _draft.value.selectedInterestIds
 
-    var otpCode: List<Int?> = List(6) { null }
-
     init {
         scope.launch {
             _draft.value = localDataSource.getDraft()
@@ -69,7 +67,6 @@ class OnboardingDraftStore(
     }
 
     fun clear() {
-        otpCode = List(6) { null }
         profilePhotoBytes = null
         _draft.value = OnboardingDraft()
         scope.launch {

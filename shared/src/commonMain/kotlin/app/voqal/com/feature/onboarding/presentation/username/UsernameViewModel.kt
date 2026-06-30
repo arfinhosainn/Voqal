@@ -62,10 +62,15 @@ class UsernameViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isSubmitting = true, error = null) }
 
-            when (val result = onboardingProfileDataSource.updateUsername(state.value.username)) {
+            // Still check availability for UX, but don't call updateUsername
+            when (val result = onboardingProfileDataSource.isUsernameAvailable(state.value.username)) {
                 is Result.Success -> {
-                    _state.update { it.copy(isSubmitting = false) }
-                    _events.send(UsernameEvent.NavigateToNext)
+                    if (result.data) {
+                        _state.update { it.copy(isSubmitting = false) }
+                        _events.send(UsernameEvent.NavigateToNext)
+                    } else {
+                        _state.update { it.copy(isSubmitting = false, error = "Username taken") }
+                    }
                 }
                 is Result.Failure -> {
                     val message = result.error.toUserMessage()

@@ -57,11 +57,15 @@ class SupabaseRoomDiscoveryRepository(
 
         channel.subscribe()
 
-        changes.collectLatest { 
-            val updatedRooms = supabaseClient.postgrest.from("rooms")
-                .select()
-                .decodeList<RoomDto>()
-            send(updatedRooms.map { it.toNewsRoomUi() })
+        changes.collect { 
+            try {
+                val updatedRooms = supabaseClient.postgrest.from("rooms")
+                    .select()
+                    .decodeList<RoomDto>()
+                send(updatedRooms.map { it.toNewsRoomUi() })
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 

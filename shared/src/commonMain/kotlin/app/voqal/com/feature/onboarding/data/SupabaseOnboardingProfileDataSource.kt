@@ -65,7 +65,7 @@ class SupabaseOnboardingProfileDataSource(
         }
 
         return try {
-            val userId = requireUserId()
+            val userId = supabaseClient.auth.currentUserOrNull()?.id
             val normalizedUsername = username.trim().lowercase()
             val existingProfiles = supabaseClient.postgrest
                 .from(ProfilesTable)

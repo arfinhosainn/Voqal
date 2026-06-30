@@ -23,10 +23,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,6 +47,7 @@ import app.voqal.com.core.components.VoqalPrimaryButton
 import app.voqal.com.core.presentation.util.ObserveAsEvents
 import app.voqal.com.core.designsystem.theme.VoqalTheme
 import app.voqal.com.feature.onboarding.OnboardingScaffold
+import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -53,11 +58,17 @@ fun ChooseInterestsRoot(
     viewModel: ChooseInterestsViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
             is ChooseInterestsEvent.NavigateToNext -> onNavigateToNext(event.selectedIds)
-            is ChooseInterestsEvent.ShowSnackbar -> Unit
+            is ChooseInterestsEvent.ShowSnackbar -> {
+                scope.launch {
+                    snackbarHostState.showSnackbar(event.message)
+                }
+            }
         }
     }
 
@@ -65,6 +76,7 @@ fun ChooseInterestsRoot(
         state = state,
         onBack = onBack,
         onAction = viewModel::onAction,
+        snackbarHostState = snackbarHostState,
         modifier = modifier
     )
 }
@@ -75,11 +87,13 @@ fun ChooseInterestsScreen(
     state: ChooseInterestsState,
     onBack: () -> Unit,
     onAction: (ChooseInterestsAction) -> Unit,
+    snackbarHostState: SnackbarHostState,
     modifier: Modifier = Modifier
 ) {
     OnboardingScaffold(
         onBack = onBack,
         modifier = modifier,
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         currentStep = 7
     ) {
         Column(
@@ -260,7 +274,8 @@ private fun PreviewChooseInterestsScreen() {
         ChooseInterestsScreen(
             state = ChooseInterestsState(),
             onBack = {},
-            onAction = {}
+            onAction = {},
+            snackbarHostState = remember { SnackbarHostState() }
         )
     }
 }

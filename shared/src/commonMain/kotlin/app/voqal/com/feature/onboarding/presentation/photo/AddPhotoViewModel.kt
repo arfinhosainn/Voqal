@@ -50,20 +50,7 @@ class AddPhotoViewModel(
 
     private fun saveProfilePhotoAndProceed() {
         viewModelScope.launch {
-            _state.update { it.copy(isSubmitting = true, error = null) }
-
-            val photoBytes = state.value.profilePhotoUri ?: ByteArray(0)
-            when (val result = onboardingProfileDataSource.uploadAvatar(photoBytes)) {
-                is Result.Success -> {
-                    _state.update { it.copy(isSubmitting = false) }
-                    _events.send(AddPhotoEvent.NavigateToNext)
-                }
-                is Result.Failure -> {
-                    val message = UiText.DynamicString(result.error.toUserMessage())
-                    _state.update { it.copy(isSubmitting = false, error = message) }
-                    _events.send(AddPhotoEvent.ShowSnackbar(message))
-                }
-            }
+            _events.send(AddPhotoEvent.NavigateToNext)
         }
     }
 }

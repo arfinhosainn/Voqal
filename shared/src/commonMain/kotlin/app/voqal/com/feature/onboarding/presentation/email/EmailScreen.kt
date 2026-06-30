@@ -94,7 +94,7 @@ fun EmailScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "We'll send your verification code there",
+                    text = "You can use this to sign in later",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Normal,
                     color = VoqalTheme.colors.onSurfaceVariant,
@@ -124,7 +124,7 @@ fun EmailScreen(
             Spacer(modifier = Modifier.weight(1f))
 
             VoqalPrimaryButton(
-                text = "Send code",
+                text = "Continue",
                 onClick = { onAction(EmailAction.OnContinueClick) },
                 enabled = state.isFormValid && !state.isSubmitting,
                 loading = state.isSubmitting,

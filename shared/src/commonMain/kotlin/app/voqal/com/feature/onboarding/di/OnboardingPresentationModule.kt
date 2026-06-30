@@ -15,7 +15,6 @@ import app.voqal.com.feature.onboarding.presentation.email.EmailViewModel
 import app.voqal.com.feature.onboarding.presentation.fullname.FullNameViewModel
 import app.voqal.com.feature.onboarding.presentation.interest.ChooseInterestsViewModel
 import app.voqal.com.feature.onboarding.presentation.language.LanguageViewModel
-import app.voqal.com.feature.onboarding.presentation.otp.OtpViewModel
 import app.voqal.com.feature.onboarding.presentation.photo.AddPhotoViewModel
 import app.voqal.com.feature.onboarding.presentation.username.UsernameViewModel
 import io.github.jan.supabase.SupabaseClient
@@ -35,8 +34,7 @@ val onboardingPresentationModule = module {
     viewModel { EmailViewModel(get(), get()) }
     viewModel { FullNameViewModel(get(), get(), get()) }
     viewModel { UsernameViewModel(get(), get()) }
-    viewModel { OtpViewModel(get(), get(), get()) }
     viewModel { AddPhotoViewModel(get(), get(), get()) }
     viewModel { LanguageViewModel(get(), get()) }
-    viewModel { ChooseInterestsViewModel(get(), get()) }
+    viewModel { ChooseInterestsViewModel(get(), get(), get()) }
 }
