@@ -4,6 +4,7 @@ package app.voqal.com.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import app.voqal.com.core.presentation.util.ImagePicker
 import app.voqal.com.feature.onboarding.presentation.OnboardingDraftStore
@@ -11,13 +12,18 @@ import app.voqal.com.feature.onboarding.presentation.navigation.OnboardingGraph
 import app.voqal.com.feature.onboarding.presentation.navigation.onboardingNavGraph
 import app.voqal.com.feature.room.presentation.navigation.RoomGraph
 import app.voqal.com.feature.room.presentation.navigation.roomGraph
+import app.voqal.com.feature.splash.presentation.SplashScreen
+import kotlinx.serialization.Serializable
 import org.koin.compose.koinInject
+
+@Serializable
+data object SplashRoute
 
 @Composable
 fun AppNavHost(
     modifier: Modifier = Modifier,
     imagePicker: ImagePicker,
-    startDestination: Any = OnboardingGraph
+    startDestination: Any = SplashRoute
 ) {
     val navController = rememberNavController()
     val onboardingDraftStore = koinInject<OnboardingDraftStore>()
@@ -27,6 +33,21 @@ fun AppNavHost(
         startDestination = startDestination,
         modifier = modifier
     ) {
+        composable<SplashRoute> {
+            SplashScreen(
+                onAuthenticated = {
+                    navController.navigate(RoomGraph) {
+                        popUpTo(SplashRoute) { inclusive = true }
+                    }
+                },
+                onNotAuthenticated = {
+                    navController.navigate(OnboardingGraph) {
+                        popUpTo(SplashRoute) { inclusive = true }
+                    }
+                }
+            )
+        }
+
         onboardingNavGraph(
             navController = navController,
             onOnboardingComplete = {

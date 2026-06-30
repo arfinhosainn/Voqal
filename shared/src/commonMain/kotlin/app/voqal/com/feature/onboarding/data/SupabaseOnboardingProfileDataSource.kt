@@ -29,6 +29,25 @@ class SupabaseOnboardingProfileDataSource(
     private val supabaseConfig: SupabaseConfig
 ) : OnboardingProfileDataSource {
 
+    override suspend fun getOnboardingStep(): Result<Int?, OnboardingProfileError> {
+        return try {
+            val userId = supabaseClient.auth.currentUserOrNull()?.id
+                ?: return Result.Success(null)
+
+            val profile = supabaseClient.postgrest.from(ProfilesTable)
+                .select(columns = Columns.list("onboarding_step")) {
+                    filter {
+                        eq("id", userId)
+                    }
+                }
+                .decodeSingleOrNull<ProfileUpdateDto>()
+
+            Result.Success(profile?.onboardingStep)
+        } catch (throwable: Throwable) {
+            Result.Failure(throwable.toOnboardingProfileError())
+        }
+    }
+
     override suspend fun ensureProfileExists(): EmptyResult<OnboardingProfileError> {
         return try {
             val userId = requireUserId()

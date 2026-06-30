@@ -4,6 +4,7 @@ import app.voqal.com.core.domain.EmptyResult
 import app.voqal.com.core.domain.Result
 
 interface OnboardingProfileDataSource {
+    suspend fun getOnboardingStep(): Result<Int?, OnboardingProfileError>
     suspend fun ensureProfileExists(): EmptyResult<OnboardingProfileError>
     suspend fun updateFullName(firstName: String, lastName: String): EmptyResult<OnboardingProfileError>
     suspend fun isUsernameAvailable(username: String): Result<Boolean, OnboardingProfileError>

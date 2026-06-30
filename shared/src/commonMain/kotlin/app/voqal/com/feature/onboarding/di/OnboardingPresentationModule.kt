@@ -17,6 +17,7 @@ import app.voqal.com.feature.onboarding.presentation.interest.ChooseInterestsVie
 import app.voqal.com.feature.onboarding.presentation.language.LanguageViewModel
 import app.voqal.com.feature.onboarding.presentation.photo.AddPhotoViewModel
 import app.voqal.com.feature.onboarding.presentation.username.UsernameViewModel
+import app.voqal.com.feature.splash.presentation.SplashViewModel
 import io.github.jan.supabase.SupabaseClient
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.bind
@@ -37,4 +38,5 @@ val onboardingPresentationModule = module {
     viewModel { AddPhotoViewModel(get(), get(), get()) }
     viewModel { LanguageViewModel(get(), get()) }
     viewModel { ChooseInterestsViewModel(get(), get(), get()) }
+    viewModel { SplashViewModel(get()) }
 }
