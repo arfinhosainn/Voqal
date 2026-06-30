@@ -67,7 +67,7 @@ fun NavGraphBuilder.onboardingNavGraph(
     }
 
     navigation<OnboardingGraph>(
-        startDestination = OnboardingRoute.Room
+        startDestination = OnboardingRoute.Email
     ) {
         // 1. Email Entry Screen
         composable<OnboardingRoute.Email>(
@@ -77,7 +77,7 @@ fun NavGraphBuilder.onboardingNavGraph(
             popExitTransition = popExitTransition
         ) {
             EmailRoot(
-                onNavigateToNext = { navController.navigate(OnboardingRoute.OtpVerification) },
+                onNavigateToNext = { navController.navigate(OnboardingRoute.FullName) },
                 onBack = { navController.popBackStack() },
                 modifier = modifier
             )
@@ -182,11 +182,14 @@ fun NavGraphBuilder.onboardingNavGraph(
             popExitTransition = popExitTransition
         ) {
             RoomRoot(
+                onRoomCreated = { roomId ->
+                    navController.navigate(OnboardingRoute.RoomDetailRoute(roomId = roomId, asHost = true))
+                },
                 modifier = modifier
             )
         }
 
-        composable<OnboardingRoute.RoomDetail>(
+        composable<OnboardingRoute.RoomDetailRoute>(
             enterTransition = enterTransition,
             exitTransition = exitTransition,
             popEnterTransition = popEnterTransition,

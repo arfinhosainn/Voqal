@@ -17,7 +17,7 @@ import org.koin.compose.koinInject
 fun AppNavHost(
     modifier: Modifier = Modifier,
     imagePicker: ImagePicker,
-    startDestination: Any = OnboardingGraph // Or dynamically check if user is logged in
+    startDestination: Any = OnboardingGraph
 ) {
     val navController = rememberNavController()
     val onboardingDraftStore = koinInject<OnboardingDraftStore>()

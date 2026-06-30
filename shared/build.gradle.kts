@@ -39,6 +39,8 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.ktor.client.okhttp)
+            implementation(libs.stream.video.compose.ui)
+            implementation(libs.stream.video.android.core)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
@@ -60,6 +62,8 @@ kotlin {
             implementation(libs.supabase.postgrest.kt)
             implementation(libs.supabase.auth.kt)
             implementation(libs.supabase.storage.kt)
+            implementation(libs.supabase.functions.kt)
+            implementation(libs.realtime.kt)
 
             implementation(libs.datastore)
             implementation(libs.datastore.preferences)
