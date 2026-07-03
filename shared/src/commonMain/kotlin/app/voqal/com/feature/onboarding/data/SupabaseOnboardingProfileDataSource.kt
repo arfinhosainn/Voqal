@@ -30,9 +30,22 @@ class SupabaseOnboardingProfileDataSource(
 ) : OnboardingProfileDataSource {
 
     override suspend fun getOnboardingStep(): Result<Int?, OnboardingProfileError> {
+        if (!supabaseConfig.isConfigured) {
+            return Result.Failure(OnboardingProfileError.NotConfigured)
+        }
+
         return try {
-            val userId = supabaseClient.auth.currentUserOrNull()?.id
-                ?: return Result.Success(null)
+            // Check if we have a session. 
+            // currentUserOrNull might be null if SDK is still loading session from storage.
+            val user = supabaseClient.auth.currentUserOrNull()
+            
+            if (user == null) {
+                // If null, we might want to wait a bit or just assume no session.
+                // For a splash screen, assume no session if not available immediately.
+                return Result.Success(null)
+            }
+
+            val userId = user.id
 
             val profile = supabaseClient.postgrest.from(ProfilesTable)
                 .select(columns = Columns.list("onboarding_step")) {
@@ -44,6 +57,7 @@ class SupabaseOnboardingProfileDataSource(
 
             Result.Success(profile?.onboardingStep)
         } catch (throwable: Throwable) {
+            println("Splash Check Error: ${throwable.message}")
             Result.Failure(throwable.toOnboardingProfileError())
         }
     }
@@ -162,13 +176,21 @@ class SupabaseOnboardingProfileDataSource(
         interestIds: Set<String>
     ): EmptyResult<OnboardingProfileError> {
         return try {
-            requireUserId()
+            val userId = requireUserId()
+            
+            // 1. Call RPC to update interests
             supabaseClient.postgrest.rpc(
                 function = "complete_onboarding",
                 parameters = CompleteOnboardingParams(
                     interestIds = interestIds.toList()
                 )
             )
+
+            // 2. Explicitly set step to 7 to ensure splash screen works
+            updateProfile(
+                ProfileUpdateDto(onboardingStep = 7)
+            )
+
             Result.Success(Unit)
         } catch (throwable: Throwable) {
             Result.Failure(throwable.toOnboardingProfileError())

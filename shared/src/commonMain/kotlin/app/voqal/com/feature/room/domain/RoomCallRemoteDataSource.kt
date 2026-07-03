@@ -11,6 +11,7 @@ interface RoomCallRemoteDataSource {
     val participants: StateFlow<List<RoomParticipant>>
     val activeSpeakerId: StateFlow<String?>
     val isMicrophoneEnabled: StateFlow<Boolean>
+    val isHost: StateFlow<Boolean>
 
     suspend fun joinRoom(
         roomId: String,
@@ -23,4 +24,5 @@ interface RoomCallRemoteDataSource {
     suspend fun stopLive(): EmptyResult<RoomCallError>
     suspend fun setMicrophoneEnabled(enabled: Boolean)
     suspend fun leaveRoom()
+    suspend fun endRoom(): EmptyResult<RoomCallError>
 }

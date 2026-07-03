@@ -5,5 +5,5 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val roomDetailPresentationModule = module {
-    viewModel { RoomDetailViewModel(get(), get(), get()) }
+    viewModel { RoomDetailViewModel(get(), get(), get(), get()) }
 }

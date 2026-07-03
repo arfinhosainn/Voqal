@@ -13,6 +13,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import app.voqal.com.core.designsystem.theme.VoqalTheme
 import app.voqal.com.feature.rooom_detail.presentation.components.CircleIconButton
+import app.voqal.com.feature.rooom_detail.presentation.components.EndButton
 import app.voqal.com.feature.rooom_detail.presentation.components.LeaveButton
 import org.jetbrains.compose.resources.vectorResource
 import voqal.shared.generated.resources.Res
@@ -24,7 +25,9 @@ import voqal.shared.generated.resources.ic_send
 fun RoomDetailBottomBar(
     modifier: Modifier = Modifier,
     actions: List<BottomBarAction>,
-    onLeave: () -> Unit
+    isHost: Boolean = false,
+    onLeave: () -> Unit,
+    onEnd: () -> Unit = {}
 ) {
 
     Surface(
@@ -37,21 +40,34 @@ fun RoomDetailBottomBar(
             modifier = Modifier
                 .padding(horizontal = 22.dp, vertical = 20.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(18.dp)
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
 
             LeaveButton(
-                modifier = Modifier.weight(0.4f),
+                modifier = Modifier.weight(if (isHost) 0.3f else 0.4f),
                 onClick = onLeave
             )
 
-            actions.forEach { action ->
-
-                CircleIconButton(
-                    icon = action.icon,
-                    contentDescription = action.contentDescription,
-                    onClick = action.onClick
+            if (isHost) {
+                EndButton(
+                    modifier = Modifier.weight(0.3f),
+                    onClick = onEnd
                 )
+            }
+
+            Row(
+                modifier = Modifier.weight(if (isHost) 0.4f else 0.6f),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                actions.forEach { action ->
+                    CircleIconButton(
+                        icon = action.icon,
+                        contentDescription = action.contentDescription,
+                        onClick = action.onClick,
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
+                }
             }
         }
     }
@@ -65,6 +81,8 @@ fun PreviewRoomDetailBottomBar() {
         RoomDetailBottomBar(
             modifier = Modifier.fillMaxWidth(),
             onLeave = {},
+            isHost = true,
+            onEnd = {},
             actions = listOf(
                 BottomBarAction(
                     icon = vectorResource(Res.drawable.ic_send),

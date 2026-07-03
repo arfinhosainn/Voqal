@@ -7,6 +7,7 @@ data class RoomDetailState(
     val title: String = "",
     val isLoading: Boolean = true,
     val isFailed: Boolean = false,
+    val isHost: Boolean = false,
     val isMicrophoneEnabled: Boolean = false,
     val participants: List<ParticipantAvatarUiState> = emptyList()
 )

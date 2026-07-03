@@ -23,17 +23,21 @@ class SplashViewModel(
     private fun checkSession() {
         viewModelScope.launch {
             delay(1500) // Professional feel
+            println("Splash: Checking session...")
             when (val result = profileDataSource.getOnboardingStep()) {
                 is Result.Success -> {
                     val step = result.data
+                    println("Splash: Onboarding step is $step")
                     // If step is 7, onboarding is complete
                     if (step != null && step >= 7) {
                         _events.send(SplashEvent.Authenticated)
                     } else {
+                        println("Splash: Step is $step, redirecting to onboarding")
                         _events.send(SplashEvent.NotAuthenticated)
                     }
                 }
                 is Result.Failure -> {
+                    println("Splash: Check failed with error ${result.error}")
                     _events.send(SplashEvent.NotAuthenticated)
                 }
             }

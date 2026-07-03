@@ -99,7 +99,9 @@ fun RoomDetailScreen(
         bottomBar = {
             RoomDetailBottomBar(
                 actions = actions,
-                onLeave = { onAction(RoomDetailAction.OnLeaveClick) }
+                isHost = state.isHost,
+                onLeave = { onAction(RoomDetailAction.OnLeaveClick) },
+                onEnd = { onAction(RoomDetailAction.OnEndClick) }
             )
         }
     ) { innerPadding ->
