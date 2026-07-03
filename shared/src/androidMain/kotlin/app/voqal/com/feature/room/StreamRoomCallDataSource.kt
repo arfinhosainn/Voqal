@@ -40,6 +40,9 @@ class StreamRoomCallDataSource(
     private val _isMicrophoneEnabled = MutableStateFlow(false)
     override val isMicrophoneEnabled = _isMicrophoneEnabled.asStateFlow()
 
+    private val _isHost = MutableStateFlow(false)
+    override val isHost = _isHost.asStateFlow()
+
     override suspend fun joinRoom(
         roomId: String,
         asHost: Boolean,
@@ -146,6 +149,18 @@ class StreamRoomCallDataSource(
         _activeSpeakerId.value = null
         _roomInfo.value = RoomInfo(null, null, isBackstage = true)
         _isMicrophoneEnabled.value = false
+        _isHost.value = false
+    }
+
+    override suspend fun endRoom(): EmptyResult<RoomCallError> {
+        val active = call ?: return Result.Failure(RoomCallError.NOT_CONNECTED)
+        return try {
+            active.end()
+            leaveRoom()
+            Result.Success(Unit)
+        } catch (e: Exception) {
+            Result.Failure(RoomCallError.UNKNOWN)
+        }
     }
 
     fun close() {
@@ -182,13 +197,19 @@ class StreamRoomCallDataSource(
             launch {
                 call.microphone.isEnabled.collect { _isMicrophoneEnabled.value = it }
             }
+            launch {
+                call.state.me
+                    .flatMapLatest { me ->
+                        me?.roles ?: flowOf(emptyList())
+                    }
+                    .collect { roles ->
+                        _isHost.value = roles.contains("host")
+                    }
+            }
         }
     }
 }
 
-// RealtimeConnection only has Connected confirmed against the public docs at the time
-// of writing — check the sealed type's other cases against the version you depend on
-// and fill these in (Reconnecting/Failed/Joined names may differ slightly by release).
 private fun RealtimeConnection.toDomain(): RoomConnectionState = when (this) {
     RealtimeConnection.Connected -> RoomConnectionState.CONNECTED
     is RealtimeConnection.Reconnecting -> RoomConnectionState.RECONNECTING

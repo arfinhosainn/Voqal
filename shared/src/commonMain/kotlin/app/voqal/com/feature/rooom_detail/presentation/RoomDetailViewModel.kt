@@ -8,6 +8,7 @@ import app.voqal.com.core.domain.onFailure
 import app.voqal.com.feature.onboarding.presentation.navigation.OnboardingRoute
 import app.voqal.com.feature.room.domain.RoomCallRemoteDataSource
 import app.voqal.com.feature.room.domain.RoomConnectionState
+import app.voqal.com.feature.room.domain.RoomDiscoveryRepository
 import app.voqal.com.feature.room.domain.StreamRoomConnectionRepository
 import app.voqal.com.feature.room.domain.toParticipantAvatarUiState
 import app.voqal.com.feature.room.domain.toUiText
@@ -22,7 +23,8 @@ import kotlinx.coroutines.launch
 class RoomDetailViewModel(
     savedStateHandle: SavedStateHandle,
     private val roomCallDataSource: RoomCallRemoteDataSource,
-    private val connectionRepository: StreamRoomConnectionRepository
+    private val connectionRepository: StreamRoomConnectionRepository,
+    private val roomDiscoveryRepository: RoomDiscoveryRepository
 ) : ViewModel() {
 
     private val route = savedStateHandle.toRoute<OnboardingRoute.RoomDetailRoute>()
@@ -31,12 +33,14 @@ class RoomDetailViewModel(
         roomCallDataSource.connectionState,
         roomCallDataSource.roomInfo,
         roomCallDataSource.participants,
-        roomCallDataSource.isMicrophoneEnabled
-    ) { connection, info, participants, micEnabled ->
+        roomCallDataSource.isMicrophoneEnabled,
+        roomCallDataSource.isHost
+    ) { connection, info, participants, micEnabled, isHost ->
         RoomDetailState(
             title = info.title.orEmpty(),
             isLoading = connection == RoomConnectionState.CONNECTING || connection == RoomConnectionState.RECONNECTING,
             isFailed = connection == RoomConnectionState.FAILED,
+            isHost = isHost,
             isMicrophoneEnabled = micEnabled,
             participants = participants.map { it.toParticipantAvatarUiState() }
         )
@@ -65,7 +69,17 @@ class RoomDetailViewModel(
     fun onAction(action: RoomDetailAction) {
         when (action) {
             RoomDetailAction.OnLeaveClick -> viewModelScope.launch {
+                // If I am the last person in the room, delete the card
+                if (roomCallDataSource.participants.value.size <= 1) {
+                    roomDiscoveryRepository.deleteRoom(route.roomId)
+                }
                 roomCallDataSource.leaveRoom()
+                _events.send(RoomDetailEvent.LeaveRoom)
+            }
+            RoomDetailAction.OnEndClick -> viewModelScope.launch {
+                // Host ending the room always deletes the card
+                roomDiscoveryRepository.deleteRoom(route.roomId)
+                roomCallDataSource.endRoom()
                 _events.send(RoomDetailEvent.LeaveRoom)
             }
             RoomDetailAction.OnMicClick -> viewModelScope.launch {

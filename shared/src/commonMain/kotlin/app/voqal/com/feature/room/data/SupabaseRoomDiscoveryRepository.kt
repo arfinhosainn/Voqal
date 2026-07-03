@@ -84,4 +84,18 @@ class SupabaseRoomDiscoveryRepository(
             Result.Failure(RoomCallError.UNKNOWN)
         }
     }
+
+    override suspend fun deleteRoom(id: String): EmptyResult<RoomCallError> {
+        return try {
+            supabaseClient.postgrest.from("rooms").delete {
+                filter {
+                    eq("id", id)
+                }
+            }
+            Result.Success(Unit)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Result.Failure(RoomCallError.UNKNOWN)
+        }
+    }
 }

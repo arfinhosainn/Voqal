@@ -17,4 +17,9 @@ interface RoomDiscoveryRepository {
         title: String,
         category: String
     ): EmptyResult<RoomCallError>
+
+    /**
+     * Removes a room from discovery when it ends.
+     */
+    suspend fun deleteRoom(id: String): EmptyResult<RoomCallError>
 }
