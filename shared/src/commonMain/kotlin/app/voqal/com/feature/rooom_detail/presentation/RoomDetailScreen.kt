@@ -25,13 +25,13 @@ import app.voqal.com.core.designsystem.theme.VoqalTheme
 import app.voqal.com.core.presentation.util.ObserveAsEvents
 import app.voqal.com.feature.rooom_detail.presentation.components.RoomDetailTopBar
 import app.voqal.com.feature.rooom_detail.presentation.components.participant.ParticipantAvatar
-import org.koin.compose.viewmodel.koinViewModel
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.vectorResource
+import org.koin.compose.viewmodel.koinViewModel
 import voqal.shared.generated.resources.Res
 import voqal.shared.generated.resources.ic_hand
 import voqal.shared.generated.resources.ic_more
 import voqal.shared.generated.resources.ic_send
-import kotlinx.coroutines.launch
 
 @Composable
 fun RoomDetailRoot(

@@ -160,12 +160,7 @@ fun NavGraphBuilder.onboardingNavGraph(
         }
 
 
-        composable<OnboardingRoute.RoomDetailRoute>(
-            enterTransition = enterTransition,
-            exitTransition = exitTransition,
-            popEnterTransition = popEnterTransition,
-            popExitTransition = popExitTransition
-        ) {
+        composable<OnboardingRoute.RoomDetailRoute> {
             RoomDetailRoot(
                 onLeave = { navController.popBackStack() }
             )

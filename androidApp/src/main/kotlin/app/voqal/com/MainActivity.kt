@@ -13,9 +13,13 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+
+        val roomId = intent.getStringExtra("roomId")
+
         setContent {
             App(
-                ImagePickerFactory().createPicker()
+                imagePicker = ImagePickerFactory().createPicker(),
+                initialRoomId = roomId
             )
         }
     }

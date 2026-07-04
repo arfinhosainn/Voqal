@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import app.voqal.com.core.designsystem.theme.VoqalTheme
+import app.voqal.com.core.presentation.theme.VoqalVideoTheme
 import app.voqal.com.core.presentation.util.ImagePicker
 import app.voqal.com.navigation.AppNavHost
 import dev.icerock.moko.permissions.PermissionsController
@@ -12,12 +13,18 @@ import org.koin.compose.koinInject
 
 @Composable
 fun App(
-    imagePicker: ImagePicker
+    imagePicker: ImagePicker,
+    initialRoomId: String? = null
 ) {
     val permissionsController = koinInject<PermissionsController>()
     BindEffect(permissionsController)
 
     VoqalTheme {
-        AppNavHost(imagePicker = imagePicker)
+        VoqalVideoTheme {
+            AppNavHost(
+                imagePicker = imagePicker,
+                initialRoomId = initialRoomId
+            )
+        }
     }
 }
