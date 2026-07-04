@@ -15,6 +15,7 @@ import app.voqal.com.feature.onboarding.presentation.email.EmailViewModel
 import app.voqal.com.feature.onboarding.presentation.fullname.FullNameViewModel
 import app.voqal.com.feature.onboarding.presentation.interest.ChooseInterestsViewModel
 import app.voqal.com.feature.onboarding.presentation.language.LanguageViewModel
+import app.voqal.com.feature.onboarding.presentation.password.PasswordViewModel
 import app.voqal.com.feature.onboarding.presentation.photo.AddPhotoViewModel
 import app.voqal.com.feature.onboarding.presentation.username.UsernameViewModel
 import app.voqal.com.feature.splash.presentation.SplashViewModel
@@ -35,6 +36,7 @@ val onboardingPresentationModule = module {
     viewModel { EmailViewModel(get(), get()) }
     viewModel { FullNameViewModel(get(), get(), get()) }
     viewModel { UsernameViewModel(get(), get()) }
+    viewModel { PasswordViewModel() }
     viewModel { AddPhotoViewModel(get(), get(), get()) }
     viewModel { LanguageViewModel(get(), get()) }
     viewModel { ChooseInterestsViewModel(get(), get(), get()) }
