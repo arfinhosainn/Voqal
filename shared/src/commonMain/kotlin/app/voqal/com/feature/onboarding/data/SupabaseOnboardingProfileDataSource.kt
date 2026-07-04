@@ -64,10 +64,13 @@ class SupabaseOnboardingProfileDataSource(
 
     override suspend fun ensureProfileExists(): EmptyResult<OnboardingProfileError> {
         return try {
-            val userId = requireUserId()
+            val user = supabaseClient.auth.currentUserOrNull() 
+                ?: throw OnboardingProfileNotAuthenticatedException()
+            
             supabaseClient.postgrest.from(ProfilesTable).upsert(
                 ProfileUpsertDto(
-                    id = userId,
+                    id = user.id,
+                    email = user.email ?: "",
                     onboardingStep = 2
                 )
             )

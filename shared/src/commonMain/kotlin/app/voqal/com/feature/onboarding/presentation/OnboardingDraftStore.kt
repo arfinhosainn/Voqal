@@ -19,6 +19,7 @@ class OnboardingDraftStore(
     val draft = _draft.asStateFlow()
 
     val email: String get() = _draft.value.email
+    val password: String get() = _draft.value.password
     val firstName: String get() = _draft.value.firstName
     val lastName: String get() = _draft.value.lastName
     val username: String get() = _draft.value.username
@@ -35,6 +36,10 @@ class OnboardingDraftStore(
 
     fun updateEmail(email: String) {
         updateDraft(currentStep = 1) { it.copy(email = email) }
+    }
+
+    fun updatePassword(password: String) {
+        updateDraft(currentStep = 2) { it.copy(password = password) }
     }
 
     fun updateFirstName(firstName: String) {

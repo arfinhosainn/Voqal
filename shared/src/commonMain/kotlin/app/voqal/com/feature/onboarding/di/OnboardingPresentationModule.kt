@@ -36,9 +36,9 @@ val onboardingPresentationModule = module {
     viewModel { EmailViewModel(get(), get()) }
     viewModel { FullNameViewModel(get(), get(), get()) }
     viewModel { UsernameViewModel(get(), get()) }
-    viewModel { PasswordViewModel() }
+    viewModel { PasswordViewModel(get(), get(), get()) }
     viewModel { AddPhotoViewModel(get(), get(), get()) }
     viewModel { LanguageViewModel(get(), get()) }
-    viewModel { ChooseInterestsViewModel(get(), get(), get()) }
+    viewModel { ChooseInterestsViewModel(get(), get()) }
     viewModel { SplashViewModel(get()) }
 }

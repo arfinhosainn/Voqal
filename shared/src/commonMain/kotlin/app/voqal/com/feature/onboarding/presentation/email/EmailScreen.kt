@@ -36,7 +36,7 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun EmailRoot(
-    onNavigateToNext: () -> Unit,
+    onNavigateToNext: (Boolean) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: EmailViewModel = koinViewModel()
@@ -45,7 +45,7 @@ fun EmailRoot(
 
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
-            EmailEvent.NavigateToNext -> onNavigateToNext()
+            is EmailEvent.NavigateToNext -> onNavigateToNext(event.isNewUser)
             is EmailEvent.ShowSnackbar -> { /* Hook up snackbar host when available */ }
         }
     }
@@ -116,8 +116,15 @@ fun EmailScreen(
                 Spacer(modifier = Modifier.height(10.dp))
                 ValidationHint(
                     isValid = state.error == null && state.isFormValid,
-                    message = state.error
-                        ?: if (state.isFormValid) "Email looks good" else "Email is incorrect"
+                    message = if (state.error != null) {
+                        state.error
+                    } else if (state.isEmailChecked) {
+                        "Email looks correct"
+                    } else if (state.isFormValid) {
+                        "Email looks good"
+                    } else {
+                        "Email is incorrect"
+                    }
                 )
             }
 

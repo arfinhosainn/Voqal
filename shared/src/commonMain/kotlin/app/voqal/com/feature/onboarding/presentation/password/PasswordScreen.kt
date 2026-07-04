@@ -44,12 +44,13 @@ import app.voqal.com.core.designsystem.theme.Poppins
 import app.voqal.com.core.designsystem.theme.VoqalTheme
 import app.voqal.com.core.presentation.util.ObserveAsEvents
 import app.voqal.com.feature.onboarding.OnboardingScaffold
+import app.voqal.com.feature.onboarding.presentation.components.ValidationHint
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun PasswordRoot(
     isNewUser: Boolean,
-    onNavigateToNext: () -> Unit,
+    onNavigateToNext: (Int?) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: PasswordViewModel = koinViewModel()
@@ -58,7 +59,7 @@ fun PasswordRoot(
 
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
-            PasswordEvent.NavigateToNext -> onNavigateToNext()
+            is PasswordEvent.NavigateToNext -> onNavigateToNext(event.step)
             is PasswordEvent.ShowSnackbar -> { /* Hook up snackbar host when available */ }
         }
     }
@@ -67,7 +68,7 @@ fun PasswordRoot(
         state = state,
         isNewUser = isNewUser,
         onBack = onBack,
-        onAction = viewModel::onAction,
+        onAction = { action -> viewModel.onAction(action, isNewUser) },
         modifier = modifier
     )
 }
@@ -125,6 +126,17 @@ fun PasswordScreen(
                 onDone = { onAction(PasswordAction.OnContinueClick) }
             )
 
+            if (isNewUser && state.password.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(10.dp))
+                PasswordValidationHints(state.password)
+            } else if (state.error != null) {
+                Spacer(modifier = Modifier.height(10.dp))
+                ValidationHint(
+                    isValid = false,
+                    message = state.error
+                )
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
 
             // Forgot password
@@ -151,7 +163,7 @@ fun PasswordScreen(
             Spacer(modifier = Modifier.weight(1f))
 
             VoqalPrimaryButton(
-                text = if (isNewUser)"Set Password" else "Change Password",
+                text = if (isNewUser)"Set Password" else "Continue",
                 onClick = { onAction(PasswordAction.OnContinueClick) },
                 enabled = state.isFormValid && !state.isSubmitting,
                 loading = state.isSubmitting,
@@ -160,6 +172,28 @@ fun PasswordScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
         }
+    }
+}
+
+@Composable
+private fun PasswordValidationHints(password: String) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        ValidationHint(
+            isValid = password.length in 9..30,
+            message = "9-30 characters"
+        )
+        ValidationHint(
+            isValid = password.contains(Regex("[a-z]")),
+            message = "At least one lowercase letter"
+        )
+        ValidationHint(
+            isValid = password.contains(Regex("[A-Z]")),
+            message = "At least one uppercase letter"
+        )
+        ValidationHint(
+            isValid = password.contains(Regex("[0-9]")),
+            message = "At least one digit"
+        )
     }
 }
 

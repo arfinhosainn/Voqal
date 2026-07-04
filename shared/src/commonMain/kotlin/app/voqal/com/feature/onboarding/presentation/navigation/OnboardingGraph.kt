@@ -78,7 +78,9 @@ fun NavGraphBuilder.onboardingNavGraph(
             popExitTransition = popExitTransition
         ) {
             EmailRoot(
-                onNavigateToNext = { navController.navigate(OnboardingRoute.Password(isNewUser = true)) },
+                onNavigateToNext = { isNewUser -> 
+                    navController.navigate(OnboardingRoute.Password(isNewUser = isNewUser)) 
+                },
                 onBack = { navController.popBackStack() },
                 modifier = modifier
             )
@@ -94,7 +96,13 @@ fun NavGraphBuilder.onboardingNavGraph(
             val route = backStackEntry.toRoute<OnboardingRoute.Password>()
             PasswordRoot(
                 isNewUser = route.isNewUser,
-                onNavigateToNext = { navController.navigate(OnboardingRoute.FullName) },
+                onNavigateToNext = { step ->
+                    if (step != null && step >= 7) {
+                        onOnboardingComplete()
+                    } else {
+                        navController.navigate(OnboardingRoute.FullName)
+                    }
+                },
                 onBack = { navController.popBackStack() },
                 modifier = modifier
             )

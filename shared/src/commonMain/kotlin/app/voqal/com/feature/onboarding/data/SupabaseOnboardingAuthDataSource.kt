@@ -3,6 +3,7 @@ package app.voqal.com.feature.onboarding.data
 import app.voqal.com.core.data.SupabaseConfig
 import app.voqal.com.core.domain.EmptyResult
 import app.voqal.com.core.domain.Result
+import app.voqal.com.feature.onboarding.data.dto.ProfileIdDto
 import app.voqal.com.feature.onboarding.domain.OnboardingAuthDataSource
 import app.voqal.com.feature.onboarding.domain.OnboardingAuthError
 import io.github.jan.supabase.SupabaseClient
@@ -10,6 +11,8 @@ import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.exception.AuthRestException
 import io.github.jan.supabase.auth.providers.builtin.Email
 import io.github.jan.supabase.exceptions.HttpRequestException
+import io.github.jan.supabase.postgrest.postgrest
+import io.github.jan.supabase.postgrest.query.Columns
 import io.ktor.client.plugins.HttpRequestTimeoutException
 
 class SupabaseOnboardingAuthDataSource(
@@ -17,29 +20,56 @@ class SupabaseOnboardingAuthDataSource(
     private val supabaseConfig: SupabaseConfig
 ) : OnboardingAuthDataSource {
 
-    override suspend fun signUp(email: String): EmptyResult<OnboardingAuthError> {
+    override suspend fun checkEmailExists(email: String): Result<Boolean, OnboardingAuthError> {
         if (!supabaseConfig.isConfigured) {
             return Result.Failure(OnboardingAuthError.NotConfigured)
         }
 
         return try {
-            // Using a simple signup since email verification is disabled in Supabase
+            // Check if the email exists in the profiles table (public check)
+            val result = supabaseClient.postgrest.from("profiles")
+                .select(columns = Columns.list("id")) {
+                    filter {
+                        eq("email", email.trim().lowercase())
+                    }
+                }
+                .decodeSingleOrNull<ProfileIdDto>()
+            
+            Result.Success(result != null)
+        } catch (e: Throwable) {
+            Result.Failure(e.toOnboardingAuthError(default = OnboardingAuthError.Unknown))
+        }
+    }
+
+    override suspend fun signUp(email: String, password: String): EmptyResult<OnboardingAuthError> {
+        if (!supabaseConfig.isConfigured) {
+            return Result.Failure(OnboardingAuthError.NotConfigured)
+        }
+
+        return try {
             supabaseClient.auth.signUpWith(Email) {
                 this.email = email
-                this.password = "VoqalPassword123!" // Hardcoded for simplified testing flow
+                this.password = password
             }
             Result.Success(Unit)
         } catch (e: Throwable) {
-            // If user already exists, try signing in
-            try {
-                supabaseClient.auth.signInWith(Email) {
-                    this.email = email
-                    this.password = "VoqalPassword123!"
-                }
-                Result.Success(Unit)
-            } catch (inner: Throwable) {
-                Result.Failure(e.toOnboardingAuthError(default = OnboardingAuthError.Unknown))
+            Result.Failure(e.toOnboardingAuthError(default = OnboardingAuthError.Unknown))
+        }
+    }
+
+    override suspend fun signIn(email: String, password: String): EmptyResult<OnboardingAuthError> {
+        if (!supabaseConfig.isConfigured) {
+            return Result.Failure(OnboardingAuthError.NotConfigured)
+        }
+
+        return try {
+            supabaseClient.auth.signInWith(Email) {
+                this.email = email
+                this.password = password
             }
+            Result.Success(Unit)
+        } catch (e: Throwable) {
+            Result.Failure(e.toOnboardingAuthError(default = OnboardingAuthError.Unknown))
         }
     }
 

@@ -4,7 +4,6 @@ package app.voqal.com.feature.onboarding.presentation.interest
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.voqal.com.core.domain.Result
-import app.voqal.com.feature.onboarding.domain.OnboardingAuthDataSource
 import app.voqal.com.feature.onboarding.domain.OnboardingProfileDataSource
 import app.voqal.com.feature.onboarding.domain.toUserMessage
 import app.voqal.com.feature.onboarding.presentation.OnboardingDraftStore
@@ -18,7 +17,6 @@ import kotlinx.coroutines.launch
 
 class ChooseInterestsViewModel(
     private val onboardingDraftStore: OnboardingDraftStore,
-    private val onboardingAuthDataSource: OnboardingAuthDataSource,
     private val onboardingProfileDataSource: OnboardingProfileDataSource
 ) : ViewModel() {
 
@@ -80,12 +78,8 @@ class ChooseInterestsViewModel(
             }
 
             // 1. Sign up / Create account
-            val authResult = onboardingAuthDataSource.signUp(draft.email)
-            if (authResult is Result.Failure) {
-                _state.update { it.copy(isSubmitting = false) }
-                _events.send(ChooseInterestsEvent.ShowSnackbar("Auth Error: ${authResult.error}"))
-                return@launch
-            }
+            // NOTE: Authentication is now handled in the Password screen.
+            // We only call ensureProfileExists here to make sure the database row is ready.
 
             // 2. Ensure Profile exists
             val ensureResult = onboardingProfileDataSource.ensureProfileExists()

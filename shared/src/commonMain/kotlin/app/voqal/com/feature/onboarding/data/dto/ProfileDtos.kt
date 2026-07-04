@@ -6,6 +6,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ProfileUpsertDto(
     val id: String,
+    val email: String,
     @SerialName("onboarding_step")
     val onboardingStep: Int = 2
 )
@@ -22,6 +23,7 @@ data class ProfileUpdateDto(
     @SerialName("last_name")
     val lastName: String? = null,
     val username: String? = null,
+    val email: String? = null,
     @SerialName("primary_language_code")
     val primaryLanguageCode: String? = null,
     @SerialName("avatar_path")

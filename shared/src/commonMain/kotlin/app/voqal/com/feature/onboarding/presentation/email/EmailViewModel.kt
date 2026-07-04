@@ -58,7 +58,23 @@ class EmailViewModel(
         if (!_state.value.isFormValid || _state.value.isSubmitting) return
 
         viewModelScope.launch {
-            _events.send(EmailEvent.NavigateToNext)
+            _state.update { it.copy(isSubmitting = true, error = null, isEmailChecked = false) }
+            
+            when (val result = onboardingAuthDataSource.checkEmailExists(email)) {
+                is Result.Success -> {
+                    _state.update { it.copy(isSubmitting = false, isEmailChecked = true) }
+                    _events.send(EmailEvent.NavigateToNext(isNewUser = !result.data))
+                }
+                is Result.Failure -> {
+                    _state.update { 
+                        it.copy(
+                            isSubmitting = false,
+                            error = result.error.toEmailErrorMessage()
+                        ) 
+                    }
+                    _events.send(EmailEvent.ShowSnackbar(result.error.toEmailErrorMessage()))
+                }
+            }
         }
     }
 
