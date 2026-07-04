@@ -3,6 +3,7 @@ package app.voqal.com.feature.onboarding.presentation.email
 data class EmailState(
     val email: String = "",
     val isSubmitting: Boolean = false,
+    val isEmailChecked: Boolean = false,
     val error: String? = null
 ) {
     val isFormValid: Boolean

@@ -2,6 +2,7 @@ package app.voqal.com.feature.onboarding.domain
 
 data class OnboardingDraft(
     val email: String = "",
+    val password: String = "",
     val firstName: String = "",
     val lastName: String = "",
     val username: String = "",
