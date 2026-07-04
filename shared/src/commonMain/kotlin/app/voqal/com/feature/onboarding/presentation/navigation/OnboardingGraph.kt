@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavBackStackEntry
+import androidx.navigation.toRoute
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import app.voqal.com.core.presentation.util.ImagePicker
@@ -23,6 +24,7 @@ import app.voqal.com.feature.onboarding.presentation.username.PickUsernameRoot
 import app.voqal.com.feature.onboarding.presentation.photo.AddPhotoRoot
 import app.voqal.com.feature.onboarding.presentation.language.ChooseLanguageRoot
 import app.voqal.com.feature.onboarding.presentation.interest.ChooseInterestsRoot
+import app.voqal.com.feature.onboarding.presentation.password.PasswordRoot
 import app.voqal.com.feature.room.presentation.RoomRoot
 import app.voqal.com.feature.room.presentation.navigation.RoomRoute
 import app.voqal.com.feature.rooom_detail.presentation.RoomDetailRoot
@@ -76,6 +78,22 @@ fun NavGraphBuilder.onboardingNavGraph(
             popExitTransition = popExitTransition
         ) {
             EmailRoot(
+                onNavigateToNext = { navController.navigate(OnboardingRoute.Password(isNewUser = true)) },
+                onBack = { navController.popBackStack() },
+                modifier = modifier
+            )
+        }
+
+        // 2. Password Entry Screen
+        composable<OnboardingRoute.Password>(
+            enterTransition = enterTransition,
+            exitTransition = exitTransition,
+            popEnterTransition = popEnterTransition,
+            popExitTransition = popExitTransition
+        ) { backStackEntry ->
+            val route = backStackEntry.toRoute<OnboardingRoute.Password>()
+            PasswordRoot(
+                isNewUser = route.isNewUser,
                 onNavigateToNext = { navController.navigate(OnboardingRoute.FullName) },
                 onBack = { navController.popBackStack() },
                 modifier = modifier

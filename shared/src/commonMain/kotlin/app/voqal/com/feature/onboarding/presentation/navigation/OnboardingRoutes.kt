@@ -10,6 +10,9 @@ sealed interface OnboardingRoute {
     data object Email : OnboardingRoute
 
     @Serializable
+    data class Password(val isNewUser: Boolean) : OnboardingRoute
+
+    @Serializable
     data object FullName : OnboardingRoute
 
     @Serializable
