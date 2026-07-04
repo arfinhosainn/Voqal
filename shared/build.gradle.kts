@@ -67,6 +67,10 @@ kotlin {
 
             implementation(libs.datastore)
             implementation(libs.datastore.preferences)
+            api(libs.moko.permissions.core)
+            api(libs.moko.permissions.microphone)
+            api(libs.moko.permissions.compose)
+
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

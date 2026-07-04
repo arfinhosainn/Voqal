@@ -27,6 +27,8 @@ kotlinx-datetime = "0.7.1"
 supabase = "3.6.0"
 ktor = "3.1.2"
 stream-video = "1.28.0"
+moko = "0.20.1"
+
 
 
 
@@ -84,6 +86,10 @@ ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "kto
 #Stream SDK
 stream-video-android-core = { module = "io.getstream:stream-video-android-core", version.ref = "stream-video" }
 stream-video-compose-ui = { module = "io.getstream:stream-video-android-ui-compose", version.ref = "stream-video" }
+
+moko-permissions-core = { module = "dev.icerock.moko:permissions", version.ref = "moko" }
+moko-permissions-microphone = { module = "dev.icerock.moko:permissions-microphone", version.ref = "moko" }
+moko-permissions-compose = { module = "dev.icerock.moko:permissions-compose", version.ref = "moko" }
 
 
 [plugins]
