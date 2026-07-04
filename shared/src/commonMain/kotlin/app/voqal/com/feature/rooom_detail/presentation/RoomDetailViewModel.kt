@@ -8,10 +8,14 @@ import app.voqal.com.core.domain.onFailure
 import app.voqal.com.feature.onboarding.presentation.navigation.OnboardingRoute
 import app.voqal.com.feature.room.domain.RoomCallRemoteDataSource
 import app.voqal.com.feature.room.domain.RoomConnectionState
+import app.voqal.com.feature.room.domain.RoomCallError
 import app.voqal.com.feature.room.domain.RoomDiscoveryRepository
 import app.voqal.com.feature.room.domain.StreamRoomConnectionRepository
 import app.voqal.com.feature.room.domain.toParticipantAvatarUiState
 import app.voqal.com.feature.room.domain.toUiText
+import dev.icerock.moko.permissions.Permission
+import dev.icerock.moko.permissions.PermissionsController
+import dev.icerock.moko.permissions.microphone.RECORD_AUDIO
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -24,7 +28,8 @@ class RoomDetailViewModel(
     savedStateHandle: SavedStateHandle,
     private val roomCallDataSource: RoomCallRemoteDataSource,
     private val connectionRepository: StreamRoomConnectionRepository,
-    private val roomDiscoveryRepository: RoomDiscoveryRepository
+    private val roomDiscoveryRepository: RoomDiscoveryRepository,
+    val permissionsController: PermissionsController
 ) : ViewModel() {
 
     private val route = savedStateHandle.toRoute<OnboardingRoute.RoomDetailRoute>()
@@ -83,7 +88,12 @@ class RoomDetailViewModel(
                 _events.send(RoomDetailEvent.LeaveRoom)
             }
             RoomDetailAction.OnMicClick -> viewModelScope.launch {
-                roomCallDataSource.setMicrophoneEnabled(!state.value.isMicrophoneEnabled)
+                try {
+                    permissionsController.providePermission(Permission.RECORD_AUDIO)
+                    roomCallDataSource.setMicrophoneEnabled(!state.value.isMicrophoneEnabled)
+                } catch (e: Exception) {
+                    _events.send(RoomDetailEvent.ShowError(RoomCallError.MICROPHONE_PERMISSION_DENIED.toUiText()))
+                }
             }
             RoomDetailAction.OnHandClick -> {
                 // TODO: raise-hand / request-to-speak — separate Stream capability, not built yet
