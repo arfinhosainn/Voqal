@@ -9,9 +9,11 @@ import androidx.navigation.compose.rememberNavController
 import app.voqal.com.core.presentation.util.ImagePicker
 import app.voqal.com.feature.onboarding.presentation.OnboardingDraftStore
 import app.voqal.com.feature.onboarding.presentation.navigation.OnboardingGraph
+import app.voqal.com.feature.onboarding.presentation.navigation.OnboardingRoute
 import app.voqal.com.feature.onboarding.presentation.navigation.onboardingNavGraph
 import app.voqal.com.feature.room.presentation.navigation.RoomGraph
 import app.voqal.com.feature.room.presentation.navigation.roomGraph
+import app.voqal.com.feature.rooom_detail.presentation.RoomDetailRoot
 import app.voqal.com.feature.splash.presentation.SplashScreen
 import kotlinx.serialization.Serializable
 import org.koin.compose.koinInject
@@ -23,16 +25,32 @@ data object SplashRoute
 fun AppNavHost(
     modifier: Modifier = Modifier,
     imagePicker: ImagePicker,
-    startDestination: Any = SplashRoute
+    initialRoomId: String? = null
 ) {
     val navController = rememberNavController()
     val onboardingDraftStore = koinInject<OnboardingDraftStore>()
+
+    val startDestination = if (initialRoomId != null) {
+        OnboardingRoute.RoomDetailRoute(roomId = initialRoomId, asHost = false)
+    } else {
+        SplashRoute
+    }
 
     NavHost(
         navController = navController,
         startDestination = startDestination,
         modifier = modifier
     ) {
+        composable<OnboardingRoute.RoomDetailRoute> {
+            RoomDetailRoot(
+                onLeave = {
+                    navController.navigate(RoomGraph) {
+                        popUpTo(OnboardingRoute.RoomDetailRoute(roomId = "", asHost = false)) { inclusive = true }
+                    }
+                }
+            )
+        }
+
         composable<SplashRoute> {
             SplashScreen(
                 onAuthenticated = {

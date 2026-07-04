@@ -84,7 +84,11 @@ class RoomDetailViewModel(
             RoomDetailAction.OnEndClick -> viewModelScope.launch {
                 // Host ending the room always deletes the card
                 roomDiscoveryRepository.deleteRoom(route.roomId)
-                roomCallDataSource.endRoom()
+                try {
+                    roomCallDataSource.endRoom()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
                 _events.send(RoomDetailEvent.LeaveRoom)
             }
             RoomDetailAction.OnMicClick -> viewModelScope.launch {

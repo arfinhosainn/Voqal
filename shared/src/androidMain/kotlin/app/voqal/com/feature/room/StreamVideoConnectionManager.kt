@@ -6,7 +6,10 @@ import app.voqal.com.feature.room.domain.RoomCallError
 import io.getstream.video.android.core.GEO
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
+import io.getstream.video.android.core.notifications.NotificationConfig
 import io.getstream.video.android.model.User
+import android.app.Application
+import app.voqal.com.core.di.VoqalNotificationHandler
 
 class StreamVideoConnectionManager(
     private val context: Context,
@@ -42,6 +45,9 @@ class StreamVideoConnectionManager(
                 geo = GEO.GlobalEdgeNetwork,
                 user = user,
                 token = token,
+                notificationConfig = NotificationConfig(
+                    notificationHandler = VoqalNotificationHandler(context.applicationContext as Application)
+                )
             ).build()
 
             client = built

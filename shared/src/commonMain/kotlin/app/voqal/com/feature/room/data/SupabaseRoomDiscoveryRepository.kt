@@ -55,7 +55,11 @@ class SupabaseRoomDiscoveryRepository(
             table = "rooms"
         }
 
-        channel.subscribe()
+        try {
+            channel.subscribe()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
 
         changes.collect { 
             try {
