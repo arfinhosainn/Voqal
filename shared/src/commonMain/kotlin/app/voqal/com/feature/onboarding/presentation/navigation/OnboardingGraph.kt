@@ -10,25 +10,21 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavBackStackEntry
-import androidx.navigation.toRoute
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import androidx.navigation.toRoute
 import app.voqal.com.core.presentation.util.ImagePicker
-
 import app.voqal.com.feature.onboarding.presentation.email.EmailRoot
 import app.voqal.com.feature.onboarding.presentation.fullname.FullNameRoot
-import app.voqal.com.feature.onboarding.presentation.username.PickUsernameRoot
-import app.voqal.com.feature.onboarding.presentation.photo.AddPhotoRoot
-import app.voqal.com.feature.onboarding.presentation.language.ChooseLanguageRoot
 import app.voqal.com.feature.onboarding.presentation.interest.ChooseInterestsRoot
+import app.voqal.com.feature.onboarding.presentation.language.ChooseLanguageRoot
 import app.voqal.com.feature.onboarding.presentation.password.PasswordRoot
-import app.voqal.com.feature.room.presentation.RoomRoot
-import app.voqal.com.feature.room.presentation.navigation.RoomRoute
+import app.voqal.com.feature.onboarding.presentation.photo.AddPhotoRoot
+import app.voqal.com.feature.onboarding.presentation.username.PickUsernameRoot
 import app.voqal.com.feature.rooom_detail.presentation.RoomDetailRoot
-import app.voqal.com.feature.rooom_detail.presentation.RoomDetailScreen
 import kotlinx.serialization.Serializable
 
 @Serializable
