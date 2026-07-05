@@ -8,11 +8,15 @@ import app.voqal.com.feature.room.domain.RoomDiscoveryRepository
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.realtime.PostgresAction
+import io.github.jan.supabase.realtime.realtime
 import io.github.jan.supabase.realtime.channel
 import io.github.jan.supabase.realtime.postgresChangeFlow
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -38,6 +42,7 @@ class SupabaseRoomDiscoveryRepository(
 ) : RoomDiscoveryRepository {
 
     override fun getRoomsFlow(): Flow<List<NewsRoomUi>> = channelFlow {
+        println("DEBUG: ROOM FLOW STARTING")
         // 1. Initial fetch
         try {
             val initialRooms = supabaseClient.postgrest.from("rooms")
@@ -50,7 +55,7 @@ class SupabaseRoomDiscoveryRepository(
         }
 
         // 2. Real-time updates
-        val channel = supabaseClient.channel("rooms_channel")
+        val channel = supabaseClient.channel("rooms_discovery")
         val changes = channel.postgresChangeFlow<PostgresAction>(schema = "public") {
             table = "rooms"
         }
@@ -61,14 +66,31 @@ class SupabaseRoomDiscoveryRepository(
             e.printStackTrace()
         }
 
-        changes.collect { 
-            try {
-                val updatedRooms = supabaseClient.postgrest.from("rooms")
-                    .select()
-                    .decodeList<RoomDto>()
-                send(updatedRooms.map { it.toNewsRoomUi() })
-            } catch (e: Exception) {
-                e.printStackTrace()
+        val job = launch {
+            changes.collect {
+                try {
+                    val updatedRooms = supabaseClient.postgrest.from("rooms")
+                        .select()
+                        .decodeList<RoomDto>()
+                    send(updatedRooms.map { it.toNewsRoomUi() })
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
+
+        try {
+            awaitClose {
+                println("DEBUG: ROOM FLOW CLOSING")
+                job.cancel()
+            }
+        } finally {
+            withContext(NonCancellable) {
+                try {
+                    supabaseClient.realtime.removeChannel(channel)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
             }
         }
     }
