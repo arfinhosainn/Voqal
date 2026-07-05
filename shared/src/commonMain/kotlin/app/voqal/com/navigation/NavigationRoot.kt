@@ -157,7 +157,7 @@ fun AppNavHost(
                 roomName = roomInfo.title.orEmpty(),
                 participantCount = participants.size,
                 participants = participants.map { it.toParticipantAvatarUiState() },
-                modifier = Modifier.padding(bottom = 30.dp), // Now 92dp tall, will be covered by 92dp bottom bar
+                modifier = Modifier.padding(bottom = 0.dp), // Now 92dp tall, will be covered by 92dp bottom bar
                 onRoomClick = {
                         activeRoomId?.let { roomId ->
                             presentationStore.expand(roomId)
