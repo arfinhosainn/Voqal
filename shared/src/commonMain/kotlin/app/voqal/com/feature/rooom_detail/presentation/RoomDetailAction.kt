@@ -6,4 +6,6 @@ sealed interface RoomDetailAction {
     data object OnMicClick : RoomDetailAction
     data object OnHandClick : RoomDetailAction
     data object OnMoreClick : RoomDetailAction
+    data object OnMinimizeClick : RoomDetailAction
+    data object OnExpandClick : RoomDetailAction
 }

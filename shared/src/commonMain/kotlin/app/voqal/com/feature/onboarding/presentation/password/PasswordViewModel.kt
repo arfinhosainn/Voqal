@@ -100,7 +100,7 @@ class PasswordViewModel(
             OnboardingAuthError.InvalidEmail -> "Email is incorrect"
             OnboardingAuthError.Network -> "Check your connection and try again"
             OnboardingAuthError.TooManyRequests -> "Too many attempts. Try again later"
-            OnboardingAuthError.Unknown -> "Incorrect password or authentication failed"
+            OnboardingAuthError.Unknown -> "Incorrect password"
         }
     }
 }

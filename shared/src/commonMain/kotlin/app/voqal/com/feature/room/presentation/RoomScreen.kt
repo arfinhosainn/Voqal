@@ -33,7 +33,9 @@ import app.voqal.com.feature.room.presentation.components.RoomColorVariant
 import app.voqal.com.feature.room.presentation.components.bottomsheet.RoomTypeBottomSheet
 import app.voqal.com.core.presentation.util.ObserveAsEvents
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
+import app.voqal.com.navigation.BottomNavStore
 
 @Composable
 fun RoomRoot(
@@ -45,6 +47,7 @@ fun RoomRoot(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val bottomNavStore = koinInject<BottomNavStore>()
 
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
@@ -55,6 +58,10 @@ fun RoomRoot(
                 }
             }
         }
+    }
+
+    ObserveAsEvents(bottomNavStore.createRoomClicks) {
+        viewModel.onAction(RoomAction.OnCreateRoomClick)
     }
     
     RoomScreen(
@@ -112,16 +119,7 @@ fun RoomScreen(
                 name = "Marian Marsh",
                 onAvatarClick = { /* Handle avatar click */ },
                 onSearchClick = { /* Handle search click */ },
-                modifier = Modifier.statusBarsPadding()
-            )
-        },
-        bottomBar = {
-            VoqalBottomNavigationBar(
-                selectedTab = VoqalBottomNavTab.Home,
-                onTabClick = {
-                    // Additional tabs will be wired when their screens exist.
-                },
-                onCreateRoomClick = { onAction(RoomAction.OnCreateRoomClick) },
+                modifier = modifier
             )
         }
     ) { innerPadding ->

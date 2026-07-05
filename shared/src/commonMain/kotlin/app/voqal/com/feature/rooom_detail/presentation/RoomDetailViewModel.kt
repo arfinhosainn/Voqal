@@ -13,6 +13,7 @@ import app.voqal.com.feature.room.domain.RoomDiscoveryRepository
 import app.voqal.com.feature.room.domain.StreamRoomConnectionRepository
 import app.voqal.com.feature.room.domain.toParticipantAvatarUiState
 import app.voqal.com.feature.room.domain.toUiText
+import app.voqal.com.feature.rooom_detail.presentation.model.RoomPresentationState
 import dev.icerock.moko.permissions.Permission
 import dev.icerock.moko.permissions.PermissionsController
 import dev.icerock.moko.permissions.microphone.RECORD_AUDIO
@@ -29,7 +30,8 @@ class RoomDetailViewModel(
     private val roomCallDataSource: RoomCallRemoteDataSource,
     private val connectionRepository: StreamRoomConnectionRepository,
     private val roomDiscoveryRepository: RoomDiscoveryRepository,
-    val permissionsController: PermissionsController
+    val permissionsController: PermissionsController,
+    private val presentationStore: RoomPresentationStore
 ) : ViewModel() {
 
     private val route = savedStateHandle.toRoute<OnboardingRoute.RoomDetailRoute>()
@@ -49,12 +51,15 @@ class RoomDetailViewModel(
             isMicrophoneEnabled = micEnabled,
             participants = participants.map { it.toParticipantAvatarUiState() }
         )
+    }.combine(presentationStore.presentationState) { state, presentation ->
+        state.copy(presentationState = presentation)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), RoomDetailState())
 
     private val _events = Channel<RoomDetailEvent>()
     val events = _events.receiveAsFlow()
 
     init {
+        presentationStore.expand(route.roomId)
         viewModelScope.launch {
             // 1. Ensure user is connected to Stream
             val connectionResult = connectionRepository.ensureUserConnected()
@@ -63,7 +68,16 @@ class RoomDetailViewModel(
                 return@launch
             }
 
-            // 2. Join the room
+            // 2. Ensure Microphone Permission is granted
+            try {
+                if (!permissionsController.isPermissionGranted(Permission.RECORD_AUDIO)) {
+                    permissionsController.providePermission(Permission.RECORD_AUDIO)
+                }
+            } catch (_: Exception) {
+                _events.send(RoomDetailEvent.ShowError(RoomCallError.MICROPHONE_PERMISSION_DENIED.toUiText()))
+            }
+
+            // 3. Join the room
             roomCallDataSource.joinRoom(roomId = route.roomId, asHost = route.asHost)
                 .onFailure { error ->
                     _events.send(RoomDetailEvent.ShowError(error.toUiText()))
@@ -74,6 +88,7 @@ class RoomDetailViewModel(
     fun onAction(action: RoomDetailAction) {
         when (action) {
             RoomDetailAction.OnLeaveClick -> viewModelScope.launch {
+                presentationStore.clear()
                 // If I am the last person in the room, delete the card
                 if (roomCallDataSource.participants.value.size <= 1) {
                     roomDiscoveryRepository.deleteRoom(route.roomId)
@@ -82,6 +97,7 @@ class RoomDetailViewModel(
                 _events.send(RoomDetailEvent.LeaveRoom)
             }
             RoomDetailAction.OnEndClick -> viewModelScope.launch {
+                presentationStore.clear()
                 // Host ending the room always deletes the card
                 roomDiscoveryRepository.deleteRoom(route.roomId)
                 try {
@@ -104,6 +120,12 @@ class RoomDetailViewModel(
             }
             RoomDetailAction.OnMoreClick -> {
                 // unrelated to call data, leave as-is
+            }
+            RoomDetailAction.OnMinimizeClick -> {
+                presentationStore.minimize()
+            }
+            RoomDetailAction.OnExpandClick -> {
+                presentationStore.expand(route.roomId)
             }
         }
     }

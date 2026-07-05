@@ -25,6 +25,7 @@ import app.voqal.com.core.designsystem.theme.VoqalTheme
 import app.voqal.com.core.presentation.util.ObserveAsEvents
 import app.voqal.com.feature.rooom_detail.presentation.components.RoomDetailTopBar
 import app.voqal.com.feature.rooom_detail.presentation.components.participant.ParticipantAvatar
+import app.voqal.com.feature.rooom_detail.presentation.model.RoomPresentationState
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -36,7 +37,7 @@ import voqal.shared.generated.resources.ic_send
 @Composable
 fun RoomDetailRoot(
     onLeave: () -> Unit,
-    viewModel: RoomDetailViewModel = koinViewModel()
+    viewModel: RoomDetailViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -53,15 +54,29 @@ fun RoomDetailRoot(
         }
     }
 
-    RoomDetailScreen(
+    if (state.presentationState == RoomPresentationState.Minimized) {
+        onLeave()
+    }
+
+    ExpandedRoomContent(
         state = state,
         onAction = viewModel::onAction,
-        snackbarHostState = snackbarHostState
+        snackbarHostState = snackbarHostState,
     )
 }
 
 @Composable
 fun RoomDetailScreen(
+    state: RoomDetailState,
+    onAction: (RoomDetailAction) -> Unit,
+    snackbarHostState: SnackbarHostState,
+    modifier: Modifier = Modifier
+) {
+    // This is now replaced by ExpandedRoomContent logic in Root
+}
+
+@Composable
+fun ExpandedRoomContent(
     state: RoomDetailState,
     onAction: (RoomDetailAction) -> Unit,
     snackbarHostState: SnackbarHostState,
@@ -81,8 +96,9 @@ fun RoomDetailScreen(
         BottomBarAction(
             icon = vectorResource(Res.drawable.ic_more),
             contentDescription = "More",
-            onClick = { onAction(RoomDetailAction.OnMoreClick) }
-        )
+        ) {
+            onAction(RoomDetailAction.OnMoreClick)
+        }
     )
 
     Scaffold(
@@ -93,7 +109,8 @@ fun RoomDetailScreen(
             RoomDetailTopBar(
                 greeting = "Good morning",
                 name = "Marian Marsh",
-                modifier = Modifier.statusBarsPadding()
+                modifier = Modifier.statusBarsPadding(),
+                onMinimizeClick = { onAction(RoomDetailAction.OnMinimizeClick) }
             )
         },
         bottomBar = {

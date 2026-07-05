@@ -45,6 +45,7 @@ fun RoomDetailTopBar(
     avatar: Painter? = null,
     onAvatarClick: () -> Unit = {},
     onSearchClick: () -> Unit = {},
+    onMinimizeClick: () -> Unit = {},
 ) {
     Row(
         modifier = modifier
@@ -74,8 +75,9 @@ fun RoomDetailTopBar(
 
             Icon(
                 imageVector = vectorResource(Res.drawable.ic_vert),
-                contentDescription = "Search",
-                tint = VoqalTheme.colors.onBackground
+                contentDescription = "Minimize",
+                tint = VoqalTheme.colors.onBackground,
+                modifier = Modifier.clickable { onMinimizeClick() }
             )
 
     }
