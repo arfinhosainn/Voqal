@@ -35,13 +35,20 @@ class SupabaseOnboardingProfileDataSource(
         }
 
         return try {
-            // Check if we have a session. 
-            // currentUserOrNull might be null if SDK is still loading session from storage.
+            // DIAGNOSTIC LOGS
+            println("DEBUG: Before Init Session = ${supabaseClient.auth.currentSessionOrNull()}")
+            println("DEBUG: Before Init User = ${supabaseClient.auth.currentUserOrNull()}")
+
+            // Wait for SDK to restore/refresh any existing session from storage
+            supabaseClient.auth.awaitInitialization()
+
+            println("DEBUG: After Init Session = ${supabaseClient.auth.currentSessionOrNull()}")
+            println("DEBUG: After Init User = ${supabaseClient.auth.currentUserOrNull()}")
+
+            // Check if we have a session.
             val user = supabaseClient.auth.currentUserOrNull()
-            
+
             if (user == null) {
-                // If null, we might want to wait a bit or just assume no session.
-                // For a splash screen, assume no session if not available immediately.
                 return Result.Success(null)
             }
 

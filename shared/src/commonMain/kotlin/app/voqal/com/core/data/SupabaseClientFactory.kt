@@ -2,6 +2,7 @@ package app.voqal.com.core.data
 
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.Auth
+import io.github.jan.supabase.auth.SettingsSessionManager
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.functions.Functions
 import io.github.jan.supabase.postgrest.Postgrest
@@ -14,7 +15,10 @@ object SupabaseClientFactory {
             supabaseUrl = config.url,
             supabaseKey = config.publishableKey
         ) {
-            install(Auth)
+            install(Auth) {
+                sessionManager = SettingsSessionManager()
+                alwaysAutoRefresh = true
+            }
             install(Postgrest)
             install(Storage)
             install(Functions)
