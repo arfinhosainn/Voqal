@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -109,7 +108,7 @@ fun ExpandedRoomContent(
             RoomDetailTopBar(
                 greeting = "Good morning",
                 name = "Marian Marsh",
-                modifier = Modifier.statusBarsPadding(),
+                modifier = Modifier,
                 onMinimizeClick = { onAction(RoomDetailAction.OnMinimizeClick) }
             )
         },
