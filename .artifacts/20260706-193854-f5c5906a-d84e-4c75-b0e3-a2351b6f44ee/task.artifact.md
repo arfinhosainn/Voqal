@@ -1,11 +1,13 @@
 # Task Management
 
 - [x] Research existing implementation and identify missing steps
-- [/] Complete "Persistent Raise Hand" feature
-    - [ ] Rename `OnRaiseHandClick` to `OnConfirmRaiseHand` in `RoomDetailAction.kt`
-    - [ ] Add `ShowSnackbar` to `RoomDetailEvent.kt`
-    - [ ] Update `RoomDetailViewModel.kt` with `UserPreferencesDataSource` and logic
-    - [ ] Update `RoomDetailScreen.kt` to handle new event and action
-    - [ ] Add animated hand indicator to `ParticipantAvatar.kt`
-    - [ ] (Optional) Improve `lowerHand()` in `StreamRoomCallDataSource.kt`
+- [x] Complete "Persistent Raise Hand" feature
+- [/] Implement Dynamic NewsRoomCard (Production Architecture)
+	- [x] Research room data sources and UI components
+	- [x] Design Production-ready DTOs and Repository interface
+	- [/] Implementation Phase
+		- [ ] Create `RoomDto.kt` and `ParticipantPreviewDto.kt`
+		- [ ] Update `RoomDiscoveryRepository` and `SupabaseRoomDiscoveryRepository`
+		- [ ] Implement `join`/`leave` discovery sync in `RoomDetailViewModel`
+		- [ ] Update `ParticipantList.kt` and `NewsRoomCard.kt` UI
 - [ ] Verify implementation

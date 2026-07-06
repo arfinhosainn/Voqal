@@ -28,7 +28,7 @@ fun ParticipantList(
                 modifier = Modifier.clickable {
                     onClick(it.id)
                 },
-                text = "${it.name} 💬",
+                text = it.name + " 💬",
                 color = VoqalTheme.colors.onBackground,
                 fontSize = 14.sp
             )

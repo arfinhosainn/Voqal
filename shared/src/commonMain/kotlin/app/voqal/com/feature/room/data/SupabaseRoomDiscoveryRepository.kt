@@ -2,40 +2,26 @@ package app.voqal.com.feature.room.data
 
 import app.voqal.com.core.domain.EmptyResult
 import app.voqal.com.core.domain.Result
+import app.voqal.com.feature.room.data.dto.RoomDto
 import app.voqal.com.feature.room.domain.NewsRoomUi
+import app.voqal.com.feature.room.domain.ParticipantUi
 import app.voqal.com.feature.room.domain.RoomCallError
 import app.voqal.com.feature.room.domain.RoomDiscoveryRepository
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.postgrest
+import io.github.jan.supabase.postgrest.query.Order
 import io.github.jan.supabase.realtime.PostgresAction
-import io.github.jan.supabase.realtime.realtime
 import io.github.jan.supabase.realtime.channel
 import io.github.jan.supabase.realtime.postgresChangeFlow
+import io.github.jan.supabase.realtime.realtime
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.Serializable
-
-@Serializable
-private data class RoomDto(
-    val id: String,
-    val title: String,
-    val category: String,
-    val listener_count: Int = 0,
-    val comment_count: Int = 0
-) {
-    fun toNewsRoomUi(): NewsRoomUi = NewsRoomUi(
-        id = id,
-        title = title,
-        category = category,
-        participants = emptyList(), 
-        listenerCount = listener_count,
-        commentCount = comment_count
-    )
-}
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 
 class SupabaseRoomDiscoveryRepository(
     private val supabaseClient: SupabaseClient
@@ -43,22 +29,48 @@ class SupabaseRoomDiscoveryRepository(
 
     override fun getRoomsFlow(): Flow<List<NewsRoomUi>> = channelFlow {
         println("DEBUG: ROOM FLOW STARTING")
-        // 1. Initial fetch
-        try {
-            val initialRooms = supabaseClient.postgrest.from("rooms")
-                .select()
-                .decodeList<RoomDto>()
-            send(initialRooms.map { it.toNewsRoomUi() })
-        } catch (e: Exception) {
-            e.printStackTrace()
-            send(emptyList())
+        // 1. Initial fetch from the view
+        suspend fun fetchRooms() {
+            try {
+                val response = supabaseClient.postgrest.from("rooms")
+                    .select {
+                        filter {
+                            eq("status", "live")
+                        }
+                        order("listener_count", Order.DESCENDING)
+                        order("last_activity_at", Order.DESCENDING)
+                    }
+                
+                val rooms = response.decodeList<RoomDto>()
+                
+                send(rooms.map { dto: RoomDto ->
+                    NewsRoomUi(
+                        id = dto.id,
+                        category = dto.category,
+                        title = dto.title,
+                        participants = dto.participantPreview.map { p ->
+                            ParticipantUi(
+                                id = p.id,
+                                name = p.name,
+                                avatar = null, // Will be loaded by ImageRequest via path
+                                countryCode = p.countryCode
+                            )
+                        },
+                        listenerCount = dto.listenerCount,
+                        commentCount = dto.commentCount
+                    )
+                })
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
+
+        fetchRooms()
 
         // 2. Real-time updates
         val channel = supabaseClient.channel("rooms_discovery")
-        val changes = channel.postgresChangeFlow<PostgresAction>(schema = "public") {
-            table = "rooms"
-        }
+        val roomChanges = channel.postgresChangeFlow<PostgresAction>(schema = "public") { table = "rooms" }
+        val sessionChanges = channel.postgresChangeFlow<PostgresAction>(schema = "public") { table = "room_sessions" }
 
         try {
             channel.subscribe()
@@ -66,23 +78,14 @@ class SupabaseRoomDiscoveryRepository(
             e.printStackTrace()
         }
 
-        val job = launch {
-            changes.collect {
-                try {
-                    val updatedRooms = supabaseClient.postgrest.from("rooms")
-                        .select()
-                        .decodeList<RoomDto>()
-                    send(updatedRooms.map { it.toNewsRoomUi() })
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
-        }
+        val job = launch { roomChanges.collect { fetchRooms() } }
+        val sessionJob = launch { sessionChanges.collect { fetchRooms() } }
 
         try {
             awaitClose {
                 println("DEBUG: ROOM FLOW CLOSING")
                 job.cancel()
+                sessionJob.cancel()
             }
         } finally {
             withContext(NonCancellable) {
@@ -102,7 +105,12 @@ class SupabaseRoomDiscoveryRepository(
     ): EmptyResult<RoomCallError> {
         return try {
             supabaseClient.postgrest.from("rooms").insert(
-                RoomDto(id = id, title = title, category = category)
+                mapOf(
+                    "id" to id,
+                    "title" to title,
+                    "category" to category
+                    // host_id is handled by SQL default auth.uid()
+                )
             )
             Result.Success(Unit)
         } catch (e: Exception) {
@@ -114,10 +122,32 @@ class SupabaseRoomDiscoveryRepository(
     override suspend fun deleteRoom(id: String): EmptyResult<RoomCallError> {
         return try {
             supabaseClient.postgrest.from("rooms").delete {
-                filter {
-                    eq("id", id)
-                }
+                filter { eq("id", id) }
             }
+            Result.Success(Unit)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Result.Failure(RoomCallError.UNKNOWN)
+        }
+    }
+
+    override suspend fun joinRoom(roomId: String): EmptyResult<RoomCallError> {
+        return try {
+            supabaseClient.postgrest.rpc("join_room", buildJsonObject {
+                put("p_room_id", roomId)
+            })
+            Result.Success(Unit)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Result.Failure(RoomCallError.UNKNOWN)
+        }
+    }
+
+    override suspend fun leaveRoom(roomId: String): EmptyResult<RoomCallError> {
+        return try {
+            supabaseClient.postgrest.rpc("leave_room", buildJsonObject {
+                put("p_room_id", roomId)
+            })
             Result.Success(Unit)
         } catch (e: Exception) {
             e.printStackTrace()

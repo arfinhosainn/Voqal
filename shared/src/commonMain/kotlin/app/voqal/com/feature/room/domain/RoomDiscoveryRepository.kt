@@ -22,4 +22,14 @@ interface RoomDiscoveryRepository {
      * Removes a room from discovery when it ends.
      */
     suspend fun deleteRoom(id: String): EmptyResult<RoomCallError>
+
+    /**
+     * Registers user joining a room in discovery.
+     */
+    suspend fun joinRoom(roomId: String): EmptyResult<RoomCallError>
+
+    /**
+     * Registers user leaving a room in discovery.
+     */
+    suspend fun leaveRoom(roomId: String): EmptyResult<RoomCallError>
 }

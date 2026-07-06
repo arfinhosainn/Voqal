@@ -2,6 +2,7 @@ package app.voqal.com.feature.room.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.voqal.com.core.utils.UuidUtils
 import app.voqal.com.core.domain.onFailure
 import app.voqal.com.core.domain.onSuccess
 import app.voqal.com.core.presentation.util.UiText
@@ -80,7 +81,7 @@ class RoomViewModel(
                 }
 
                 // 2. Create the room in Stream
-                val roomId = "room_${Random.nextInt(100000, 999999)}"
+                val roomId = UuidUtils.randomUuid()
                 val result = roomCallDataSource.joinRoom(
                     roomId = roomId,
                     asHost = true,
@@ -90,14 +91,21 @@ class RoomViewModel(
                 result
                     .onSuccess {
                         // 3. Register room in Discovery (Supabase)
-                        roomDiscoveryRepository.createRoom(
+                        val discoveryResult = roomDiscoveryRepository.createRoom(
                             id = roomId,
                             title = _state.value.selectedRoomType.title,
                             category = "VOQAL ROOM"
                         )
 
-                        _state.update { it.copy(isCreatingRoom = false, showRoomTypeSheet = false) }
-                        _events.send(RoomEvent.RoomCreated(roomId))
+                        discoveryResult
+                            .onSuccess {
+                                _state.update { it.copy(isCreatingRoom = false, showRoomTypeSheet = false) }
+                                _events.send(RoomEvent.RoomCreated(roomId))
+                            }
+                            .onFailure { error ->
+                                _state.update { it.copy(isCreatingRoom = false) }
+                                _events.send(RoomEvent.Error(error.toUiText()))
+                            }
                     }
                     .onFailure { error ->
                         _state.update { it.copy(isCreatingRoom = false) }
