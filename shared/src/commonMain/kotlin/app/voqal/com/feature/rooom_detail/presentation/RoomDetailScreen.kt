@@ -23,6 +23,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.voqal.com.core.designsystem.theme.VoqalTheme
 import app.voqal.com.core.presentation.util.ObserveAsEvents
 import app.voqal.com.feature.rooom_detail.presentation.components.EndRoomDialog
+import app.voqal.com.feature.rooom_detail.presentation.components.RaiseHandSheet
 import app.voqal.com.feature.rooom_detail.presentation.components.RoomDetailTopBar
 import app.voqal.com.feature.rooom_detail.presentation.components.participant.ParticipantAvatar
 import app.voqal.com.feature.rooom_detail.presentation.model.RoomPresentationState
@@ -50,6 +51,11 @@ fun RoomDetailRoot(
             is RoomDetailEvent.ShowError -> {
                 scope.launch {
                     snackbarHostState.showSnackbar(event.error.asStringAsync())
+                }
+            }
+            is RoomDetailEvent.ShowSnackbar -> {
+                scope.launch {
+                    snackbarHostState.showSnackbar(event.message.asStringAsync())
                 }
             }
         }
@@ -119,12 +125,18 @@ fun ExpandedRoomContent(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            if (state.showEndRoomDialog) {
+            if (state.isEndRoomDialogVisible) {
                 EndRoomDialog(
-                    onDismiss = { onAction(RoomDetailAction.OnToggleEndRoomDialog) },
+                    onDismiss = { onAction(RoomDetailAction.OnDismissEndRoomDialog) },
                     onConfirm = { onAction(RoomDetailAction.OnEndClick) }
                 )
             }
+
+            RaiseHandSheet(
+                isVisible = state.isRaiseHandSheetVisible,
+                onDismiss = { onAction(RoomDetailAction.OnDismissRaiseHandSheet) },
+                onRaiseHand = { onAction(RoomDetailAction.OnConfirmRaiseHand) }
+            )
 
             if (state.isLoading) {
                 CircularProgressIndicator(

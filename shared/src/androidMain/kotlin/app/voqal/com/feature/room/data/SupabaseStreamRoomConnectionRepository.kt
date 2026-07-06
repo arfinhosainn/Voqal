@@ -45,6 +45,9 @@ class SupabaseStreamRoomConnectionRepository(
     private val connectionManager: StreamVideoConnectionManager
 ) : StreamRoomConnectionRepository {
 
+    override val currentUserId: String?
+        get() = connectionManager.currentUserId
+
     override suspend fun ensureUserConnected(): EmptyResult<RoomCallError> {
         return try {
             // If already connected, return success

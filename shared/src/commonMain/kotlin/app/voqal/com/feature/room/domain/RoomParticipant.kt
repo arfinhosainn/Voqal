@@ -11,6 +11,8 @@ data class RoomParticipant(
     val role: String,
     val isSpeaking: Boolean,
     val isAudioEnabled: Boolean,
+    val isHandRaised: Boolean = false,
+    val handRaisedTimestamp: Long = 0L,
     val countryCode: String? = null
 )
 
@@ -20,5 +22,7 @@ fun RoomParticipant.toParticipantAvatarUiState(): ParticipantAvatarUiState = Par
     avatar = null,
     countryCode = countryCode,
     micState = if (isAudioEnabled) MicState.ON else MicState.OFF,
-    isSpeaking = isSpeaking
+    isSpeaking = isSpeaking,
+    isHandRaised = isHandRaised,
+    handRaisedTimestamp = handRaisedTimestamp
 )

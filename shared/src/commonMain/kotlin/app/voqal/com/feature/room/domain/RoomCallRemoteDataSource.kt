@@ -25,4 +25,7 @@ interface RoomCallRemoteDataSource {
     suspend fun setMicrophoneEnabled(enabled: Boolean)
     suspend fun leaveRoom()
     suspend fun endRoom(): EmptyResult<RoomCallError>
+
+    suspend fun raiseHand(): EmptyResult<RoomCallError>
+    suspend fun lowerHand(): EmptyResult<RoomCallError>
 }

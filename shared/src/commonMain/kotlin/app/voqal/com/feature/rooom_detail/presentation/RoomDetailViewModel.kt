@@ -4,7 +4,10 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import app.voqal.com.core.data.UserPreferencesDataSource
 import app.voqal.com.core.domain.onFailure
+import app.voqal.com.core.domain.onSuccess
+import app.voqal.com.core.presentation.util.UiText
 import app.voqal.com.feature.onboarding.presentation.navigation.OnboardingRoute
 import app.voqal.com.feature.room.domain.RoomCallRemoteDataSource
 import app.voqal.com.feature.room.domain.RoomConnectionState
@@ -32,12 +35,14 @@ class RoomDetailViewModel(
     private val roomCallDataSource: RoomCallRemoteDataSource,
     private val connectionRepository: StreamRoomConnectionRepository,
     private val roomDiscoveryRepository: RoomDiscoveryRepository,
+    private val userPreferencesDataSource: UserPreferencesDataSource,
     val permissionsController: PermissionsController,
     private val presentationStore: RoomPresentationStore
 ) : ViewModel() {
 
     private val route = savedStateHandle.toRoute<OnboardingRoute.RoomDetailRoute>()
-    private val _showEndRoomDialog = MutableStateFlow(false)
+    private val _isEndRoomDialogVisible = MutableStateFlow(false)
+    private val _isRaiseHandSheetVisible = MutableStateFlow(false)
 
     val state: StateFlow<RoomDetailState> = combine(
         roomCallDataSource.connectionState,
@@ -56,8 +61,10 @@ class RoomDetailViewModel(
         )
     }.combine(presentationStore.presentationState) { state, presentation ->
         state.copy(presentationState = presentation)
-    }.combine(_showEndRoomDialog) { state, showDialog ->
-        state.copy(showEndRoomDialog = showDialog)
+    }.combine(_isEndRoomDialogVisible) { state, showDialog ->
+        state.copy(isEndRoomDialogVisible = showDialog)
+    }.combine(_isRaiseHandSheetVisible) { state, showSheet ->
+        state.copy(isRaiseHandSheetVisible = showSheet)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), RoomDetailState())
 
     private val _events = Channel<RoomDetailEvent>()
@@ -94,7 +101,7 @@ class RoomDetailViewModel(
         when (action) {
             RoomDetailAction.OnLeaveClick -> viewModelScope.launch {
                 if (state.value.isHost) {
-                    _showEndRoomDialog.update { true }
+                    _isEndRoomDialogVisible.update { true }
                 } else {
                     presentationStore.clear()
                     roomCallDataSource.leaveRoom()
@@ -120,8 +127,19 @@ class RoomDetailViewModel(
                     _events.send(RoomDetailEvent.ShowError(RoomCallError.MICROPHONE_PERMISSION_DENIED.toUiText()))
                 }
             }
-            RoomDetailAction.OnHandClick -> {
-                // TODO: raise-hand / request-to-speak — separate Stream capability, not built yet
+            RoomDetailAction.OnHandClick -> viewModelScope.launch {
+                val mySessionId = connectionRepository.currentUserId // Assuming this matches session ID or we can find it in participants
+                val isAlreadyRaised = state.value.participants.find { it.id == mySessionId }?.isHandRaised ?: false
+                
+                if (isAlreadyRaised) {
+                    roomCallDataSource.lowerHand()
+                } else if (!userPreferencesDataSource.hasSeenRaiseHandEducation()) {
+                    onAction(RoomDetailAction.OnShowRaiseHandSheet)
+                } else {
+                    roomCallDataSource.raiseHand().onSuccess {
+                        _events.send(RoomDetailEvent.ShowSnackbar(UiText.DynamicString("Hand raised!")))
+                    }
+                }
             }
             RoomDetailAction.OnMinimizeClick -> {
                 presentationStore.minimize()
@@ -129,8 +147,26 @@ class RoomDetailViewModel(
             RoomDetailAction.OnExpandClick -> {
                 presentationStore.expand(route.roomId)
             }
-            RoomDetailAction.OnToggleEndRoomDialog -> {
-                _showEndRoomDialog.update { !it }
+            RoomDetailAction.OnShowEndRoomDialog -> {
+                _isEndRoomDialogVisible.update { true }
+            }
+            RoomDetailAction.OnDismissEndRoomDialog -> {
+                _isEndRoomDialogVisible.update { false }
+            }
+            RoomDetailAction.OnShowRaiseHandSheet -> {
+                _isRaiseHandSheetVisible.update { true }
+            }
+            RoomDetailAction.OnDismissRaiseHandSheet -> {
+                _isRaiseHandSheetVisible.update { false }
+            }
+            RoomDetailAction.OnConfirmRaiseHand -> viewModelScope.launch {
+                roomCallDataSource.raiseHand().onSuccess {
+                    userPreferencesDataSource.setHasSeenRaiseHandEducation(true)
+                    _isRaiseHandSheetVisible.update { false }
+                    _events.send(RoomDetailEvent.ShowSnackbar(UiText.DynamicString("Hand raised!")))
+                }.onFailure {
+                    _isRaiseHandSheetVisible.update { false }
+                }
             }
         }
     }

@@ -10,5 +10,7 @@ data class ParticipantAvatarUiState(
     val avatar: Painter?,
     val countryCode: String?,
     val micState: MicState,
-    val isSpeaking: Boolean
+    val isSpeaking: Boolean,
+    val isHandRaised: Boolean = false,
+    val handRaisedTimestamp: Long = 0L
 )

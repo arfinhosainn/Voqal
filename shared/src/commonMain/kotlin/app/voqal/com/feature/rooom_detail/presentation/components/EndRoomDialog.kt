@@ -12,7 +12,9 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -47,7 +49,8 @@ fun EndRoomDialog(
         confirmButton = {
             Column(
                 modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Button(
                     onClick = onConfirm,
@@ -71,6 +74,17 @@ fun EndRoomDialog(
                 ) {
                     Text("Stay", fontWeight = FontWeight.SemiBold)
                 }
+                
+                TextButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "Cancel",
+                        color = VoqalTheme.colors.onSurfaceVariant,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
             }
         },
         dismissButton = null,
@@ -88,4 +102,3 @@ fun PreviewEndRoomDialog() {
         )
     }
 }
-

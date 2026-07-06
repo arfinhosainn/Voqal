@@ -6,11 +6,20 @@ import androidx.datastore.preferences.core.Preferences
 import okio.Path.Companion.toPath
 
 private const val OnboardingDraftDataStoreFileName = "onboarding_draft.preferences_pb"
+private const val UserPreferencesDataStoreFileName = "user_preferences.preferences_pb"
 
 fun createOnboardingDraftDataStore(): DataStore<Preferences> {
     return PreferenceDataStoreFactory.createWithPath(
         produceFile = {
             getDataStorePath(OnboardingDraftDataStoreFileName).toPath()
+        }
+    )
+}
+
+fun createUserPreferencesDataStore(): DataStore<Preferences> {
+    return PreferenceDataStoreFactory.createWithPath(
+        produceFile = {
+            getDataStorePath(UserPreferencesDataStoreFileName).toPath()
         }
     )
 }
