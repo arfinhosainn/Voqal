@@ -1,10 +1,17 @@
 -- Add new columns to public.rooms
 ALTER TABLE public.rooms
+ADD COLUMN IF NOT EXISTS host_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
 ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'live',
 ADD COLUMN IF NOT EXISTS listener_count INT DEFAULT 0,
 ADD COLUMN IF NOT EXISTS comment_count INT DEFAULT 0,
 ADD COLUMN IF NOT EXISTS participant_preview JSONB DEFAULT '[]',
 ADD COLUMN IF NOT EXISTS last_activity_at TIMESTAMPTZ DEFAULT now();
+
+-- Set host_id default
+ALTER TABLE public.rooms ALTER COLUMN host_id SET DEFAULT auth.uid();
+
+-- Drop redundant view
+DROP VIEW IF EXISTS public.room_discovery_view;
 
 -- Update trigger function to sync room metadata
 CREATE OR REPLACE FUNCTION public.sync_room_metadata()
@@ -65,6 +72,21 @@ DROP TRIGGER IF EXISTS tr_sync_room_metadata_messages ON public.room_messages;
 CREATE TRIGGER tr_sync_room_metadata_messages
 AFTER INSERT OR UPDATE OR DELETE ON public.room_messages
 FOR EACH ROW EXECUTE FUNCTION public.sync_room_metadata();
+
+-- Update join_room RPC to close all active sessions for the user
+CREATE OR REPLACE FUNCTION public.join_room(p_room_id UUID)
+RETURNS void AS $$
+BEGIN
+    -- Close any existing active sessions for this user in ANY room
+    UPDATE public.room_sessions
+    SET left_at = now()
+    WHERE user_id = auth.uid() AND left_at IS NULL;
+
+    -- Insert new active session
+    INSERT INTO public.room_sessions (room_id, user_id)
+    VALUES (p_room_id, auth.uid());
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Backfill existing data
 DO $$

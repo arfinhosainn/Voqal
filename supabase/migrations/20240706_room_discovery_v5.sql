@@ -77,7 +77,7 @@ SELECT
         WHERE rm.room_id = r.id
     ) as comment_count,
     (
-        SELECT jsonb_agg(p)
+        SELECT COALESCE(jsonb_agg(p), '[]'::jsonb)
         FROM (
             SELECT
                 pr.id,

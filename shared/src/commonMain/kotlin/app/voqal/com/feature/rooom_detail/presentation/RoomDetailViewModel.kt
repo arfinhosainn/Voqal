@@ -91,6 +91,9 @@ class RoomDetailViewModel(
 
             // 3. Join the room
             roomCallDataSource.joinRoom(roomId = route.roomId, asHost = route.asHost)
+                .onSuccess {
+                    roomDiscoveryRepository.joinRoom(route.roomId)
+                }
                 .onFailure { error ->
                     _events.send(RoomDetailEvent.ShowError(error.toUiText()))
                 }
@@ -104,6 +107,7 @@ class RoomDetailViewModel(
                     _isEndRoomDialogVisible.update { true }
                 } else {
                     presentationStore.clear()
+                    roomDiscoveryRepository.leaveRoom(route.roomId)
                     roomCallDataSource.leaveRoom()
                     _events.send(RoomDetailEvent.LeaveRoom)
                 }
@@ -111,6 +115,7 @@ class RoomDetailViewModel(
             RoomDetailAction.OnEndClick -> viewModelScope.launch {
                 presentationStore.clear()
                 // Host ending the room always deletes the card
+                roomDiscoveryRepository.leaveRoom(route.roomId)
                 roomDiscoveryRepository.deleteRoom(route.roomId)
                 try {
                     roomCallDataSource.endRoom()
