@@ -78,7 +78,7 @@ fun VoqalBottomNavigationBar(
         modifier = modifier
             .fillMaxWidth()
             .height(92.dp)
-            .clip(RoundedCornerShape(topStart = 42.dp, topEnd = 42.dp))
+            .clip(RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp))
             .background(VoqalTheme.colors.background)
             .padding(start = 28.dp, end = 28.dp),
         verticalAlignment = Alignment.CenterVertically,

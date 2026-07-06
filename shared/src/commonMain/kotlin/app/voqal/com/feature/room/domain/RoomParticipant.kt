@@ -10,14 +10,15 @@ data class RoomParticipant(
     val imageUrl: String?,
     val role: String,
     val isSpeaking: Boolean,
-    val isAudioEnabled: Boolean
+    val isAudioEnabled: Boolean,
+    val countryCode: String? = null
 )
 
 fun RoomParticipant.toParticipantAvatarUiState(): ParticipantAvatarUiState = ParticipantAvatarUiState(
     id = sessionId,
     name = name,
     avatar = null,
-    countryFlag = null, // backfill once you wire your own profile lookup — see note above
+    countryCode = countryCode,
     micState = if (isAudioEnabled) MicState.ON else MicState.OFF,
     isSpeaking = isSpeaking
 )

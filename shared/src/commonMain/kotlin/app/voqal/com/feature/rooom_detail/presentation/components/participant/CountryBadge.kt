@@ -10,13 +10,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun CountryBadge(
-    flag: Painter?,
+    flag: DrawableResource?,
     modifier: Modifier = Modifier
 ) {
     if (flag == null) return
@@ -28,7 +29,7 @@ fun CountryBadge(
         contentAlignment = Alignment.Center
     ) {
         Image(
-            painter = flag,
+            painter = painterResource(flag),
             contentDescription = "Country Flag",
             modifier = Modifier
                 .size(20.dp)

@@ -7,4 +7,5 @@ data class InviteParticipantUi(
     val name: String,
     val avatar: Painter? = null,
     val isOnline: Boolean = true,
+    val countryCode: String? = null
 )

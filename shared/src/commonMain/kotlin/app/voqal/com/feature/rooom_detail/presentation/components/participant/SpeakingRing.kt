@@ -31,8 +31,8 @@ fun SpeakingRing(
 
     Box(
         modifier = modifier
-            .border(width = borderWidth, color = borderColor, shape = VoqalTheme.shapes.large)
-            .padding(1.dp)
+            .border(width = borderWidth, color = borderColor, shape = VoqalTheme.shapes.extraLarge)
+            .padding(0.dp)
     ) {
         content()
     }

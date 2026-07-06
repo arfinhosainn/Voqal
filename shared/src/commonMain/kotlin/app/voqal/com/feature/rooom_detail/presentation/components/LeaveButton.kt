@@ -29,7 +29,7 @@ fun LeaveButton(
         colors = ButtonDefaults.buttonColors(
             containerColor = if (isSystemInDarkTheme()) Color(0xFF573A46) else Color(0xFFFFE3EF)
         ),
-        contentPadding = PaddingValues(horizontal = 5.dp)
+        contentPadding = PaddingValues(horizontal = 20.dp)
     ) {
 
         Text(

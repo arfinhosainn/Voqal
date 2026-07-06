@@ -13,6 +13,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -36,6 +37,7 @@ import app.voqal.com.feature.rooom_detail.presentation.RoomPresentationStore
 import app.voqal.com.feature.rooom_detail.presentation.components.MiniRoomBar
 import app.voqal.com.feature.rooom_detail.presentation.model.RoomPresentationState
 import app.voqal.com.feature.splash.presentation.SplashScreen
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import org.koin.compose.koinInject
 
@@ -49,6 +51,7 @@ fun AppNavHost(
     modifier: Modifier = Modifier,
 ) {
     val navController = rememberNavController()
+    val scope = rememberCoroutineScope()
     val onboardingDraftStore = koinInject<OnboardingDraftStore>()
     val presentationStore = koinInject<RoomPresentationStore>()
     val roomCallDataSource = koinInject<RoomCallRemoteDataSource>()
@@ -57,6 +60,7 @@ fun AppNavHost(
     val presentationState by presentationStore.presentationState.collectAsStateWithLifecycle()
     val roomInfo by roomCallDataSource.roomInfo.collectAsStateWithLifecycle()
     val participants by roomCallDataSource.participants.collectAsStateWithLifecycle()
+    val isMicEnabled by roomCallDataSource.isMicrophoneEnabled.collectAsStateWithLifecycle()
     val activeRoomId by presentationStore.activeRoomId.collectAsStateWithLifecycle()
 
     val selectedTab by bottomNavStore.selectedTab.collectAsStateWithLifecycle()
@@ -157,14 +161,20 @@ fun AppNavHost(
                 roomName = roomInfo.title.orEmpty(),
                 participantCount = participants.size,
                 participants = participants.map { it.toParticipantAvatarUiState() },
-                modifier = Modifier.padding(bottom = 0.dp), // Now 92dp tall, will be covered by 92dp bottom bar
+                isMicrophoneEnabled = isMicEnabled,
+                modifier = Modifier.padding(bottom = 45.dp), // Now 92dp tall, will be covered by 92dp bottom bar
                 onRoomClick = {
-                        activeRoomId?.let { roomId ->
-                            presentationStore.expand(roomId)
-                            navController.navigate(OnboardingRoute.RoomDetailRoute(roomId = roomId, asHost = false))
-                        }
+                    activeRoomId?.let { roomId ->
+                        presentationStore.expand(roomId)
+                        navController.navigate(OnboardingRoute.RoomDetailRoute(roomId = roomId, asHost = false))
                     }
-                ) {
+                },
+                onSendClick = {
+                    scope.launch {
+                        roomCallDataSource.setMicrophoneEnabled(!isMicEnabled)
+                    }
+                }
+            ) {
                     activeRoomId?.let { roomId ->
                         presentationStore.expand(roomId)
                         navController.navigate(OnboardingRoute.RoomDetailRoute(roomId = roomId, asHost = false))

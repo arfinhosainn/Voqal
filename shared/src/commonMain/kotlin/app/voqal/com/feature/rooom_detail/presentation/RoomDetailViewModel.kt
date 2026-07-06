@@ -18,11 +18,13 @@ import dev.icerock.moko.permissions.Permission
 import dev.icerock.moko.permissions.PermissionsController
 import dev.icerock.moko.permissions.microphone.RECORD_AUDIO
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class RoomDetailViewModel(
@@ -35,6 +37,7 @@ class RoomDetailViewModel(
 ) : ViewModel() {
 
     private val route = savedStateHandle.toRoute<OnboardingRoute.RoomDetailRoute>()
+    private val _showEndRoomDialog = MutableStateFlow(false)
 
     val state: StateFlow<RoomDetailState> = combine(
         roomCallDataSource.connectionState,
@@ -53,6 +56,8 @@ class RoomDetailViewModel(
         )
     }.combine(presentationStore.presentationState) { state, presentation ->
         state.copy(presentationState = presentation)
+    }.combine(_showEndRoomDialog) { state, showDialog ->
+        state.copy(showEndRoomDialog = showDialog)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), RoomDetailState())
 
     private val _events = Channel<RoomDetailEvent>()
@@ -88,13 +93,13 @@ class RoomDetailViewModel(
     fun onAction(action: RoomDetailAction) {
         when (action) {
             RoomDetailAction.OnLeaveClick -> viewModelScope.launch {
-                presentationStore.clear()
-                // If I am the last person in the room, delete the card
-                if (roomCallDataSource.participants.value.size <= 1) {
-                    roomDiscoveryRepository.deleteRoom(route.roomId)
+                if (state.value.isHost) {
+                    _showEndRoomDialog.update { true }
+                } else {
+                    presentationStore.clear()
+                    roomCallDataSource.leaveRoom()
+                    _events.send(RoomDetailEvent.LeaveRoom)
                 }
-                roomCallDataSource.leaveRoom()
-                _events.send(RoomDetailEvent.LeaveRoom)
             }
             RoomDetailAction.OnEndClick -> viewModelScope.launch {
                 presentationStore.clear()
@@ -118,14 +123,14 @@ class RoomDetailViewModel(
             RoomDetailAction.OnHandClick -> {
                 // TODO: raise-hand / request-to-speak — separate Stream capability, not built yet
             }
-            RoomDetailAction.OnMoreClick -> {
-                // unrelated to call data, leave as-is
-            }
             RoomDetailAction.OnMinimizeClick -> {
                 presentationStore.minimize()
             }
             RoomDetailAction.OnExpandClick -> {
                 presentationStore.expand(route.roomId)
+            }
+            RoomDetailAction.OnToggleEndRoomDialog -> {
+                _showEndRoomDialog.update { !it }
             }
         }
     }

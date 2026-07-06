@@ -8,4 +8,5 @@ data class ParticipantUi(
     val id: String,
     val name: String,
     val avatar: Painter? = null,
+    val countryCode: String? = null
 )

@@ -21,13 +21,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.voqal.com.core.designsystem.theme.VoqalTheme
+import app.voqal.com.core.presentation.util.CountryFlagResources
+import app.voqal.com.feature.rooom_detail.presentation.model.MicState
 import app.voqal.com.feature.rooom_detail.presentation.model.ParticipantAvatarUiState
 
 @Composable
 fun ParticipantAvatar(
     state: ParticipantAvatarUiState,
     modifier: Modifier = Modifier,
-    onClick: (() -> Unit)? = null
+    onClick: (() -> Unit)? = null,
 ) {
     Column(
         modifier = modifier,
@@ -50,14 +52,14 @@ fun ParticipantAvatar(
                             contentDescription = state.name,
                             modifier = Modifier
                                 .size(90.dp)
-                                .clip(VoqalTheme.shapes.large),
+                                .clip(VoqalTheme.shapes.extraLarge),
                             contentScale = ContentScale.Crop
                         )
                     } else {
                         Box(
                             modifier = Modifier
                                 .size(90.dp)
-                                .clip(VoqalTheme.shapes.large)
+                                .clip(VoqalTheme.shapes.extraLarge)
                                 .background(VoqalTheme.colors.primary.copy(alpha = 0.2f)),
                             contentAlignment = Alignment.Center
                         ) {
@@ -71,15 +73,17 @@ fun ParticipantAvatar(
 
                     // Country Badge (Bottom Start)
                     CountryBadge(
-                        flag = state.countryFlag,
+                        flag = CountryFlagResources.resolve(state.countryCode),
                         modifier = Modifier.align(Alignment.BottomStart)
                     )
 
                     // Mic Badge (Bottom End)
-                    MicBadge(
-                        micState = state.micState,
-                        modifier = Modifier.align(Alignment.BottomEnd)
-                    )
+                    if (state.micState != MicState.ON) {
+                        MicBadge(
+                            micState = state.micState,
+                            modifier = Modifier.align(Alignment.BottomEnd)
+                        )
+                    }
                 }
             }
         }

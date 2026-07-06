@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.voqal.com.core.designsystem.theme.VoqalTheme
 import app.voqal.com.core.presentation.util.ObserveAsEvents
+import app.voqal.com.feature.rooom_detail.presentation.components.EndRoomDialog
 import app.voqal.com.feature.rooom_detail.presentation.components.RoomDetailTopBar
 import app.voqal.com.feature.rooom_detail.presentation.components.participant.ParticipantAvatar
 import app.voqal.com.feature.rooom_detail.presentation.model.RoomPresentationState
@@ -30,7 +31,8 @@ import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import voqal.shared.generated.resources.Res
 import voqal.shared.generated.resources.ic_hand
-import voqal.shared.generated.resources.ic_more
+import voqal.shared.generated.resources.ic_mic
+import voqal.shared.generated.resources.ic_micoff
 import voqal.shared.generated.resources.ic_send
 
 @Composable
@@ -65,38 +67,30 @@ fun RoomDetailRoot(
 }
 
 @Composable
-fun RoomDetailScreen(
-    state: RoomDetailState,
-    onAction: (RoomDetailAction) -> Unit,
-    snackbarHostState: SnackbarHostState,
-    modifier: Modifier = Modifier
-) {
-    // This is now replaced by ExpandedRoomContent logic in Root
-}
-
-@Composable
 fun ExpandedRoomContent(
     state: RoomDetailState,
     onAction: (RoomDetailAction) -> Unit,
     snackbarHostState: SnackbarHostState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val actions = listOf(
         BottomBarAction(
             icon = vectorResource(Res.drawable.ic_send),
-            contentDescription = "Mic",
-            onClick = { onAction(RoomDetailAction.OnMicClick) }
-        ),
+            contentDescription = "Send",
+        ) { /* Keep as is or handle send */ },
         BottomBarAction(
             icon = vectorResource(Res.drawable.ic_hand),
             contentDescription = "Hand",
             onClick = { onAction(RoomDetailAction.OnHandClick) }
         ),
         BottomBarAction(
-            icon = vectorResource(Res.drawable.ic_more),
-            contentDescription = "More",
+            icon = if (state.isMicrophoneEnabled)
+                vectorResource(Res.drawable.ic_mic)
+            else
+                vectorResource(Res.drawable.ic_micoff),
+            contentDescription = "Mic",
         ) {
-            onAction(RoomDetailAction.OnMoreClick)
+            onAction(RoomDetailAction.OnMicClick)
         }
     )
 
@@ -117,7 +111,6 @@ fun ExpandedRoomContent(
                 actions = actions,
                 isHost = state.isHost,
                 onLeave = { onAction(RoomDetailAction.OnLeaveClick) },
-                onEnd = { onAction(RoomDetailAction.OnEndClick) }
             )
         }
     ) { innerPadding ->
@@ -126,6 +119,13 @@ fun ExpandedRoomContent(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
+            if (state.showEndRoomDialog) {
+                EndRoomDialog(
+                    onDismiss = { onAction(RoomDetailAction.OnToggleEndRoomDialog) },
+                    onConfirm = { onAction(RoomDetailAction.OnEndClick) }
+                )
+            }
+
             if (state.isLoading) {
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.Center),

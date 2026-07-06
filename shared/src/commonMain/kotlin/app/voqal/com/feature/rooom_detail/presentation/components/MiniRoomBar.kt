@@ -30,8 +30,10 @@ import app.voqal.com.feature.room.presentation.components.MemberAvatarGroup
 import app.voqal.com.feature.rooom_detail.presentation.model.ParticipantAvatarUiState
 import org.jetbrains.compose.resources.vectorResource
 import voqal.shared.generated.resources.Res
+import voqal.shared.generated.resources.ic_expand
 import voqal.shared.generated.resources.ic_hand
-import voqal.shared.generated.resources.ic_more
+import voqal.shared.generated.resources.ic_mic
+import voqal.shared.generated.resources.ic_micoff
 import voqal.shared.generated.resources.ic_send
 
 @Composable
@@ -39,6 +41,7 @@ fun MiniRoomBar(
     roomName: String,
     participantCount: Int,
     participants: List<ParticipantAvatarUiState>,
+    isMicrophoneEnabled: Boolean,
     modifier: Modifier = Modifier,
     onRoomClick: () -> Unit = {},
     onSendClick: () -> Unit = {},
@@ -51,7 +54,7 @@ fun MiniRoomBar(
             .height(140.dp)
             .clickable(onClick = onRoomClick),
         color = Color(0xFF3D4351),
-        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+        shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp),
         tonalElevation = 6.dp,
         shadowElevation = 8.dp,
     ) {
@@ -59,7 +62,7 @@ fun MiniRoomBar(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(72.dp)
+                    .height(100.dp)
                     .padding(horizontal = 18.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -69,7 +72,7 @@ fun MiniRoomBar(
                     Text(
                         text = roomName,
                         color = Color.White,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.SemiBold,
                         fontSize = 14.sp,
                         maxLines = 1
                     )
@@ -77,9 +80,14 @@ fun MiniRoomBar(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         MemberAvatarGroup(
                             participants = participants.map {
-                                ParticipantUi(id = it.id, name = it.name, avatar = it.avatar)
+                                ParticipantUi(
+                                    id = it.id,
+                                    name = it.name,
+                                    avatar = it.avatar,
+                                    countryCode = it.countryCode
+                                )
                             },
-                            avatarSize = 24.dp,
+                            avatarSize = 35.dp,
                             overlap = 8.dp,
                             maxVisible = 4,
                             modifier = Modifier.padding(end = 8.dp)
@@ -93,7 +101,10 @@ fun MiniRoomBar(
                 }
 
                 MiniRoomAction(
-                    icon = vectorResource(Res.drawable.ic_send),
+                    icon = if (isMicrophoneEnabled)
+                        vectorResource(Res.drawable.ic_mic)
+                    else
+                        vectorResource(Res.drawable.ic_micoff),
                     onClick = onSendClick
                 )
 
@@ -107,7 +118,7 @@ fun MiniRoomBar(
                 Spacer(Modifier.width(12.dp))
 
                 MiniRoomAction(
-                    icon = vectorResource(Res.drawable.ic_more),
+                    icon = vectorResource(Res.drawable.ic_expand),
                     onClick = onExpandClick
                 )
             }
@@ -123,7 +134,7 @@ private fun MiniRoomAction(
     onClick: () -> Unit,
 ) {
     Surface(
-        modifier = Modifier.size(42.dp),
+        modifier = Modifier.size(52.dp),
         shape = CircleShape,
         color = Color(0xFF242730),
         onClick = onClick
@@ -137,7 +148,7 @@ private fun MiniRoomAction(
                 imageVector = icon,
                 contentDescription = null,
                 tint = Color.White,
-                modifier = Modifier.size(20.dp)
+                modifier = Modifier.size(25.dp)
             )
         }
     }
@@ -151,7 +162,8 @@ fun MiniRoomBarPreview() {
             MiniRoomBar(
                 roomName = "Kotlin Malaysia",
                 participantCount = 23,
-                participants = emptyList()
+                participants = emptyList(),
+                isMicrophoneEnabled = true,
             )
         }
 

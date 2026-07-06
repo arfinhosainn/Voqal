@@ -8,7 +8,7 @@ data class ParticipantAvatarUiState(
     val id: String,
     val name: String,
     val avatar: Painter?,
-    val countryFlag: Painter?,
+    val countryCode: String?,
     val micState: MicState,
     val isSpeaking: Boolean
 )
