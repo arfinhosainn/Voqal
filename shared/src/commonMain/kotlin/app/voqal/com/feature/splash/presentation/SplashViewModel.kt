@@ -8,6 +8,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 class SplashViewModel(
     private val profileDataSource: OnboardingProfileDataSource
@@ -22,7 +23,7 @@ class SplashViewModel(
 
     private fun checkSession() {
         viewModelScope.launch {
-            delay(1500) // Professional feel
+            delay(1500.milliseconds) // Professional feel
             println("Splash: Checking session...")
             when (val result = profileDataSource.getOnboardingStep()) {
                 is Result.Success -> {

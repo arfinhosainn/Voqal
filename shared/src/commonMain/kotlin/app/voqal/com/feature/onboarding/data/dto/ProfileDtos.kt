@@ -28,6 +28,8 @@ data class ProfileUpdateDto(
     val primaryLanguageCode: String? = null,
     @SerialName("avatar_path")
     val avatarPath: String? = null,
+    @SerialName("country_code")
+    val countryCode: String? = null,
     @SerialName("onboarding_step")
     val onboardingStep: Int? = null
 )

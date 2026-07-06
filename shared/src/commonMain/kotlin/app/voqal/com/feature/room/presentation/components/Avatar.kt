@@ -16,7 +16,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.voqal.com.core.designsystem.theme.VoqalTheme
+import app.voqal.com.core.presentation.util.CountryFlagResources
 import app.voqal.com.feature.room.domain.ParticipantUi
+import app.voqal.com.feature.rooom_detail.presentation.components.participant.CountryBadge
 
 @Composable
 fun Avatar(
@@ -27,24 +29,37 @@ fun Avatar(
     Box(
         modifier = Modifier
             .size(size)
-            .clip(CircleShape)
-            .border(
-                2.dp,
-                VoqalTheme.colors.background,
-                CircleShape
-            )
-            .background(Color.Gray),
-        contentAlignment = Alignment.Center
     ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(CircleShape)
+                .border(
+                    2.dp,
+                    VoqalTheme.colors.background,
+                    CircleShape
+                )
+                .background(Color.Gray),
+            contentAlignment = Alignment.Center
+        ) {
 
-        participant.avatar?.let {
+            participant.avatar?.let {
 
-            Image(
-                painter = it,
-                contentDescription = participant.name,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
-            )
+                Image(
+                    painter = it,
+                    contentDescription = participant.name,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            }
         }
+
+        // Country Badge (Proportional size)
+        CountryBadge(
+            flag = CountryFlagResources.resolve(participant.countryCode),
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .size(size * 0.4f)
+        )
     }
 }

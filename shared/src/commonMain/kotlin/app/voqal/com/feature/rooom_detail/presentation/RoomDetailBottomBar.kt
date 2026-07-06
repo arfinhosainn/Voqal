@@ -13,11 +13,11 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import app.voqal.com.core.designsystem.theme.VoqalTheme
 import app.voqal.com.feature.rooom_detail.presentation.components.CircleIconButton
-import app.voqal.com.feature.rooom_detail.presentation.components.EndButton
 import app.voqal.com.feature.rooom_detail.presentation.components.LeaveButton
 import org.jetbrains.compose.resources.vectorResource
 import voqal.shared.generated.resources.Res
 import voqal.shared.generated.resources.ic_hand
+import voqal.shared.generated.resources.ic_micoff
 import voqal.shared.generated.resources.ic_more
 import voqal.shared.generated.resources.ic_send
 
@@ -27,7 +27,6 @@ fun RoomDetailBottomBar(
     actions: List<BottomBarAction>,
     isHost: Boolean = false,
     onLeave: () -> Unit,
-    onEnd: () -> Unit = {}
 ) {
 
     Surface(
@@ -44,20 +43,13 @@ fun RoomDetailBottomBar(
         ) {
 
             LeaveButton(
-                modifier = Modifier.weight(if (isHost) 0.3f else 0.4f),
+                modifier = modifier,
                 onClick = onLeave
             )
 
-            if (isHost) {
-                EndButton(
-                    modifier = Modifier.weight(0.3f),
-                    onClick = onEnd
-                )
-            }
-
             Row(
-                modifier = Modifier.weight(if (isHost) 0.4f else 0.6f),
-                horizontalArrangement = Arrangement.End,
+                modifier = Modifier.weight(0.5f),
+                horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 actions.forEach { action ->
@@ -82,7 +74,6 @@ fun PreviewRoomDetailBottomBar() {
             modifier = Modifier.fillMaxWidth(),
             onLeave = {},
             isHost = true,
-            onEnd = {},
             actions = listOf(
                 BottomBarAction(
                     icon = vectorResource(Res.drawable.ic_send),
@@ -95,7 +86,7 @@ fun PreviewRoomDetailBottomBar() {
                     onClick = {}
                 ),
                 BottomBarAction(
-                    icon = vectorResource(Res.drawable.ic_more),
+                    icon = vectorResource(Res.drawable.ic_micoff),
                     contentDescription = "Mic",
                     onClick = {}
                 )

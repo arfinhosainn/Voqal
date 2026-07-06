@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -24,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ColorFilter.Companion.tint
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -74,10 +76,10 @@ fun RoomDetailTopBar(
 
 
             Icon(
-                imageVector = vectorResource(Res.drawable.ic_vert),
+                imageVector = Icons.Default.KeyboardArrowDown,
                 contentDescription = "Minimize",
                 tint = VoqalTheme.colors.onBackground,
-                modifier = Modifier.clickable { onMinimizeClick() }
+                modifier = Modifier.size(32.dp).clickable { onMinimizeClick() }
             )
 
     }
