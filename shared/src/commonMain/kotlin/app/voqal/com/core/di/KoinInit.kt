@@ -8,6 +8,7 @@ import org.koin.dsl.KoinAppDeclaration
 
 val appModules = listOf(
     permissionModule,
+    coreDataModule,
     onboardingPresentationModule,
     roomPresentationModule,
     roomDetailPresentationModule,

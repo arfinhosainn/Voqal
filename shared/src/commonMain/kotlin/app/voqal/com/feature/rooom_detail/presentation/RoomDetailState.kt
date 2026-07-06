@@ -12,5 +12,6 @@ data class RoomDetailState(
     val isMicrophoneEnabled: Boolean = false,
     val participants: List<ParticipantAvatarUiState> = emptyList(),
     val presentationState: RoomPresentationState = RoomPresentationState.Expanded,
-    val showEndRoomDialog: Boolean = false
+    val isEndRoomDialogVisible: Boolean = false,
+    val isRaiseHandSheetVisible: Boolean = false
 )

@@ -7,5 +7,11 @@ sealed interface RoomDetailAction {
     data object OnHandClick : RoomDetailAction
     data object OnMinimizeClick : RoomDetailAction
     data object OnExpandClick : RoomDetailAction
-    data object OnToggleEndRoomDialog : RoomDetailAction
+    
+    data object OnShowEndRoomDialog : RoomDetailAction
+    data object OnDismissEndRoomDialog : RoomDetailAction
+    
+    data object OnShowRaiseHandSheet : RoomDetailAction
+    data object OnDismissRaiseHandSheet : RoomDetailAction
+    data object OnConfirmRaiseHand : RoomDetailAction
 }

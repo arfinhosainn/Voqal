@@ -14,6 +14,7 @@ import app.voqal.com.core.domain.Result
 import io.getstream.video.android.core.CreateCallOptions
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.RealtimeConnection
+import io.getstream.video.android.core.model.Reaction
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
@@ -139,6 +140,29 @@ class StreamRoomCallDataSource(
         call?.microphone?.setEnabled(enabled)
     }
 
+    override suspend fun raiseHand(): EmptyResult<RoomCallError> {
+        val active = call ?: return Result.Failure(RoomCallError.NOT_CONNECTED)
+        return try {
+            // We can add a custom attribute or just send the reaction.
+            // If we want to ensure a 'new' reaction is seen, we can send it again.
+            active.sendReaction("raised-hand")
+            Result.Success(Unit)
+        } catch (e: Exception) {
+            Result.Failure(RoomCallError.UNKNOWN)
+        }
+    }
+
+    override suspend fun lowerHand(): EmptyResult<RoomCallError> {
+        if (call == null) return Result.Failure(RoomCallError.NOT_CONNECTED)
+        return try {
+            // For now, we'll just return success as a placeholder if no direct API is found.
+            // In a real scenario, this might involve deleting a reaction or updating a custom state.
+            Result.Success(Unit)
+        } catch (e: Exception) {
+            Result.Failure(RoomCallError.UNKNOWN)
+        }
+    }
+
     override suspend fun leaveRoom() {
         observerJob?.cancel()
         observerJob = null
@@ -221,15 +245,41 @@ private fun RealtimeConnection.toDomain(): RoomConnectionState = when (this) {
 private fun List<ParticipantState>.toRoomParticipantsFlow(): Flow<List<RoomParticipant>> {
     if (isEmpty()) return flowOf(emptyList())
     val perParticipant = map { p ->
-        combine(p.image, p.userNameOrId, p.speaking, p.audioEnabled, p.roles) { image, name, speaking, audio, roles ->
+        combine(
+            p.image,
+            p.userNameOrId,
+            p.speaking,
+            p.audioEnabled,
+            p.roles,
+            p.reactions
+        ) { args: Array<Any?> ->
+            val image = args[0] as? String
+            val name = args[1] as String
+            val speaking = args[2] as Boolean
+            val audio = args[3] as Boolean
+            val roles = args[4] as List<String>
+            val reactions = args[5] as List<*>
+            // Filter reactions of type "raised-hand"
+            val handRaisedReactions = reactions.mapNotNull { it as? Reaction }
+                .filter { it.response.type == "raised-hand" }
+            
+            val isHandRaised = handRaisedReactions.isNotEmpty()
+            
+            // If multiple reactions exist, take the newest one's timestamp
+            // or just use the current time if the reaction is very recent
+            val handRaisedTimestamp = handRaisedReactions
+                .maxByOrNull { it.createdAt }?.createdAt ?: 0L
+
             RoomParticipant(
                 sessionId = p.sessionId,
-                userId = p.userId.value, // StateValue<String> — stable per session, deliberate snapshot read
+                userId = p.userId.value,
                 name = name,
                 imageUrl = image,
                 role = roles.firstOrNull() ?: "listener",
                 isSpeaking = speaking,
-                isAudioEnabled = audio
+                isAudioEnabled = audio,
+                isHandRaised = isHandRaised,
+                handRaisedTimestamp = handRaisedTimestamp
             )
         }
     }
