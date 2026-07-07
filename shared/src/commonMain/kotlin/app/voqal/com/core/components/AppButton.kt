@@ -38,8 +38,7 @@ fun VoqalPrimaryButton(
 ) {
     Button(
         onClick = onClick,
-
-        modifier = modifier.wrapContentWidth(),
+        modifier = modifier,
         enabled = enabled && !loading,
         shape = shape,
         colors = colors,

@@ -132,11 +132,11 @@ private fun InviteToRoomDialogPreview() {
     VoqalTheme {
         InviteToRoomDialog(
             participants = listOf(
-                InviteParticipantUi(id = "1", name = "Alex", avatar = null),
-                InviteParticipantUi(id = "2", name = "Jordan", avatar = null),
-                InviteParticipantUi(id = "3", name = "Taylor", avatar = null),
-                InviteParticipantUi(id = "4", name = "Morgan", avatar = null),
-                InviteParticipantUi(id = "5", name = "Casey", avatar = null),
+                InviteParticipantUi(id = "1", name = "Alex", avatarUrl = null),
+                InviteParticipantUi(id = "2", name = "Jordan", avatarUrl = null),
+                InviteParticipantUi(id = "3", name = "Taylor", avatarUrl = null),
+                InviteParticipantUi(id = "4", name = "Morgan", avatarUrl = null),
+                InviteParticipantUi(id = "5", name = "Casey", avatarUrl = null),
             ),
             onDismissRequest = {},
             onSearchQueryChange = {},

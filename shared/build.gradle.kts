@@ -65,10 +65,16 @@ kotlin {
             implementation(libs.supabase.functions.kt)
             implementation(libs.realtime.kt)
 
+            implementation(libs.coil.compose)
+            implementation(libs.coil.network.ktor)
+
             implementation(libs.datastore)
             implementation(libs.datastore.preferences)
             api(libs.moko.permissions.core)
             api(libs.moko.permissions.microphone)
+            api(libs.moko.permissions.location)
+            api(libs.moko.permissions.notifications)
+            api(libs.moko.permissions.camera)
             api(libs.moko.permissions.compose)
 
         }

@@ -1,11 +1,12 @@
 package app.voqal.com.feature.room.domain
 
-import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.runtime.Immutable
 
+@Immutable
 data class InviteParticipantUi(
     val id: String,
     val name: String,
-    val avatar: Painter? = null,
+    val avatarUrl: String? = null,
     val isOnline: Boolean = true,
     val countryCode: String? = null
 )

@@ -83,7 +83,7 @@ fun MiniRoomBar(
                                 ParticipantUi(
                                     id = it.id,
                                     name = it.name,
-                                    avatar = it.avatar,
+                                    avatarUrl = it.avatarUrl,
                                     countryCode = it.countryCode
                                 )
                             },

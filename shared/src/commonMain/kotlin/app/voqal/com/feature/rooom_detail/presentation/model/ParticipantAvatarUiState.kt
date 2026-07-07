@@ -7,7 +7,7 @@ import androidx.compose.ui.graphics.painter.Painter
 data class ParticipantAvatarUiState(
     val id: String,
     val name: String,
-    val avatar: Painter?,
+    val avatarUrl: String?,
     val countryCode: String?,
     val micState: MicState,
     val isSpeaking: Boolean,
