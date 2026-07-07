@@ -85,14 +85,14 @@ fun RoomScreen(
     if (showInviteDialog) {
         InviteToRoomDialog(
             participants = listOf(
-                InviteParticipantUi(id = "1", name = "Alex", avatar = null),
-                InviteParticipantUi(id = "2", name = "Jordan", avatar = null),
-                InviteParticipantUi(id = "3", name = "Taylor", avatar = null),
-                InviteParticipantUi(id = "4", name = "Morgan", avatar = null),
-                InviteParticipantUi(id = "5", name = "Casey", avatar = null),
-                InviteParticipantUi(id = "6", name = "Riley", avatar = null),
-                InviteParticipantUi(id = "7", name = "Parker", avatar = null),
-                InviteParticipantUi(id = "8", name = "Quinn", avatar = null),
+                InviteParticipantUi(id = "1", name = "Alex", avatarUrl = null),
+                InviteParticipantUi(id = "2", name = "Jordan", avatarUrl = null),
+                InviteParticipantUi(id = "3", name = "Taylor", avatarUrl = null),
+                InviteParticipantUi(id = "4", name = "Morgan", avatarUrl = null),
+                InviteParticipantUi(id = "5", name = "Casey", avatarUrl = null),
+                InviteParticipantUi(id = "6", name = "Riley", avatarUrl = null),
+                InviteParticipantUi(id = "7", name = "Parker", avatarUrl = null),
+                InviteParticipantUi(id = "8", name = "Quinn", avatarUrl = null),
             ),
             onDismissRequest = { showInviteDialog = false }
         )

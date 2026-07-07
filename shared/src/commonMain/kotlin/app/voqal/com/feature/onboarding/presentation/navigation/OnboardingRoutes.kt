@@ -28,6 +28,12 @@ sealed interface OnboardingRoute {
     data object ChooseInterests : OnboardingRoute
 
     @Serializable
+    data object LocationPermission : OnboardingRoute
+
+    @Serializable
+    data object MicrophonePermission : OnboardingRoute
+
+    @Serializable
     data object RoomDetail : OnboardingRoute
 
     @Serializable

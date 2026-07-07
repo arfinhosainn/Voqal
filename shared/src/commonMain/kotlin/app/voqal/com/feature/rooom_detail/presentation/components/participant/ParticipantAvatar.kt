@@ -28,6 +28,7 @@ import app.voqal.com.core.designsystem.theme.VoqalTheme
 import app.voqal.com.core.presentation.util.CountryFlagResources
 import app.voqal.com.feature.rooom_detail.presentation.model.MicState
 import app.voqal.com.feature.rooom_detail.presentation.model.ParticipantAvatarUiState
+import coil3.compose.AsyncImage
 import org.jetbrains.compose.resources.painterResource
 import voqal.shared.generated.resources.Res
 import voqal.shared.generated.resources.ic_raisehand
@@ -73,9 +74,9 @@ private fun ParticipantAvatarContent(
 ) {
     Box(modifier = modifier.size(90.dp)) {
         // Avatar
-        if (state.avatar != null) {
-            Image(
-                painter = state.avatar,
+        if (state.avatarUrl != null) {
+            AsyncImage(
+                model = state.avatarUrl,
                 contentDescription = state.name,
                 modifier = Modifier
                     .size(90.dp)

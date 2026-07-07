@@ -24,6 +24,8 @@ import app.voqal.com.feature.onboarding.presentation.language.ChooseLanguageRoot
 import app.voqal.com.feature.onboarding.presentation.password.PasswordRoot
 import app.voqal.com.feature.onboarding.presentation.photo.AddPhotoRoot
 import app.voqal.com.feature.onboarding.presentation.username.PickUsernameRoot
+import app.voqal.com.feature.permission.presentation.PermissionRoot
+import app.voqal.com.core.permissions.domain.PermissionType
 import app.voqal.com.feature.rooom_detail.presentation.RoomDetailRoot
 import kotlinx.serialization.Serializable
 
@@ -156,15 +158,52 @@ fun NavGraphBuilder.onboardingNavGraph(
         ) {
             ChooseLanguageRoot(
                 onNavigateToNext = { chosenLanguage ->
-                    // You can optionally pass args using type-safe route configurations if needed
-                    navController.navigate(OnboardingRoute.ChooseInterests)
+                    navController.navigate(OnboardingRoute.LocationPermission)
                 },
                 onBack = { navController.popBackStack() },
                 modifier = modifier
             )
         }
 
-        // 7. User Interests Chip Selection Screen
+        // 7. Location Permission Screen
+        composable<OnboardingRoute.LocationPermission>(
+            enterTransition = enterTransition,
+            exitTransition = exitTransition,
+            popEnterTransition = popEnterTransition,
+            popExitTransition = popExitTransition
+        ) {
+            PermissionRoot(
+                permissionType = PermissionType.LOCATION,
+                emoji = "📍",
+                title = "share your location to discover local rooms",
+                description = "",
+                onPermissionHandled = {
+                    navController.navigate(OnboardingRoute.MicrophonePermission)
+                },
+                modifier = modifier
+            )
+        }
+
+        // 8. Microphone Permission Screen
+        composable<OnboardingRoute.MicrophonePermission>(
+            enterTransition = enterTransition,
+            exitTransition = exitTransition,
+            popEnterTransition = popEnterTransition,
+            popExitTransition = popExitTransition
+        ) {
+            PermissionRoot(
+                permissionType = PermissionType.MICROPHONE,
+                emoji = "🎙️",
+                title = "turn on your mic to join the conversation",
+                description = "",
+                onPermissionHandled = {
+                    navController.navigate(OnboardingRoute.ChooseInterests)
+                },
+                modifier = modifier
+            )
+        }
+
+        // 9. User Interests Chip Selection Screen
         composable<OnboardingRoute.ChooseInterests>(
             enterTransition = enterTransition,
             exitTransition = exitTransition,
@@ -173,7 +212,6 @@ fun NavGraphBuilder.onboardingNavGraph(
         ) {
             ChooseInterestsRoot(
                 onNavigateToNext = { selectedInterestIds ->
-                    // Onboarding flow concludes here, exit graph layout limits safely
                     onOnboardingComplete()
                 },
                 onBack = { navController.popBackStack() },

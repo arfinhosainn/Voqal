@@ -52,7 +52,9 @@ class SupabaseRoomDiscoveryRepository(
                             ParticipantUi(
                                 id = p.id,
                                 name = p.name,
-                                avatar = null, // Will be loaded by ImageRequest via path
+                                avatarUrl = p.avatarPath?.let { path ->
+                                    "https://bykulndzmnkfkgypgaae.supabase.co/storage/v1/object/public/avatars/$path"
+                                },
                                 countryCode = p.countryCode
                             )
                         },
