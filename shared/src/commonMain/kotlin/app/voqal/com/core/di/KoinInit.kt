@@ -1,5 +1,6 @@
 package app.voqal.com.core.di
 
+import app.voqal.com.feature.chat.di.chatModule
 import app.voqal.com.feature.onboarding.di.onboardingPresentationModule
 import app.voqal.com.feature.room.di.roomPresentationModule
 import app.voqal.com.feature.rooom_detail.di.roomDetailPresentationModule
@@ -10,6 +11,7 @@ val appModules = listOf(
     permissionModule,
     coreDataModule,
     onboardingPresentationModule,
+    chatModule,
     roomPresentationModule,
     roomDetailPresentationModule,
 )

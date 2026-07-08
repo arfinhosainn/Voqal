@@ -14,4 +14,8 @@ sealed interface RoomDetailAction {
     data object OnShowRaiseHandSheet : RoomDetailAction
     data object OnDismissRaiseHandSheet : RoomDetailAction
     data object OnConfirmRaiseHand : RoomDetailAction
+
+    data object OnChatClick : RoomDetailAction
+    data object OnShowChatSheet : RoomDetailAction
+    data object OnDismissChatSheet : RoomDetailAction
 }

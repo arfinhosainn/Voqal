@@ -5,6 +5,7 @@ import app.voqal.com.feature.rooom_detail.presentation.model.ParticipantAvatarUi
 import app.voqal.com.feature.rooom_detail.presentation.model.RoomPresentationState
 
 data class RoomDetailState(
+    val roomId: String = "",
     val title: String = "",
     val isLoading: Boolean = true,
     val isFailed: Boolean = false,
@@ -13,5 +14,6 @@ data class RoomDetailState(
     val participants: List<ParticipantAvatarUiState> = emptyList(),
     val presentationState: RoomPresentationState = RoomPresentationState.Expanded,
     val isEndRoomDialogVisible: Boolean = false,
-    val isRaiseHandSheetVisible: Boolean = false
+    val isRaiseHandSheetVisible: Boolean = false,
+    val isChatVisible: Boolean = false
 )
