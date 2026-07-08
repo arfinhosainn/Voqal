@@ -1,5 +1,6 @@
 package app.voqal.com.core.di
 
+import app.voqal.com.feature.chat.di.chatModule
 import app.voqal.com.feature.onboarding.di.onboardingPresentationModule
 import app.voqal.com.feature.permission.di.permissionPresentationModule
 import app.voqal.com.feature.room.di.roomPresentationModule

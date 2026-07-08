@@ -42,6 +42,7 @@ class RoomDetailViewModel(
     private val route = savedStateHandle.toRoute<OnboardingRoute.RoomDetailRoute>()
     private val _isEndRoomDialogVisible = MutableStateFlow(false)
     private val _isRaiseHandSheetVisible = MutableStateFlow(false)
+    private val _isChatSheetVisible = MutableStateFlow(false)
 
     val state: StateFlow<RoomDetailState> = combine(
         roomCallDataSource.connectionState,
@@ -51,6 +52,7 @@ class RoomDetailViewModel(
         roomCallDataSource.isHost
     ) { connection, info, participants, micEnabled, isHost ->
         RoomDetailState(
+            roomId = route.roomId,
             title = info.title.orEmpty(),
             isLoading = connection == RoomConnectionState.CONNECTING || connection == RoomConnectionState.RECONNECTING,
             isFailed = connection == RoomConnectionState.FAILED,
@@ -64,6 +66,8 @@ class RoomDetailViewModel(
         state.copy(isEndRoomDialogVisible = showDialog)
     }.combine(_isRaiseHandSheetVisible) { state, showSheet ->
         state.copy(isRaiseHandSheetVisible = showSheet)
+    }.combine(_isChatSheetVisible) { state, showChat ->
+        state.copy(isChatVisible = showChat)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), RoomDetailState())
 
     private val _events = Channel<RoomDetailEvent>()
@@ -169,6 +173,15 @@ class RoomDetailViewModel(
                 }.onFailure {
                     _isRaiseHandSheetVisible.update { false }
                 }
+            }
+            RoomDetailAction.OnChatClick -> {
+                _isChatSheetVisible.update { true }
+            }
+            RoomDetailAction.OnShowChatSheet -> {
+                _isChatSheetVisible.update { true }
+            }
+            RoomDetailAction.OnDismissChatSheet -> {
+                _isChatSheetVisible.update { false }
             }
         }
     }

@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.voqal.com.core.designsystem.theme.VoqalTheme
 import app.voqal.com.core.presentation.util.ObserveAsEvents
+import app.voqal.com.feature.chat.presentation.ChatBottomSheet
 import app.voqal.com.feature.rooom_detail.presentation.components.EndRoomDialog
 import app.voqal.com.feature.rooom_detail.presentation.components.RaiseHandSheet
 import app.voqal.com.feature.rooom_detail.presentation.components.RoomDetailTopBar
@@ -83,7 +84,8 @@ fun ExpandedRoomContent(
         BottomBarAction(
             icon = vectorResource(Res.drawable.ic_send),
             contentDescription = "Send",
-        ) { /* Keep as is or handle send */ },
+            onClick = { onAction(RoomDetailAction.OnChatClick) }
+        ),
         BottomBarAction(
             icon = vectorResource(Res.drawable.ic_hand),
             contentDescription = "Hand",
@@ -136,6 +138,12 @@ fun ExpandedRoomContent(
                 isVisible = state.isRaiseHandSheetVisible,
                 onDismiss = { onAction(RoomDetailAction.OnDismissRaiseHandSheet) },
                 onRaiseHand = { onAction(RoomDetailAction.OnConfirmRaiseHand) }
+            )
+
+            ChatBottomSheet(
+                roomId = state.roomId,
+                isVisible = state.isChatVisible,
+                onDismiss = { onAction(RoomDetailAction.OnDismissChatSheet) }
             )
 
             if (state.isLoading) {
