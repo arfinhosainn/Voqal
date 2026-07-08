@@ -31,6 +31,10 @@ moko = "0.20.1"
 coil = "3.4.0"
 
 
+
+
+
+
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-testJunit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
@@ -86,6 +90,9 @@ stream-video-compose-ui = { module = "io.getstream:stream-video-android-ui-compo
 
 moko-permissions-core = { module = "dev.icerock.moko:permissions", version.ref = "moko" }
 moko-permissions-microphone = { module = "dev.icerock.moko:permissions-microphone", version.ref = "moko" }
+moko-permissions-location = { module = "dev.icerock.moko:permissions-location", version.ref = "moko" }
+moko-permissions-notifications = { module = "dev.icerock.moko:permissions-notifications", version.ref = "moko" }
+moko-permissions-camera = { module = "dev.icerock.moko:permissions-camera", version.ref = "moko" }
 moko-permissions-compose = { module = "dev.icerock.moko:permissions-compose", version.ref = "moko" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 coil-network-ktor = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coil" }

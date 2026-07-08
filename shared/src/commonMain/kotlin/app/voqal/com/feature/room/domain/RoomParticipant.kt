@@ -19,7 +19,7 @@ data class RoomParticipant(
 fun RoomParticipant.toParticipantAvatarUiState(): ParticipantAvatarUiState = ParticipantAvatarUiState(
     id = sessionId,
     name = name,
-    avatar = null,
+    avatarUrl = imageUrl,
     countryCode = countryCode,
     micState = if (isAudioEnabled) MicState.ON else MicState.OFF,
     isSpeaking = isSpeaking,

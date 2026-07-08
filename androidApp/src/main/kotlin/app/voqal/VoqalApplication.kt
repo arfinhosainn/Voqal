@@ -2,7 +2,7 @@ package app.voqal
 
 
 import android.app.Application
-import app.voqal.com.core.di.initAndroidKoin
+import app.voqal.com.core.di.KoinInit
 import org.koin.android.ext.koin.androidContext
 
 class VoqalApplication : Application() {
@@ -10,7 +10,7 @@ class VoqalApplication : Application() {
         super.onCreate()
 
         // Starts ONCE and supplies the application context globally
-        initAndroidKoin {
+        KoinInit.initKoin {
             androidContext(this@VoqalApplication)
         }
     }

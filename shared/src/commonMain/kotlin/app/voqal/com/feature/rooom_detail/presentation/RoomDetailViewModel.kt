@@ -7,6 +7,8 @@ import androidx.navigation.toRoute
 import app.voqal.com.core.data.UserPreferencesDataSource
 import app.voqal.com.core.domain.onFailure
 import app.voqal.com.core.domain.onSuccess
+import app.voqal.com.core.permissions.domain.PermissionManager
+import app.voqal.com.core.permissions.domain.PermissionType
 import app.voqal.com.core.presentation.util.UiText
 import app.voqal.com.feature.onboarding.presentation.navigation.OnboardingRoute
 import app.voqal.com.feature.room.domain.RoomCallRemoteDataSource
@@ -17,9 +19,6 @@ import app.voqal.com.feature.room.domain.StreamRoomConnectionRepository
 import app.voqal.com.feature.room.domain.toParticipantAvatarUiState
 import app.voqal.com.feature.room.domain.toUiText
 import app.voqal.com.feature.rooom_detail.presentation.model.RoomPresentationState
-import dev.icerock.moko.permissions.Permission
-import dev.icerock.moko.permissions.PermissionsController
-import dev.icerock.moko.permissions.microphone.RECORD_AUDIO
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -36,7 +35,7 @@ class RoomDetailViewModel(
     private val connectionRepository: StreamRoomConnectionRepository,
     private val roomDiscoveryRepository: RoomDiscoveryRepository,
     private val userPreferencesDataSource: UserPreferencesDataSource,
-    val permissionsController: PermissionsController,
+    private val permissionManager: PermissionManager,
     private val presentationStore: RoomPresentationStore
 ) : ViewModel() {
 
@@ -85,12 +84,10 @@ class RoomDetailViewModel(
             }
 
             // 2. Ensure Microphone Permission is granted
-            try {
-                if (!permissionsController.isPermissionGranted(Permission.RECORD_AUDIO)) {
-                    permissionsController.providePermission(Permission.RECORD_AUDIO)
-                }
-            } catch (_: Exception) {
+            val permissionResult = permissionManager.request(PermissionType.MICROPHONE)
+            if (permissionResult != app.voqal.com.core.permissions.domain.PermissionResult.GRANTED) {
                 _events.send(RoomDetailEvent.ShowError(RoomCallError.MICROPHONE_PERMISSION_DENIED.toUiText()))
+                return@launch
             }
 
             // 3. Join the room
@@ -129,10 +126,10 @@ class RoomDetailViewModel(
                 _events.send(RoomDetailEvent.LeaveRoom)
             }
             RoomDetailAction.OnMicClick -> viewModelScope.launch {
-                try {
-                    permissionsController.providePermission(Permission.RECORD_AUDIO)
+                val result = permissionManager.request(PermissionType.MICROPHONE)
+                if (result == app.voqal.com.core.permissions.domain.PermissionResult.GRANTED) {
                     roomCallDataSource.setMicrophoneEnabled(!state.value.isMicrophoneEnabled)
-                } catch (e: Exception) {
+                } else {
                     _events.send(RoomDetailEvent.ShowError(RoomCallError.MICROPHONE_PERMISSION_DENIED.toUiText()))
                 }
             }

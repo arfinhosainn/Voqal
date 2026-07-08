@@ -72,6 +72,9 @@ kotlin {
             implementation(libs.datastore.preferences)
             api(libs.moko.permissions.core)
             api(libs.moko.permissions.microphone)
+            api(libs.moko.permissions.location)
+            api(libs.moko.permissions.notifications)
+            api(libs.moko.permissions.camera)
             api(libs.moko.permissions.compose)
 
         }
