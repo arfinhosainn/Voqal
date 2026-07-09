@@ -12,10 +12,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.outlined.InsertEmoticon
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,16 +27,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import app.voqal.com.core.designsystem.theme.VoqalTheme
-
-import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.outlined.InsertEmoticon
-import androidx.compose.material3.IconButton
 import androidx.compose.ui.unit.sp
+import app.voqal.com.core.designsystem.theme.VoqalTheme
 
 @Composable
 fun ChatInputBar(
@@ -49,7 +45,7 @@ fun ChatInputBar(
 ) {
     Surface(
         modifier = modifier.fillMaxWidth(),
-        color = Color.Transparent
+        color = VoqalTheme.extendedColors.chip
     ) {
         Row(
             modifier = Modifier
@@ -118,7 +114,7 @@ fun ChatInputBar(
                 onClick = onSendClick,
                 enabled = enabled && message.isNotBlank(),
                 shape = CircleShape,
-                color = if (message.isNotBlank()) VoqalTheme.colors.primary else VoqalTheme.colors.surface
+                color = VoqalTheme.colors.surface
             ) {
                 Box(
                     contentAlignment = Alignment.Center
@@ -143,9 +139,9 @@ private fun AttachButton(
 ) {
 
     Surface(
-        modifier = Modifier.size(35.dp),
+        modifier = Modifier.size(45.dp),
         shape = CircleShape,
-        color = VoqalTheme.colors.surface,
+        color = VoqalTheme.extendedColors.chip,
         onClick = onClick
     ) {
 
@@ -155,13 +151,14 @@ private fun AttachButton(
 
             Icon(
                 imageVector = Icons.Default.Add,
-                contentDescription = "Attach"
+                contentDescription = "Attach",
+                modifier = Modifier.size(25.dp)
             )
         }
     }
 }
 
-@Preview
+@PreviewLightDark
 @Composable
 private fun ChatInputBarPreview() {
 

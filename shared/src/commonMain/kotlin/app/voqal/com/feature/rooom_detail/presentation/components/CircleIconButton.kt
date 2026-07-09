@@ -26,7 +26,7 @@ fun CircleIconButton(
         modifier = modifier.size(54.dp),
         onClick = onClick,
         colors = IconButtonDefaults.filledIconButtonColors(
-            containerColor = VoqalTheme.extendedColors.chip
+            containerColor = VoqalTheme.colors.surface
         )
     ) {
         Icon(

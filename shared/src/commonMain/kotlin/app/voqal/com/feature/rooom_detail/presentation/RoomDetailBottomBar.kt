@@ -28,38 +28,50 @@ fun RoomDetailBottomBar(
     isHost: Boolean = false,
     onLeave: () -> Unit,
 ) {
-
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(30.dp),
-        color = VoqalTheme.colors.background
+        color = VoqalTheme.colors.background,
+        shadowElevation = 0.dp,
+        tonalElevation = 0.dp
     ) {
+        RoomBottomBarContent(
+            actions = actions,
+            isHost = isHost,
+            onLeave = onLeave
+        )
+    }
+}
+
+@Composable
+fun RoomBottomBarContent(
+    actions: List<BottomBarAction>,
+    isHost: Boolean = false,
+    onLeave: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .padding(horizontal = 22.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        LeaveButton(
+            onClick = onLeave
+        )
 
         Row(
-            modifier = Modifier
-                .padding(horizontal = 22.dp, vertical = 20.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
+            modifier = Modifier.weight(0.5f),
+            horizontalArrangement = Arrangement.SpaceAround,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-
-            LeaveButton(
-                modifier = modifier,
-                onClick = onLeave
-            )
-
-            Row(
-                modifier = Modifier.weight(0.5f),
-                horizontalArrangement = Arrangement.SpaceAround,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                actions.forEach { action ->
-                    CircleIconButton(
-                        icon = action.icon,
-                        contentDescription = action.contentDescription,
-                        onClick = action.onClick,
-                        modifier = Modifier.padding(start = 8.dp)
-                    )
-                }
+            actions.forEach { action ->
+                CircleIconButton(
+                    icon = action.icon,
+                    contentDescription = action.contentDescription,
+                    onClick = action.onClick,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
             }
         }
     }
