@@ -16,36 +16,37 @@ import app.voqal.com.feature.chat.presentation.model.ChatMessageUi
 fun ChatMessages(
     messages: List<ChatMessageUi>,
     listState: LazyListState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isPeek: Boolean = false
 ) {
+    val displayMessages = if (isPeek) messages.take(2) else messages
+
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         state = listState,
         reverseLayout = true,
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 20.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+        contentPadding = PaddingValues(
+            horizontal = 16.dp, 
+            vertical = if (isPeek) 8.dp else 20.dp
+        ),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        userScrollEnabled = !isPeek
     ) {
         itemsIndexed(
-            items = messages,
+            items = displayMessages,
             key = { _, message -> message.id }
         ) { index, message ->
             
             // Dynamic Grouping Logic
-            val nextMessage = if (index > 0) messages[index - 1] else null
-            val isNextFromSameSender = nextMessage?.senderId == message.senderId
-            
-            // Determine if we should show avatar and name
-            // In reverseLayout, index 0 is the newest message (bottom)
-            // Grouping logic: if the message ABOVE (higher index in reverse) is from same sender, hide avatar
-            val previousMessage = if (index < messages.lastIndex) messages[index + 1] else null
+            val previousMessage = if (index < displayMessages.lastIndex) displayMessages[index + 1] else null
             val isFirstInGroup = previousMessage?.senderId != message.senderId
 
             ChatBubble(
                 message = message,
-                showAvatar = isFirstInGroup,
-                showSenderName = isFirstInGroup,
+                showAvatar = isFirstInGroup && !isPeek, // Hide avatars in peek for more space
+                showSenderName = isFirstInGroup && !isPeek,
                 modifier = Modifier.padding(
-                    top = if (isFirstInGroup && index < messages.lastIndex) 8.dp else 0.dp
+                    top = if (isFirstInGroup && index < displayMessages.lastIndex) 8.dp else 0.dp
                 )
             )
         }

@@ -13,6 +13,7 @@ val appModules = listOf(
     coreDataModule,
     onboardingPresentationModule,
     permissionPresentationModule,
+    chatModule,
     roomPresentationModule,
     roomDetailPresentationModule,
 )
