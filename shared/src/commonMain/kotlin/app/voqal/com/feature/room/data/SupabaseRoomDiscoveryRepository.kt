@@ -29,6 +29,7 @@ class SupabaseRoomDiscoveryRepository(
 
     override fun getRoomsFlow(): Flow<List<NewsRoomUi>> = channelFlow {
         println("DEBUG: ROOM FLOW STARTING")
+
         // 1. Initial fetch from the view
         suspend fun fetchRooms() {
             try {
@@ -70,7 +71,9 @@ class SupabaseRoomDiscoveryRepository(
         fetchRooms()
 
         // 2. Real-time updates
-        val channel = supabaseClient.channel("rooms_discovery")
+        // Use unique suffix to avoid collision with stale channels from previous subscriptions
+        val channelName = "rooms_discovery_${kotlin.random.Random.nextLong()}"
+        val channel = supabaseClient.channel(channelName)
         val roomChanges = channel.postgresChangeFlow<PostgresAction>(schema = "public") { table = "rooms" }
         val sessionChanges = channel.postgresChangeFlow<PostgresAction>(schema = "public") { table = "room_sessions" }
 
