@@ -5,12 +5,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import app.voqal.com.core.data.UserPreferencesDataSource
+import app.voqal.com.core.domain.Result
 import app.voqal.com.core.domain.onFailure
 import app.voqal.com.core.domain.onSuccess
 import app.voqal.com.core.permissions.domain.PermissionManager
 import app.voqal.com.core.permissions.domain.PermissionType
 import app.voqal.com.core.presentation.util.UiText
-import app.voqal.com.feature.onboarding.presentation.navigation.OnboardingRoute
 import app.voqal.com.feature.room.domain.RoomCallRemoteDataSource
 import app.voqal.com.feature.room.domain.RoomConnectionState
 import app.voqal.com.feature.room.domain.RoomCallError
@@ -19,6 +19,7 @@ import app.voqal.com.feature.room.domain.StreamRoomConnectionRepository
 import app.voqal.com.feature.room.domain.toParticipantAvatarUiState
 import app.voqal.com.feature.room.domain.toUiText
 import app.voqal.com.feature.rooom_detail.presentation.model.RoomPresentationState
+import app.voqal.com.feature.rooom_detail.presentation.navigation.RoomDetailRoute
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -39,7 +40,7 @@ class RoomDetailViewModel(
     private val presentationStore: RoomPresentationStore
 ) : ViewModel() {
 
-    private val route = savedStateHandle.toRoute<OnboardingRoute.RoomDetailRoute>()
+    private val route = savedStateHandle.toRoute<RoomDetailRoute>()
     private val _isEndRoomDialogVisible = MutableStateFlow(false)
     private val _isRaiseHandSheetVisible = MutableStateFlow(false)
     private val _isChatSheetVisible = MutableStateFlow(false)
@@ -68,7 +69,7 @@ class RoomDetailViewModel(
         state.copy(isRaiseHandSheetVisible = showSheet)
     }.combine(_isChatSheetVisible) { state, showChat ->
         state.copy(isChatVisible = showChat)
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), RoomDetailState())
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), RoomDetailState(roomId = route.roomId))
 
     private val _events = Channel<RoomDetailEvent>()
     val events = _events.receiveAsFlow()
@@ -78,7 +79,7 @@ class RoomDetailViewModel(
         viewModelScope.launch {
             // 1. Ensure user is connected to Stream
             val connectionResult = connectionRepository.ensureUserConnected()
-            if (connectionResult is app.voqal.com.core.domain.Result.Failure) {
+            if (connectionResult is Result.Error) {
                 _events.send(RoomDetailEvent.ShowError(connectionResult.error.toUiText()))
                 return@launch
             }

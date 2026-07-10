@@ -7,7 +7,6 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import app.voqal.com.feature.chat.presentation.components.ChatInputBar
@@ -21,7 +20,7 @@ import app.voqal.com.feature.rooom_detail.presentation.RoomBottomBarContent
 fun TransformingChatLayout(
     transition: TransformingSheetTransition,
     chatState: ChatUiState,
-    onChatEvent: (ChatEvent) -> Unit,
+    onChatAction: (ChatAction) -> Unit,
     roomActions: List<BottomBarAction>,
     isHost: Boolean,
     onLeaveRoom: () -> Unit,
@@ -60,7 +59,7 @@ fun TransformingChatLayout(
                     }
             ) {
                 ChatTopBar(
-                    onCollapseClick = { onChatEvent(ChatEvent.Dismiss) }
+                    onCollapseClick = { onChatAction(ChatAction.Dismiss) }
                 )
             }
         }
@@ -96,10 +95,10 @@ fun TransformingChatLayout(
             ) {
                 ChatInputBar(
                     message = chatState.input,
-                    onMessageChange = { onChatEvent(ChatEvent.InputChanged(it)) },
-                    onAttachClick = { onChatEvent(ChatEvent.OpenAttachment) },
-                    onSendClick = { onChatEvent(ChatEvent.Send) },
-                    onEmojiClick = { onChatEvent(ChatEvent.OpenEmoji) },
+                    onMessageChange = { onChatAction(ChatAction.InputChanged(it)) },
+                    onAttachClick = { onChatAction(ChatAction.OpenAttachment) },
+                    onSendClick = { onChatAction(ChatAction.Send) },
+                    onEmojiClick = { onChatAction(ChatAction.OpenEmoji) },
                     enabled = !chatState.isSending
                 )
             }

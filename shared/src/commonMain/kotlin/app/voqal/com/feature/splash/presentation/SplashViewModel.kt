@@ -37,7 +37,7 @@ class SplashViewModel(
                         _events.send(SplashEvent.NotAuthenticated)
                     }
                 }
-                is Result.Failure -> {
+                is Result.Error -> {
                     println("Splash: Check failed with error ${result.error}")
                     _events.send(SplashEvent.NotAuthenticated)
                 }

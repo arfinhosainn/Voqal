@@ -117,7 +117,7 @@ class SupabaseRoomDiscoveryRepository(
             Result.Success(Unit)
         } catch (e: Exception) {
             e.printStackTrace()
-            Result.Failure(RoomCallError.UNKNOWN)
+            Result.Error(RoomCallError.UNKNOWN)
         }
     }
 
@@ -129,7 +129,7 @@ class SupabaseRoomDiscoveryRepository(
             Result.Success(Unit)
         } catch (e: Exception) {
             e.printStackTrace()
-            Result.Failure(RoomCallError.UNKNOWN)
+            Result.Error(RoomCallError.UNKNOWN)
         }
     }
 
@@ -141,7 +141,7 @@ class SupabaseRoomDiscoveryRepository(
             Result.Success(Unit)
         } catch (e: Exception) {
             e.printStackTrace()
-            Result.Failure(RoomCallError.UNKNOWN)
+            Result.Error(RoomCallError.UNKNOWN)
         }
     }
 
@@ -153,7 +153,7 @@ class SupabaseRoomDiscoveryRepository(
             Result.Success(Unit)
         } catch (e: Exception) {
             e.printStackTrace()
-            Result.Failure(RoomCallError.UNKNOWN)
+            Result.Error(RoomCallError.UNKNOWN)
         }
     }
 }

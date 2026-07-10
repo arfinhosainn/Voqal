@@ -54,7 +54,7 @@ class StreamVideoConnectionManager(
             currentUserId = userId
             Result.Success(built)
         } catch (@Suppress("UNUSED_PARAMETER") e: Exception) {
-            Result.Failure(RoomCallError.UNKNOWN)
+            Result.Error(RoomCallError.UNKNOWN)
         }
     }
 

@@ -5,5 +5,5 @@ import kotlinx.coroutines.flow.Flow
 
 interface ChatRemoteDataSource {
     fun observeMessages(roomId: String): Flow<List<ChatMessageDto>>
-    suspend fun sendMessage(roomId: String, text: String)
+    suspend fun sendMessage(roomId: String, userId: String, text: String)
 }

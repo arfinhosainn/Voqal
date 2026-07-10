@@ -10,7 +10,7 @@ import app.voqal.com.feature.room.domain.StreamRoomConnectionRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-class ChatRepositoryImpl(
+class SupabaseChatRepository(
     private val remoteDataSource: ChatRemoteDataSource,
     private val connectionRepository: StreamRoomConnectionRepository
 ) : ChatRepository {
@@ -22,13 +22,13 @@ class ChatRepositoryImpl(
         }
     }
 
-    override suspend fun sendMessage(roomId: String, text: String): Result<Unit, ChatError> {
+    override suspend fun sendMessage(roomId: String, userId: String, text: String): Result<Unit, ChatError> {
         return try {
-            remoteDataSource.sendMessage(roomId, text)
+            remoteDataSource.sendMessage(roomId, userId, text)
             Result.Success(Unit)
         } catch (e: Exception) {
             e.printStackTrace()
-            Result.Failure(ChatError.NETWORK)
+            Result.Error(ChatError.NETWORK)
         }
     }
 

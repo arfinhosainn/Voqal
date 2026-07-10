@@ -26,7 +26,6 @@ import app.voqal.com.feature.onboarding.presentation.photo.AddPhotoRoot
 import app.voqal.com.feature.onboarding.presentation.username.PickUsernameRoot
 import app.voqal.com.feature.permission.presentation.PermissionRoot
 import app.voqal.com.core.permissions.domain.PermissionType
-import app.voqal.com.feature.rooom_detail.presentation.RoomDetailRoot
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -216,13 +215,6 @@ fun NavGraphBuilder.onboardingNavGraph(
                 },
                 onBack = { navController.popBackStack() },
                 modifier = modifier
-            )
-        }
-
-
-        composable<OnboardingRoute.RoomDetailRoute> {
-            RoomDetailRoot(
-                onLeave = { navController.popBackStack() }
             )
         }
     }

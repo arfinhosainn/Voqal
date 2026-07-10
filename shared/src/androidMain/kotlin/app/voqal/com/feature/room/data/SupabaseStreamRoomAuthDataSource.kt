@@ -28,7 +28,7 @@ class SupabaseStreamRoomAuthDataSource(
     override suspend fun getStreamToken(): EmptyResult<RoomCallError> {
         return try {
             val userId = supabaseClient.auth.currentUserOrNull()?.id
-                ?: return Result.Failure(RoomCallError.NOT_CONNECTED)
+                ?: return Result.Error(RoomCallError.NOT_CONNECTED)
 
             // Call Supabase Edge Function to generate Stream Video token
             val response = supabaseClient.functions.invoke(
@@ -38,7 +38,7 @@ class SupabaseStreamRoomAuthDataSource(
 
             Result.Success(Unit)
         } catch (e: Exception) {
-            Result.Failure(RoomCallError.UNKNOWN)
+            Result.Error(RoomCallError.UNKNOWN)
         }
     }
 }

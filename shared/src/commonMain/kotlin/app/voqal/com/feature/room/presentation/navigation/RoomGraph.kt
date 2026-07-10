@@ -5,11 +5,10 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import app.voqal.com.feature.onboarding.presentation.navigation.OnboardingRoute
 import app.voqal.com.feature.room.presentation.RoomRoot
 
 fun NavGraphBuilder.roomGraph(
-    navController: NavController,
+    onNavigateToRoom: (roomId: String, asHost: Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
     navigation<RoomGraph>(
@@ -18,10 +17,10 @@ fun NavGraphBuilder.roomGraph(
         composable<RoomRoute.Rooms> {
             RoomRoot(
                 onRoomCreated = { roomId ->
-                    navController.navigate(OnboardingRoute.RoomDetailRoute(roomId = roomId, asHost = true))
+                    onNavigateToRoom(roomId, true)
                 },
                 onRoomClick = { roomId ->
-                    navController.navigate(OnboardingRoute.RoomDetailRoute(roomId = roomId, asHost = false))
+                    onNavigateToRoom(roomId, false)
                 },
                 modifier = modifier
             )

@@ -36,6 +36,7 @@ import app.voqal.com.feature.rooom_detail.presentation.RoomDetailRoot
 import app.voqal.com.feature.rooom_detail.presentation.RoomPresentationStore
 import app.voqal.com.feature.rooom_detail.presentation.components.MiniRoomBar
 import app.voqal.com.feature.rooom_detail.presentation.model.RoomPresentationState
+import app.voqal.com.feature.rooom_detail.presentation.navigation.RoomDetailRoute
 import app.voqal.com.feature.splash.presentation.SplashScreen
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -77,7 +78,7 @@ fun AppNavHost(
     }
 
     val startDestination = if (initialRoomId != null) {
-        OnboardingRoute.RoomDetailRoute(roomId = initialRoomId, asHost = false)
+        RoomDetailRoute(roomId = initialRoomId, asHost = false)
     } else {
         SplashRoute
     }
@@ -108,11 +109,11 @@ fun AppNavHost(
                     .fillMaxSize()
                     .padding(innerPadding)
             ) {
-                composable<OnboardingRoute.RoomDetailRoute> {
+                composable<RoomDetailRoute> {
                     RoomDetailRoot(
                         onLeave = {
                             navController.navigate(RoomGraph) {
-                                popUpTo(OnboardingRoute.RoomDetailRoute(roomId = "", asHost = false)) {
+                                popUpTo(RoomDetailRoute(roomId = "", asHost = false)) {
                                     inclusive = true
                                 }
                             }
@@ -147,7 +148,9 @@ fun AppNavHost(
                 )
 
                 roomGraph(
-                    navController = navController,
+                    onNavigateToRoom = { roomId, asHost ->
+                        navController.navigate(RoomDetailRoute(roomId = roomId, asHost = asHost))
+                    }
                 )
             }
 
@@ -166,7 +169,7 @@ fun AppNavHost(
                 onRoomClick = {
                     activeRoomId?.let { roomId ->
                         presentationStore.expand(roomId)
-                        navController.navigate(OnboardingRoute.RoomDetailRoute(roomId = roomId, asHost = false))
+                        navController.navigate(RoomDetailRoute(roomId = roomId, asHost = false))
                     }
                 },
                 onSendClick = {
@@ -177,7 +180,7 @@ fun AppNavHost(
             ) {
                     activeRoomId?.let { roomId ->
                         presentationStore.expand(roomId)
-                        navController.navigate(OnboardingRoute.RoomDetailRoute(roomId = roomId, asHost = false))
+                        navController.navigate(RoomDetailRoute(roomId = roomId, asHost = false))
                     }
                 }
             }

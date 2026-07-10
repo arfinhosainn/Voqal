@@ -36,7 +36,7 @@ class StreamVideoSessionManager(
         currentUserId = userId
         Result.Success(built)
     } catch (e: Exception) {
-        Result.Failure(RoomCallError.UNKNOWN)
+        Result.Error(RoomCallError.UNKNOWN)
     }
 
     fun currentClient(): StreamVideo? = client
