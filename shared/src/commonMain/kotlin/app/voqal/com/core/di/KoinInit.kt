@@ -4,7 +4,11 @@ import app.voqal.com.feature.chat.di.chatModule
 import app.voqal.com.feature.onboarding.di.onboardingPresentationModule
 import app.voqal.com.feature.permission.di.permissionPresentationModule
 import app.voqal.com.feature.room.di.roomPresentationModule
+import app.voqal.com.feature.room.domain.RoomRecoveryManager
 import app.voqal.com.feature.rooom_detail.di.roomDetailPresentationModule
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import org.koin.core.Koin
 import org.koin.core.context.startKoin
 import org.koin.dsl.KoinAppDeclaration
 
@@ -24,3 +28,13 @@ expect object KoinInit {
 }
 
 fun initKoin(config: KoinAppDeclaration? = null) = KoinInit.initKoin(config)
+
+fun runRoomRecovery(koin: Koin) {
+    GlobalScope.launch {
+        try {
+            koin.get<RoomRecoveryManager>().recover()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+}

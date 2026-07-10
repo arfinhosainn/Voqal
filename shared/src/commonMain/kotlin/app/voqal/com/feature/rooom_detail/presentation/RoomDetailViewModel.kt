@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import app.voqal.com.core.data.StoredRoomData
 import app.voqal.com.core.data.UserPreferencesDataSource
 import app.voqal.com.core.domain.Result
 import app.voqal.com.core.domain.onFailure
@@ -28,7 +29,9 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class RoomDetailViewModel(
     savedStateHandle: SavedStateHandle,
@@ -95,6 +98,13 @@ class RoomDetailViewModel(
             roomCallDataSource.joinRoom(roomId = route.roomId, asHost = route.asHost)
                 .onSuccess {
                     roomDiscoveryRepository.joinRoom(route.roomId)
+                    userPreferencesDataSource.setStoredRoom(
+                        StoredRoomData(
+                            roomId = route.roomId,
+                            wasHost = route.asHost,
+                            createdAt = kotlin.time.Clock.System.now().toEpochMilliseconds()
+                        )
+                    )
                 }
                 .onFailure { error ->
                     _events.send(RoomDetailEvent.ShowError(error.toUiText()))
@@ -108,6 +118,7 @@ class RoomDetailViewModel(
                 if (state.value.isHost) {
                     _isEndRoomDialogVisible.update { true }
                 } else {
+                    userPreferencesDataSource.setStoredRoom(null)
                     presentationStore.clear()
                     roomDiscoveryRepository.leaveRoom(route.roomId)
                     roomCallDataSource.leaveRoom()
@@ -115,6 +126,7 @@ class RoomDetailViewModel(
                 }
             }
             RoomDetailAction.OnEndClick -> viewModelScope.launch {
+                userPreferencesDataSource.setStoredRoom(null)
                 presentationStore.clear()
                 // Host ending the room always deletes the card
                 roomDiscoveryRepository.leaveRoom(route.roomId)
@@ -184,6 +196,30 @@ class RoomDetailViewModel(
             RoomDetailAction.OnDismissChatSheet -> {
                 _isChatSheetVisible.update { false }
             }
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        viewModelScope.launch {
+            withContext(NonCancellable) {
+                leaveCurrentRoom()
+            }
+        }
+    }
+
+    private suspend fun leaveCurrentRoom() {
+        try {
+            if (roomCallDataSource.isHost.value) {
+                roomDiscoveryRepository.deleteRoom(route.roomId)
+                roomCallDataSource.endRoom()
+            } else {
+                roomCallDataSource.leaveRoom()
+            }
+            roomDiscoveryRepository.leaveRoom(route.roomId)
+            presentationStore.clear()
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 }

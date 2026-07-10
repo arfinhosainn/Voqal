@@ -6,10 +6,11 @@ import org.koin.dsl.KoinAppDeclaration
 
 actual object KoinInit {
     actual fun initKoin(config: KoinAppDeclaration?) {
-        startKoin {
+        val koin = startKoin {
             config?.invoke(this)
             modules(appModules + roomDataAndroidModule)
-        }
+        }.koin
+        runRoomRecovery(koin)
     }
 
     actual fun doInitKoin() {
