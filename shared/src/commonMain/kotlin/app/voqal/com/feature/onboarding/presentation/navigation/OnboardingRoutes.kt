@@ -1,7 +1,5 @@
 package app.voqal.com.feature.onboarding.presentation.navigation
 
-
-
 import kotlinx.serialization.Serializable
 
 sealed interface OnboardingRoute {
@@ -35,8 +33,5 @@ sealed interface OnboardingRoute {
 
     @Serializable
     data object RoomDetail : OnboardingRoute
-
-    @Serializable
-    data class RoomDetailRoute(val roomId: String, val asHost: Boolean = false)
 
 }

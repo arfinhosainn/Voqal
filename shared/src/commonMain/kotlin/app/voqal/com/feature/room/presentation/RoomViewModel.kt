@@ -2,6 +2,7 @@ package app.voqal.com.feature.room.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.voqal.com.core.domain.Result
 import app.voqal.com.core.utils.UuidUtils
 import app.voqal.com.core.domain.onFailure
 import app.voqal.com.core.domain.onSuccess
@@ -15,13 +16,11 @@ import app.voqal.com.feature.room.presentation.model.RoomType
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlin.random.Random
 
 data class RoomState(
     val showRoomTypeSheet: Boolean = false,
@@ -74,7 +73,7 @@ class RoomViewModel(
                 // 1. Ensure user is connected to Stream
                 val connectionResult = connectionRepository.ensureUserConnected()
                 
-                if (connectionResult is app.voqal.com.core.domain.Result.Failure) {
+                if (connectionResult is Result.Error) {
                     _state.update { it.copy(isCreatingRoom = false) }
                     _events.send(RoomEvent.Error(connectionResult.error.toUiText()))
                     return@launch

@@ -63,7 +63,7 @@ class PasswordViewModel(
                     // Critical: Ensure the profile (and email) is saved to the database IMMEDIATELY
                     // after successful sign-up/sign-in so that future checks find it.
                     val ensureResult = onboardingProfileDataSource.ensureProfileExists()
-                    if (ensureResult is Result.Failure) {
+                    if (ensureResult is Result.Error) {
                         _state.update { 
                             it.copy(
                                 isSubmitting = false,
@@ -81,7 +81,7 @@ class PasswordViewModel(
                     _state.update { it.copy(isSubmitting = false) }
                     _events.send(PasswordEvent.NavigateToNext(step))
                 }
-                is Result.Failure -> {
+                is Result.Error -> {
                     _state.update { 
                         it.copy(
                             isSubmitting = false,

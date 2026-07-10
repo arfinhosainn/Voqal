@@ -18,7 +18,7 @@ import app.voqal.com.feature.chat.presentation.components.ChatTopBar
 @Composable
 fun ChatContent(
     state: ChatUiState,
-    onEvent: (ChatEvent) -> Unit,
+    onEvent: (ChatAction) -> Unit,
     modifier: Modifier = Modifier
 ) {
 
@@ -45,7 +45,7 @@ fun ChatContent(
 
             ChatTopBar(
                 onCollapseClick = {
-                    onEvent(ChatEvent.Dismiss)
+                    onEvent(ChatAction.Dismiss)
                 }
             )
 
@@ -67,16 +67,16 @@ fun ChatContent(
             ChatInputBar(
                 message = state.input,
                 onMessageChange = {
-                    onEvent(ChatEvent.InputChanged(it))
+                    onEvent(ChatAction.InputChanged(it))
                 },
                 onAttachClick = {
-                    onEvent(ChatEvent.OpenAttachment)
+                    onEvent(ChatAction.OpenAttachment)
                 },
                 onEmojiClick = {
-                    onEvent(ChatEvent.OpenEmoji)
+                    onEvent(ChatAction.OpenEmoji)
                 },
                 onSendClick = {
-                    onEvent(ChatEvent.Send)
+                    onEvent(ChatAction.Send)
                 },
                 enabled = !state.isSending
             )

@@ -13,7 +13,6 @@ import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.exceptions.HttpRequestException
 import io.github.jan.supabase.exceptions.RestException
-import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.postgrest.rpc
@@ -31,7 +30,7 @@ class SupabaseOnboardingProfileDataSource(
 
     override suspend fun getOnboardingStep(): Result<Int?, OnboardingProfileError> {
         if (!supabaseConfig.isConfigured) {
-            return Result.Failure(OnboardingProfileError.NotConfigured)
+            return Result.Error(OnboardingProfileError.NotConfigured)
         }
 
         return try {
@@ -65,7 +64,7 @@ class SupabaseOnboardingProfileDataSource(
             Result.Success(profile?.onboardingStep)
         } catch (throwable: Throwable) {
             println("Splash Check Error: ${throwable.message}")
-            Result.Failure(throwable.toOnboardingProfileError())
+            Result.Error(throwable.toOnboardingProfileError())
         }
     }
 
@@ -83,7 +82,7 @@ class SupabaseOnboardingProfileDataSource(
             )
             Result.Success(Unit)
         } catch (throwable: Throwable) {
-            Result.Failure(throwable.toOnboardingProfileError())
+            Result.Error(throwable.toOnboardingProfileError())
         }
     }
 
@@ -104,7 +103,7 @@ class SupabaseOnboardingProfileDataSource(
         username: String
     ): Result<Boolean, OnboardingProfileError> {
         if (!supabaseConfig.isConfigured) {
-            return Result.Failure(OnboardingProfileError.NotConfigured)
+            return Result.Error(OnboardingProfileError.NotConfigured)
         }
 
         return try {
@@ -121,7 +120,7 @@ class SupabaseOnboardingProfileDataSource(
 
             Result.Success(existingProfiles.none { it.id != userId })
         } catch (throwable: Throwable) {
-            Result.Failure(throwable.toOnboardingProfileError())
+            Result.Error(throwable.toOnboardingProfileError())
         }
     }
 
@@ -129,10 +128,10 @@ class SupabaseOnboardingProfileDataSource(
         val normalizedUsername = username.trim().lowercase()
 
         return when (val availability = isUsernameAvailable(normalizedUsername)) {
-            is Result.Failure -> availability
+            is Result.Error -> availability
             is Result.Success -> {
                 if (!availability.data) {
-                    Result.Failure(OnboardingProfileError.UsernameTaken)
+                    Result.Error(OnboardingProfileError.UsernameTaken)
                 } else {
                     updateProfile(
                         ProfileUpdateDto(
@@ -169,7 +168,7 @@ class SupabaseOnboardingProfileDataSource(
                 )
             )
         } catch (throwable: Throwable) {
-            Result.Failure(throwable.toOnboardingProfileError())
+            Result.Error(throwable.toOnboardingProfileError())
         }
     }
 
@@ -203,7 +202,7 @@ class SupabaseOnboardingProfileDataSource(
 
             Result.Success(Unit)
         } catch (throwable: Throwable) {
-            Result.Failure(throwable.toOnboardingProfileError())
+            Result.Error(throwable.toOnboardingProfileError())
         }
     }
 
@@ -221,7 +220,7 @@ class SupabaseOnboardingProfileDataSource(
                 }
             Result.Success(Unit)
         } catch (throwable: Throwable) {
-            Result.Failure(throwable.toOnboardingProfileError())
+            Result.Error(throwable.toOnboardingProfileError())
         }
     }
 

@@ -83,7 +83,7 @@ class ChooseInterestsViewModel(
 
             // 2. Ensure Profile exists
             val ensureResult = onboardingProfileDataSource.ensureProfileExists()
-            if (ensureResult is Result.Failure) {
+            if (ensureResult is Result.Error) {
                 _state.update { it.copy(isSubmitting = false) }
                 _events.send(ChooseInterestsEvent.ShowSnackbar("Profile Error: ${ensureResult.error.toUserMessage()}"))
                 return@launch
@@ -91,14 +91,14 @@ class ChooseInterestsViewModel(
 
             // 3. Update all collected data
             val nameResult = onboardingProfileDataSource.updateFullName(draft.firstName, draft.lastName)
-            if (nameResult is Result.Failure) {
+            if (nameResult is Result.Error) {
                 _state.update { it.copy(isSubmitting = false) }
                 _events.send(ChooseInterestsEvent.ShowSnackbar("Name Update Error: ${nameResult.error.toUserMessage()}"))
                 return@launch
             }
 
             val usernameResult = onboardingProfileDataSource.updateUsername(draft.username)
-            if (usernameResult is Result.Failure) {
+            if (usernameResult is Result.Error) {
                 _state.update { it.copy(isSubmitting = false) }
                 _events.send(ChooseInterestsEvent.ShowSnackbar("Username Update Error: ${usernameResult.error.toUserMessage()}"))
                 return@launch
@@ -106,7 +106,7 @@ class ChooseInterestsViewModel(
 
             onboardingDraftStore.profilePhotoBytes?.let { 
                 val avatarResult = onboardingProfileDataSource.uploadAvatar(it)
-                if (avatarResult is Result.Failure) {
+                if (avatarResult is Result.Error) {
                     _state.update { it.copy(isSubmitting = false) }
                     _events.send(ChooseInterestsEvent.ShowSnackbar("Avatar Upload Error: ${avatarResult.error.toUserMessage()}"))
                     return@launch
@@ -115,7 +115,7 @@ class ChooseInterestsViewModel(
 
             draft.selectedLanguageId?.let { 
                 val langResult = onboardingProfileDataSource.updateLanguage(it)
-                if (langResult is Result.Failure) {
+                if (langResult is Result.Error) {
                     _state.update { it.copy(isSubmitting = false) }
                     _events.send(ChooseInterestsEvent.ShowSnackbar("Language Update Error: ${langResult.error.toUserMessage()}"))
                     return@launch
@@ -128,7 +128,7 @@ class ChooseInterestsViewModel(
                     _state.update { it.copy(isSubmitting = false) }
                     _events.send(ChooseInterestsEvent.NavigateToNext(selectedIds.toList()))
                 }
-                is Result.Failure -> {
+                is Result.Error -> {
                     val message = result.error.toUserMessage()
                     _state.update { it.copy(isSubmitting = false) }
                     _events.send(ChooseInterestsEvent.ShowSnackbar("Final Step Error: $message"))

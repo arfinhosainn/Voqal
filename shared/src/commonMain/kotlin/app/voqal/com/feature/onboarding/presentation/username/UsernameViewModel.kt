@@ -72,7 +72,7 @@ class UsernameViewModel(
                         _state.update { it.copy(isSubmitting = false, error = "Username taken") }
                     }
                 }
-                is Result.Failure -> {
+                is Result.Error -> {
                     val message = result.error.toUserMessage()
                     _state.update { it.copy(error = message, isSubmitting = false) }
                     _events.send(UsernameEvent.ShowSnackbar(message))

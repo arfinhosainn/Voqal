@@ -65,7 +65,7 @@ class EmailViewModel(
                     _state.update { it.copy(isSubmitting = false, isEmailChecked = true) }
                     _events.send(EmailEvent.NavigateToNext(isNewUser = !result.data))
                 }
-                is Result.Failure -> {
+                is Result.Error -> {
                     _state.update { 
                         it.copy(
                             isSubmitting = false,

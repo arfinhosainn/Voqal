@@ -34,6 +34,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.voqal.com.core.designsystem.theme.VoqalTheme
 import app.voqal.com.core.presentation.util.ObserveAsEvents
 import app.voqal.com.feature.chat.presentation.ChatEvent
+import app.voqal.com.feature.chat.presentation.ChatAction
 import app.voqal.com.feature.chat.presentation.ChatViewModel
 import app.voqal.com.feature.chat.presentation.TransformingChatLayout
 import app.voqal.com.feature.chat.presentation.TransformingChatSheet
@@ -80,6 +81,24 @@ fun RoomDetailRoot(
         }
     }
 
+    ObserveAsEvents(chatViewModel.events) { event ->
+        when (event) {
+            is ChatEvent.ShowError -> {
+                scope.launch {
+                    snackbarHostState.showSnackbar(event.message)
+                }
+            }
+            ChatEvent.ScrollToBottom -> {
+                scope.launch {
+                    messagesListState.animateScrollToItem(0)
+                }
+            }
+            ChatEvent.HideKeyboard -> {
+                // Focus management can be added here if needed
+            }
+        }
+    }
+
     if (state.presentationState == RoomPresentationState.Minimized) {
         onLeave()
     }
@@ -88,7 +107,7 @@ fun RoomDetailRoot(
         state = state,
         chatState = chatState,
         onAction = viewModel::onAction,
-        onChatEvent = chatViewModel::onEvent,
+        onChatAction = chatViewModel::onAction,
         messagesListState = messagesListState,
         snackbarHostState = snackbarHostState,
     )
@@ -100,7 +119,7 @@ fun ExpandedRoomContent(
     state: RoomDetailState,
     chatState: app.voqal.com.feature.chat.presentation.ChatUiState,
     onAction: (RoomDetailAction) -> Unit,
-    onChatEvent: (ChatEvent) -> Unit,
+    onChatAction: (ChatAction) -> Unit,
     messagesListState: androidx.compose.foundation.lazy.LazyListState,
     snackbarHostState: SnackbarHostState,
     modifier: Modifier = Modifier,
@@ -204,11 +223,11 @@ fun ExpandedRoomContent(
                     TransformingChatLayout(
                         transition = transition,
                         chatState = chatState,
-                        onChatEvent = { event ->
-                            if (event == ChatEvent.Dismiss) {
+                        onChatAction = { action ->
+                            if (action == ChatAction.Dismiss) {
                                 onAction(RoomDetailAction.OnDismissChatSheet)
                             } else {
-                                onChatEvent(event)
+                                onChatAction(action)
                             }
                         },
                         roomActions = actions,

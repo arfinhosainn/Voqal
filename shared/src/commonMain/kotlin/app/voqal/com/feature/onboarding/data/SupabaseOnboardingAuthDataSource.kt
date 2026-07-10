@@ -22,7 +22,7 @@ class SupabaseOnboardingAuthDataSource(
 
     override suspend fun checkEmailExists(email: String): Result<Boolean, OnboardingAuthError> {
         if (!supabaseConfig.isConfigured) {
-            return Result.Failure(OnboardingAuthError.NotConfigured)
+            return Result.Error(OnboardingAuthError.NotConfigured)
         }
 
         return try {
@@ -37,13 +37,13 @@ class SupabaseOnboardingAuthDataSource(
             
             Result.Success(result != null)
         } catch (e: Throwable) {
-            Result.Failure(e.toOnboardingAuthError(default = OnboardingAuthError.Unknown))
+            Result.Error(e.toOnboardingAuthError(default = OnboardingAuthError.Unknown))
         }
     }
 
     override suspend fun signUp(email: String, password: String): EmptyResult<OnboardingAuthError> {
         if (!supabaseConfig.isConfigured) {
-            return Result.Failure(OnboardingAuthError.NotConfigured)
+            return Result.Error(OnboardingAuthError.NotConfigured)
         }
 
         return try {
@@ -53,13 +53,13 @@ class SupabaseOnboardingAuthDataSource(
             }
             Result.Success(Unit)
         } catch (e: Throwable) {
-            Result.Failure(e.toOnboardingAuthError(default = OnboardingAuthError.Unknown))
+            Result.Error(e.toOnboardingAuthError(default = OnboardingAuthError.Unknown))
         }
     }
 
     override suspend fun signIn(email: String, password: String): EmptyResult<OnboardingAuthError> {
         if (!supabaseConfig.isConfigured) {
-            return Result.Failure(OnboardingAuthError.NotConfigured)
+            return Result.Error(OnboardingAuthError.NotConfigured)
         }
 
         return try {
@@ -69,7 +69,7 @@ class SupabaseOnboardingAuthDataSource(
             }
             Result.Success(Unit)
         } catch (e: Throwable) {
-            Result.Failure(e.toOnboardingAuthError(default = OnboardingAuthError.Unknown))
+            Result.Error(e.toOnboardingAuthError(default = OnboardingAuthError.Unknown))
         }
     }
 

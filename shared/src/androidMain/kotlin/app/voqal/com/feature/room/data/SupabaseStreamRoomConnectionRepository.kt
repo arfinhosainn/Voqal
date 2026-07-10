@@ -61,7 +61,7 @@ class SupabaseStreamRoomConnectionRepository(
             } catch (e: Exception) {
                 e.printStackTrace()
                 null
-            } ?: return Result.Failure(RoomCallError.NOT_CONNECTED)
+            } ?: return Result.Error(RoomCallError.NOT_CONNECTED)
 
             val userId = currentUser.id
 
@@ -77,7 +77,7 @@ class SupabaseStreamRoomConnectionRepository(
 
             if (profiles.isEmpty()) {
                 println("Supabase Error: No profile found for user $userId")
-                return Result.Failure(RoomCallError.NOT_CONNECTED)
+                return Result.Error(RoomCallError.NOT_CONNECTED)
             }
 
             val profile = profiles.first()
@@ -92,7 +92,7 @@ class SupabaseStreamRoomConnectionRepository(
             if (response.status.value !in 200..299) {
                 val errorBody = try { response.bodyAsText() } catch (e: Exception) { "Could not read error body" }
                 println("Edge Function Error: ${response.status} - $errorBody")
-                return Result.Failure(RoomCallError.UNKNOWN)
+                return Result.Error(RoomCallError.UNKNOWN)
             }
 
             val tokenResponse = response.body<StreamTokenResponseForConnection>()
@@ -120,11 +120,11 @@ class SupabaseStreamRoomConnectionRepository(
 
             when (connectResult) {
                 is Result.Success -> Result.Success(Unit)
-                is Result.Failure -> Result.Failure(connectResult.error)
+                is Result.Error -> Result.Error(connectResult.error)
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            Result.Failure(RoomCallError.UNKNOWN)
+            Result.Error(RoomCallError.UNKNOWN)
         }
     }
 }

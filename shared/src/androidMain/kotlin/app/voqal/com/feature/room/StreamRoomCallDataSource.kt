@@ -51,10 +51,10 @@ class StreamRoomCallDataSource(
         description: String?
     ): EmptyResult<RoomCallError> {
         val client = connectionManager.currentClient()
-            ?: return Result.Failure(RoomCallError.NOT_CONNECTED)
+            ?: return Result.Error(RoomCallError.NOT_CONNECTED)
         val userId = connectionManager.currentUserId
-            ?: return Result.Failure(RoomCallError.NOT_CONNECTED)
-        if (call != null) return Result.Failure(RoomCallError.ALREADY_IN_ROOM)
+            ?: return Result.Error(RoomCallError.NOT_CONNECTED)
+        if (call != null) return Result.Error(RoomCallError.ALREADY_IN_ROOM)
 
         val newCall = client.call("audio_room", roomId)
         call = newCall
@@ -99,7 +99,7 @@ class StreamRoomCallDataSource(
 
             if (failed) {
                 call = null
-                Result.Failure(RoomCallError.JOIN_FAILED)
+                Result.Error(RoomCallError.JOIN_FAILED)
             } else {
                 observe(newCall)
                 if (asHost) {
@@ -114,25 +114,25 @@ class StreamRoomCallDataSource(
         } catch (e: Exception) {
             e.printStackTrace()
             call = null
-            Result.Failure(RoomCallError.JOIN_FAILED)
+            Result.Error(RoomCallError.JOIN_FAILED)
         }
     }
 
     override suspend fun goLive(): EmptyResult<RoomCallError> {
-        val active = call ?: return Result.Failure(RoomCallError.NOT_CONNECTED)
+        val active = call ?: return Result.Error(RoomCallError.NOT_CONNECTED)
         return try {
             active.goLive(); Result.Success(Unit)
         } catch (e: Exception) {
-            Result.Failure(RoomCallError.UNKNOWN)
+            Result.Error(RoomCallError.UNKNOWN)
         }
     }
 
     override suspend fun stopLive(): EmptyResult<RoomCallError> {
-        val active = call ?: return Result.Failure(RoomCallError.NOT_CONNECTED)
+        val active = call ?: return Result.Error(RoomCallError.NOT_CONNECTED)
         return try {
             active.stopLive(); Result.Success(Unit)
         } catch (e: Exception) {
-            Result.Failure(RoomCallError.UNKNOWN)
+            Result.Error(RoomCallError.UNKNOWN)
         }
     }
 
@@ -141,25 +141,25 @@ class StreamRoomCallDataSource(
     }
 
     override suspend fun raiseHand(): EmptyResult<RoomCallError> {
-        val active = call ?: return Result.Failure(RoomCallError.NOT_CONNECTED)
+        val active = call ?: return Result.Error(RoomCallError.NOT_CONNECTED)
         return try {
             // We can add a custom attribute or just send the reaction.
             // If we want to ensure a 'new' reaction is seen, we can send it again.
             active.sendReaction("raised-hand")
             Result.Success(Unit)
         } catch (e: Exception) {
-            Result.Failure(RoomCallError.UNKNOWN)
+            Result.Error(RoomCallError.UNKNOWN)
         }
     }
 
     override suspend fun lowerHand(): EmptyResult<RoomCallError> {
-        if (call == null) return Result.Failure(RoomCallError.NOT_CONNECTED)
+        if (call == null) return Result.Error(RoomCallError.NOT_CONNECTED)
         return try {
             // For now, we'll just return success as a placeholder if no direct API is found.
             // In a real scenario, this might involve deleting a reaction or updating a custom state.
             Result.Success(Unit)
         } catch (e: Exception) {
-            Result.Failure(RoomCallError.UNKNOWN)
+            Result.Error(RoomCallError.UNKNOWN)
         }
     }
 
@@ -177,13 +177,13 @@ class StreamRoomCallDataSource(
     }
 
     override suspend fun endRoom(): EmptyResult<RoomCallError> {
-        val active = call ?: return Result.Failure(RoomCallError.NOT_CONNECTED)
+        val active = call ?: return Result.Error(RoomCallError.NOT_CONNECTED)
         return try {
             active.end()
             leaveRoom()
             Result.Success(Unit)
         } catch (e: Exception) {
-            Result.Failure(RoomCallError.UNKNOWN)
+            Result.Error(RoomCallError.UNKNOWN)
         }
     }
 

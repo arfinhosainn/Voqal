@@ -7,7 +7,7 @@ import app.voqal.com.feature.chat.domain.repository.ChatRepository
 class SendMessageUseCase(
     private val repository: ChatRepository
 ) {
-    suspend operator fun invoke(roomId: String, text: String): Result<Unit, ChatError> {
+    suspend operator fun invoke(roomId: String, userId: String, text: String): Result<Unit, ChatError> {
         val trimmed = text.trim()
         
         if (trimmed.isEmpty()) {
@@ -15,9 +15,9 @@ class SendMessageUseCase(
         }
         
         if (trimmed.length > 500) {
-            return Result.Failure(ChatError.MESSAGE_TOO_LONG)
+            return Result.Error(ChatError.MESSAGE_TOO_LONG)
         }
         
-        return repository.sendMessage(roomId, trimmed)
+        return repository.sendMessage(roomId, userId, trimmed)
     }
 }
