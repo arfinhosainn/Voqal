@@ -47,6 +47,7 @@ class RoomDetailViewModel(
     private val _isEndRoomDialogVisible = MutableStateFlow(false)
     private val _isRaiseHandSheetVisible = MutableStateFlow(false)
     private val _isChatSheetVisible = MutableStateFlow(false)
+    private val _selectedProfile = MutableStateFlow<app.voqal.com.feature.rooom_detail.presentation.components.UserProfileUi?>(null)
 
     val state: StateFlow<RoomDetailState> = combine(
         roomCallDataSource.connectionState,
@@ -72,6 +73,8 @@ class RoomDetailViewModel(
         state.copy(isRaiseHandSheetVisible = showSheet)
     }.combine(_isChatSheetVisible) { state, showChat ->
         state.copy(isChatVisible = showChat)
+    }.combine(_selectedProfile) { state, profile ->
+        state.copy(selectedProfile = profile)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), RoomDetailState(roomId = route.roomId))
 
     private val _events = Channel<RoomDetailEvent>()
@@ -207,6 +210,12 @@ class RoomDetailViewModel(
             }
             RoomDetailAction.OnDismissChatSheet -> {
                 _isChatSheetVisible.update { false }
+            }
+            is RoomDetailAction.OnParticipantClick -> {
+                _selectedProfile.update { action.participant }
+            }
+            RoomDetailAction.OnDismissProfileSheet -> {
+                _selectedProfile.update { null }
             }
         }
     }
