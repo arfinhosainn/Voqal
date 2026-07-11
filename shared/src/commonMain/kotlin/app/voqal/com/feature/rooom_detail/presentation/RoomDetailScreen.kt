@@ -41,6 +41,8 @@ import app.voqal.com.feature.chat.presentation.TransformingChatSheet
 import app.voqal.com.feature.rooom_detail.presentation.components.EndRoomDialog
 import app.voqal.com.feature.rooom_detail.presentation.components.RaiseHandSheet
 import app.voqal.com.feature.rooom_detail.presentation.components.RoomDetailTopBar
+import app.voqal.com.feature.rooom_detail.presentation.components.UserProfileSheet
+import app.voqal.com.feature.rooom_detail.presentation.components.UserProfileUi
 import app.voqal.com.feature.rooom_detail.presentation.components.participant.ParticipantAvatar
 import app.voqal.com.feature.rooom_detail.presentation.model.RoomPresentationState
 import kotlinx.coroutines.launch
@@ -250,6 +252,19 @@ fun ExpandedRoomContent(
                     )
                 }
 
+                UserProfileSheet(
+                    isVisible = state.selectedProfile != null,
+                    profile = state.selectedProfile ?: UserProfileUi(
+                        id = "", name = "", role = "",
+                        avatarUrl = null, followersCount = 0, followingCount = 0, bio = ""
+                    ),
+                    onDismiss = { onAction(RoomDetailAction.OnDismissProfileSheet) },
+                    onFollowClick = {},
+                    onShareClick = {},
+                    onTipClick = {},
+                    onMoreClick = {},
+                )
+
                 RaiseHandSheet(
                     isVisible = state.isRaiseHandSheetVisible,
                     onDismiss = { onAction(RoomDetailAction.OnDismissRaiseHandSheet) },
@@ -273,7 +288,21 @@ fun ExpandedRoomContent(
                     items(state.participants, key = { it.id }) { participant ->
                         ParticipantAvatar(
                             state = participant,
-                            onClick = { /* Handle participant click */ }
+                            onClick = {
+                                onAction(
+                                    RoomDetailAction.OnParticipantClick(
+                                        UserProfileUi(
+                                            id = participant.id,
+                                            name = participant.name,
+                                            role = "Listener",
+                                            avatarUrl = participant.avatarUrl,
+                                            followersCount = 0,
+                                            followingCount = 0,
+                                            bio = "",
+                                        )
+                                    )
+                                )
+                            }
                         )
                     }
                 }

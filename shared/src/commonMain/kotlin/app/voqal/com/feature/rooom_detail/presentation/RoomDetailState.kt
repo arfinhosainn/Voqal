@@ -1,6 +1,7 @@
 package app.voqal.com.feature.rooom_detail.presentation
 
 import app.voqal.com.core.presentation.util.UiText
+import app.voqal.com.feature.rooom_detail.presentation.components.UserProfileUi
 import app.voqal.com.feature.rooom_detail.presentation.model.ParticipantAvatarUiState
 import app.voqal.com.feature.rooom_detail.presentation.model.RoomPresentationState
 
@@ -15,5 +16,6 @@ data class RoomDetailState(
     val presentationState: RoomPresentationState = RoomPresentationState.Expanded,
     val isEndRoomDialogVisible: Boolean = false,
     val isRaiseHandSheetVisible: Boolean = false,
-    val isChatVisible: Boolean = false
+    val isChatVisible: Boolean = false,
+    val selectedProfile: UserProfileUi? = null,
 )

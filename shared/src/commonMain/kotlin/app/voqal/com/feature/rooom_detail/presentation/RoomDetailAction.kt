@@ -1,5 +1,7 @@
 package app.voqal.com.feature.rooom_detail.presentation
 
+import app.voqal.com.feature.rooom_detail.presentation.components.UserProfileUi
+
 sealed interface RoomDetailAction {
     data object OnLeaveClick : RoomDetailAction
     data object OnEndClick : RoomDetailAction
@@ -18,4 +20,7 @@ sealed interface RoomDetailAction {
     data object OnChatClick : RoomDetailAction
     data object OnShowChatSheet : RoomDetailAction
     data object OnDismissChatSheet : RoomDetailAction
+
+    data class OnParticipantClick(val participant: UserProfileUi) : RoomDetailAction
+    data object OnDismissProfileSheet : RoomDetailAction
 }
