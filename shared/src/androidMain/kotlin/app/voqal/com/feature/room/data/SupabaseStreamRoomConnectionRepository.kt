@@ -2,7 +2,7 @@ package app.voqal.com.feature.room.data
 
 import app.voqal.com.core.domain.EmptyResult
 import app.voqal.com.core.domain.Result
-import app.voqal.com.feature.room.StreamVideoConnectionManager
+import app.voqal.com.feature.room.StreamClientHolder
 import app.voqal.com.feature.room.domain.RoomCallError
 import app.voqal.com.feature.room.domain.StreamRoomConnectionRepository
 import io.github.jan.supabase.SupabaseClient
@@ -13,6 +13,8 @@ import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.storage.storage
 import io.ktor.client.call.body
 import io.ktor.client.statement.bodyAsText
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlin.time.Duration.Companion.hours
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -40,22 +42,27 @@ internal data class StreamTokenResponseForConnection(
     val token: String
 )
 
+private data class StreamUserData(
+    val userId: String,
+    val userName: String,
+    val avatarUrl: String?,
+    val token: String
+)
+
 class SupabaseStreamRoomConnectionRepository(
     private val supabaseClient: SupabaseClient,
-    private val connectionManager: StreamVideoConnectionManager
+    private val clientHolder: StreamClientHolder
 ) : StreamRoomConnectionRepository {
 
     override val currentUserId: String?
-        get() = connectionManager.currentUserId
+        get() = clientHolder.currentUserId
 
     override suspend fun ensureUserConnected(): EmptyResult<RoomCallError> {
         return try {
-            // If already connected, return success
-            if (connectionManager.isConnected()) {
+            if (clientHolder.isConnected()) {
                 return Result.Success(Unit)
             }
 
-            // Get current user - Wrap in try-catch to handle the session load crash
             val currentUser = try {
                 supabaseClient.auth.currentUserOrNull()
             } catch (e: Exception) {
@@ -65,40 +72,35 @@ class SupabaseStreamRoomConnectionRepository(
 
             val userId = currentUser.id
 
-            // Get user profile data
-            val profiles = supabaseClient.postgrest
-                .from("profiles")
-                .select(columns = Columns.list("id", "username", "first_name", "last_name", "avatar_path")) {
-                    filter {
-                        eq("id", userId)
-                    }
-                }
-                .decodeList<ProfileDto>()
+            val userData = fetchStreamUserData(userId)
+                ?: return Result.Error(RoomCallError.NOT_CONNECTED)
 
-            if (profiles.isEmpty()) {
-                println("Supabase Error: No profile found for user $userId")
-                return Result.Error(RoomCallError.NOT_CONNECTED)
-            }
-
-            val profile = profiles.first()
-            val userName = profile.username ?: profile.firstName ?: "User"
-
-            // Get Stream Video token from Edge Function
-            val response = supabaseClient.functions.invoke(
-                function = "get-stream-token",
-                body = StreamTokenRequest(userId = userId)
+            clientHolder.connectUser(
+                userId = userData.userId,
+                name = userData.userName,
+                imageUrl = userData.avatarUrl,
+                token = userData.token
             )
-            
-            if (response.status.value !in 200..299) {
-                val errorBody = try { response.bodyAsText() } catch (e: Exception) { "Could not read error body" }
-                println("Edge Function Error: ${response.status} - $errorBody")
-                return Result.Error(RoomCallError.UNKNOWN)
-            }
 
-            val tokenResponse = response.body<StreamTokenResponseForConnection>()
+            Result.Success(Unit)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Result.Error(RoomCallError.UNKNOWN)
+        }
+    }
 
-            // Get avatar URL if exists
-            val avatarUrl = if (profile.avatarPath != null) {
+    private suspend fun fetchStreamUserData(userId: String): StreamUserData? = coroutineScope {
+        val profileDeferred = async { fetchProfile(userId) }
+        val tokenDeferred = async { fetchStreamToken(userId) }
+
+        val profile = profileDeferred.await()
+            ?: return@coroutineScope null
+
+        val tokenResponse = tokenDeferred.await()
+            ?: return@coroutineScope null
+
+        val avatarUrlDeferred = async {
+            if (profile.avatarPath != null) {
                 try {
                     supabaseClient.storage
                         .from("avatars")
@@ -109,22 +111,56 @@ class SupabaseStreamRoomConnectionRepository(
             } else {
                 null
             }
+        }
 
-            // Connect user to Stream Video
-            val connectResult = connectionManager.connectUser(
-                userId = userId,
-                name = userName,
-                imageUrl = avatarUrl,
-                token = tokenResponse.token
-            )
+        val userName = profile.username ?: profile.firstName ?: "User"
+        val avatarUrl = avatarUrlDeferred.await()
 
-            when (connectResult) {
-                is Result.Success -> Result.Success(Unit)
-                is Result.Error -> Result.Error(connectResult.error)
+        StreamUserData(
+            userId = userId,
+            userName = userName,
+            avatarUrl = avatarUrl,
+            token = tokenResponse.token
+        )
+    }
+
+    private suspend fun fetchProfile(userId: String): ProfileDto? {
+        return try {
+            val profiles = supabaseClient.postgrest
+                .from("profiles")
+                .select(columns = Columns.list("id", "username", "first_name", "last_name", "avatar_path")) {
+                    filter { eq("id", userId) }
+                }
+                .decodeList<ProfileDto>()
+
+            if (profiles.isEmpty()) {
+                println("Supabase Error: No profile found for user $userId")
+                null
+            } else {
+                profiles.first()
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            Result.Error(RoomCallError.UNKNOWN)
+            null
+        }
+    }
+
+    private suspend fun fetchStreamToken(userId: String): StreamTokenResponseForConnection? {
+        return try {
+            val response = supabaseClient.functions.invoke(
+                function = "get-stream-token",
+                body = StreamTokenRequest(userId = userId)
+            )
+            if (response.status.value !in 200..299) {
+                val errorBody = try { response.bodyAsText() } catch (e: Exception) { "Could not read error body" }
+                println("Edge Function Error: ${response.status} - $errorBody")
+                null
+            } else {
+                response.body<StreamTokenResponseForConnection>()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
         }
     }
 }
