@@ -80,35 +80,47 @@ class RoomDetailViewModel(
     init {
         presentationStore.expand(route.roomId)
         viewModelScope.launch {
-            // 1. Ensure user is connected to Stream
-            val connectionResult = connectionRepository.ensureUserConnected()
-            if (connectionResult is Result.Error) {
-                _events.send(RoomDetailEvent.ShowError(connectionResult.error.toUiText()))
-                return@launch
-            }
-
-            // 2. Ensure Microphone Permission is granted
-            val permissionResult = permissionManager.request(PermissionType.MICROPHONE)
-            if (permissionResult != app.voqal.com.core.permissions.domain.PermissionResult.GRANTED) {
-                _events.send(RoomDetailEvent.ShowError(RoomCallError.MICROPHONE_PERMISSION_DENIED.toUiText()))
-                return@launch
-            }
-
-            // 3. Join the room
-            roomCallDataSource.joinRoom(roomId = route.roomId, asHost = route.asHost)
-                .onSuccess {
-                    roomDiscoveryRepository.joinRoom(route.roomId)
-                    userPreferencesDataSource.setStoredRoom(
-                        StoredRoomData(
-                            roomId = route.roomId,
-                            wasHost = route.asHost,
-                            createdAt = kotlin.time.Clock.System.now().toEpochMilliseconds()
-                        )
+            if (route.asHost) {
+                // Creator path — already connected, joined in RoomViewModel,
+                // and DB auto-join trigger already ran on rooms INSERT
+                // Just ensure mic permission and persist room data locally
+                permissionManager.request(PermissionType.MICROPHONE)
+                userPreferencesDataSource.setStoredRoom(
+                    StoredRoomData(
+                        roomId = route.roomId,
+                        wasHost = true,
+                        createdAt = kotlin.time.Clock.System.now().toEpochMilliseconds()
                     )
+                )
+            } else {
+                // Guest path — need to fully connect and join
+                val connectionResult = connectionRepository.ensureUserConnected()
+                if (connectionResult is Result.Error) {
+                    _events.send(RoomDetailEvent.ShowError(connectionResult.error.toUiText()))
+                    return@launch
                 }
-                .onFailure { error ->
-                    _events.send(RoomDetailEvent.ShowError(error.toUiText()))
+
+                val permissionResult = permissionManager.request(PermissionType.MICROPHONE)
+                if (permissionResult != app.voqal.com.core.permissions.domain.PermissionResult.GRANTED) {
+                    _events.send(RoomDetailEvent.ShowError(RoomCallError.MICROPHONE_PERMISSION_DENIED.toUiText()))
+                    return@launch
                 }
+
+                roomCallDataSource.joinRoom(roomId = route.roomId, asHost = false)
+                    .onSuccess {
+                        roomDiscoveryRepository.joinRoom(route.roomId)
+                        userPreferencesDataSource.setStoredRoom(
+                            StoredRoomData(
+                                roomId = route.roomId,
+                                wasHost = false,
+                                createdAt = kotlin.time.Clock.System.now().toEpochMilliseconds()
+                            )
+                        )
+                    }
+                    .onFailure { error ->
+                        _events.send(RoomDetailEvent.ShowError(error.toUiText()))
+                    }
+            }
         }
     }
 

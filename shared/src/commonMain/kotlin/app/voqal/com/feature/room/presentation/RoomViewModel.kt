@@ -14,12 +14,7 @@ import app.voqal.com.feature.room.domain.StreamRoomConnectionRepository
 import app.voqal.com.feature.room.domain.toUiText
 import app.voqal.com.feature.room.presentation.model.RoomType
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 data class RoomState(
@@ -69,30 +64,30 @@ class RoomViewModel(
         viewModelScope.launch {
             try {
                 _state.update { it.copy(isCreatingRoom = true) }
-                
-                // 1. Ensure user is connected to Stream
+
                 val connectionResult = connectionRepository.ensureUserConnected()
-                
                 if (connectionResult is Result.Error) {
                     _state.update { it.copy(isCreatingRoom = false) }
                     _events.send(RoomEvent.Error(connectionResult.error.toUiText()))
                     return@launch
                 }
 
-                // 2. Create the room in Stream
                 val roomId = UuidUtils.randomUuid()
-                val result = roomCallDataSource.joinRoom(
+                val roomTitle = _state.value.selectedRoomType.title
+
+                val joinResult = roomCallDataSource.joinRoom(
                     roomId = roomId,
                     asHost = true,
-                    title = _state.value.selectedRoomType.title
+                    title = roomTitle
                 )
 
-                result
+                joinResult
                     .onSuccess {
-                        // 3. Register room in Discovery (Supabase)
+                        // goLive is already called inside joinRoom for host.
+                        // DB insert is independent of Stream — run it while Stream finishes setup.
                         val discoveryResult = roomDiscoveryRepository.createRoom(
                             id = roomId,
-                            title = _state.value.selectedRoomType.title,
+                            title = roomTitle,
                             category = "VOQAL ROOM"
                         )
 
